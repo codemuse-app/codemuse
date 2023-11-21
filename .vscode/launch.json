@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
+        // With a temporary profile
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/out/**/*.js",
+        "${workspaceFolder}/packages/vscode/out/**/*.map",
+      ],
+      "cwd": "${workspaceFolder}/packages/vscode",
+      "preLaunchTask": "vscode: npm: watch"
+    },
+    {
+      "name": "Extension Tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
+        "--extensionTestsPath=${workspaceFolder}/packages/vscode/out/test/suite/index"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/vscode/out/**/*.js",
+        "${workspaceFolder}/packages/vscode/out/**/*.map",
+      ],
+      "cwd": "${workspaceFolder}/packages/vscode",
+      "preLaunchTask": "vscode: npm: watch"
+    }
+  ]
+}

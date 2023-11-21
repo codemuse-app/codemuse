@@ -1,0 +1,12 @@
+{
+  "name": "codemuse",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI Onboarding and peer programming assistant.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "author": "CodeMuse <contact@codemuse.app>",
+  "dependencies": {}
+}
