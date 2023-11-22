@@ -44,7 +44,9 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@sourcegraph/scip-python": "^0.6.0",
     "@sourcegraph/scip-typescript": "^0.3.9",
-    "@sourcegraph/scip-python": "^0.6.0"
+    "google-protobuf": "^3.21.2",
+    "graphology": "^0.25.4"
   }
 }

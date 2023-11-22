@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 
 import * as Languages from "../languages";
 import { Status } from "../status";
+import { buildGraph } from "./graph/build";
 
 export class Index {
   private static instance: Index;
@@ -46,7 +47,9 @@ export class Index {
                 message: `Indexing ${language.languageId}`,
               });
 
-              await language.run(workspace.uri.fsPath);
+              const scipPath = await language.run(workspace.uri.fsPath);
+
+              await buildGraph(workspace.uri.fsPath, scipPath);
 
               progress.report({
                 message: `Indexing ${language.languageId} complete`,

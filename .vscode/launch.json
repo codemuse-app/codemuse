@@ -10,8 +10,8 @@
         // With a temporary profile
       ],
       "outFiles": [
-        "${workspaceFolder}/packages/vscode/out/**/*.js",
-        "${workspaceFolder}/packages/vscode/out/**/*.map",
+        "${workspaceFolder}/packages/vscode/dist/**/*.js",
+        "${workspaceFolder}/packages/vscode/dist/**/*.map",
       ],
       "cwd": "${workspaceFolder}/packages/vscode",
       "preLaunchTask": "vscode: npm: watch"
@@ -25,8 +25,8 @@
         "--extensionTestsPath=${workspaceFolder}/packages/vscode/out/test/suite/index"
       ],
       "outFiles": [
-        "${workspaceFolder}/packages/vscode/out/**/*.js",
-        "${workspaceFolder}/packages/vscode/out/**/*.map",
+        "${workspaceFolder}/packages/vscode/dist/**/*.js",
+        "${workspaceFolder}/packages/vscode/dist/**/*.map",
       ],
       "cwd": "${workspaceFolder}/packages/vscode",
       "preLaunchTask": "vscode: npm: watch"

@@ -198,6 +198,8 @@ export class Python extends LanguageProvider {
         cwd,
         "--output",
         storagePath,
+        "--project-name",
+        cwd.split("/").pop() ?? "",
       ],
       {
         env: {
