@@ -45,7 +45,7 @@ class PythonPackage {
         }
       } else {
         if (!gettingFiles) {
-          throw "Unexpected. Thought I should be getting files now";
+          throw new Error("Unexpected output from pip show");
         }
 
         // Skip cached or out of project rfiles
