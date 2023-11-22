@@ -31,14 +31,14 @@ export class Index {
     vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
-        title: "CodeMuse is indexing your workspace.",
+        title: "CodeMuse is indexing your workspace",
         cancellable: false,
       },
       async (progress) => {
         for (const workspace of vscode.workspace.workspaceFolders!) {
           for (const language of instance.languages) {
             const done = Status.getInstance().loading(
-              `Indexing ${language.languageId}`
+              `indexing ${language.languageId}`
             );
 
             if (await language.detect()) {
