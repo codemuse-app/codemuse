@@ -33,14 +33,15 @@ export abstract class LanguageProvider {
 
   /**
    * Detect if the language provider should be run on the given workspace folder.
-   * @returns {Promise<boolean>} Whether the language provider should be run on the given workspace folder.
+   * @returns Whether the language provider should be run on the given workspace folder.
    * @todo This could return a sublist of the workspace folders that should be run.
    */
   abstract detect(): Promise<boolean>;
+
   /**
-   * Run the language provider on the given workspace folder.
-   * Returns the location of the index file.
-   * @returns {Promise<string>} The location of the index file.
+   * Run the language provider on the given workspace folder. This builds the index file to the storage directory.
+   * @param cwd The path to the workspace folder.
+   * @returns The location of the scip index file.
    */
   abstract run(cwd: string): Promise<string>;
 }
