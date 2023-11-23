@@ -200,6 +200,8 @@ export class Python extends LanguageProvider {
         storagePath,
         "--project-name",
         cwd.split("/").pop() ?? "",
+        "--project-version",
+        "indexer",
       ],
       {
         env: {
