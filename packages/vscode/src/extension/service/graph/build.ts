@@ -136,10 +136,6 @@ export const buildGraph = async (cwd: string, scipIndexPath: string) => {
         continue;
       }
 
-      if (occurrence.symbol.endsWith(".")) {
-        continue;
-      }
-
       if (occurrence.symbol_roles === scip.SymbolRole.Definition) {
         continue;
       }
@@ -178,10 +174,10 @@ const sortRanges = (a: number[], b: number[]) => {
   if (a[0] === b[0]) {
     if (a[1] === b[1]) {
       if (a[2] === b[2]) {
-        return a[3] - b[3];
+        return b[3] - a[3];
       }
 
-      return a[2] - b[2];
+      return b[2] - a[2];
     }
 
     return a[1] - b[1];
