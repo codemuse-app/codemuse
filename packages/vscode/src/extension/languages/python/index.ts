@@ -71,7 +71,15 @@ export class Python extends LanguageProvider {
 
   private async getPythonPath(cwd: string) {
     // Detect the presence of the python extension, if it is installed use its global python path (for the workspace)
-    const pythonExtension = vscode.extensions.getExtension("ms-python.python");
+
+    let pythonExtension;
+
+    try {
+      pythonExtension = vscode.extensions.getExtension("ms-python.python");
+    } catch (e) {
+      // Ignore
+      console.error(e);
+    }
 
     if (pythonExtension) {
       const pythonPath =
@@ -177,7 +185,9 @@ export class Python extends LanguageProvider {
   }
 
   async run(cwd: string) {
-    const path = resolve(__dirname + "../../../../../bin/scip-python/index.js");
+    const path = resolve(__dirname + "../../../bin/scip-python/index.js");
+
+    console.log(path);
 
     const environmentLocation = await this.createEnvironment(cwd);
     const pythonPath = await this.getPythonPath(cwd);

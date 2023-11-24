@@ -9,5 +9,3 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 gulpfile.js
-../../**
-../**

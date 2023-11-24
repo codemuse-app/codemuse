@@ -1,6 +1,6 @@
 {
   "name": "vscode",
-  "displayName": "vscode",
+  "displayName": "CodeMuse",
   "description": "AI onboarding and peer programming.",
   "version": "0.0.0",
   "engines": {
@@ -20,13 +20,14 @@
   "contributes": {},
   "scripts": {
     "gulp": "gulp",
-    "vscode:prepublish": "npm run gulp && npm run compile",
-    "compile": "npm run gulp && tsc -p ./",
-    "watch": "npm run gulp && tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile",
+    "compile": "npm run gulp && webpack --mode production --devtool hidden-source-map",
+    "watch": "npm run gulp && webpack --watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "vscode-test",
-    "package": "vsce package --allow-missing-repository --allow-star-activation --skip-license"
+    "package": "vsce package --allow-missing-repository --no-dependencies --allow-star-activation --skip-license",
+    "selfinstall": "npm run package && code --install-extension vscode-0.0.0.vsix --force"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.5",

@@ -5,10 +5,11 @@
       "type": "npm",
       "label": "vscode: npm: watch",
       "script": "watch",
-      "problemMatcher": "$tsc-watch",
+      "problemMatcher": "$ts-webpack-watch",
       "isBackground": true,
       "presentation": {
-        "reveal": "never"
+        "reveal": "never",
+        "group": "watchers"
       },
       "group": {
         "kind": "build",
