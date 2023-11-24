@@ -2,7 +2,7 @@
   "name": "vscode",
   "displayName": "vscode",
   "description": "AI onboarding and peer programming.",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "engines": {
     "vscode": "^1.84.0"
   },
@@ -25,7 +25,8 @@
     "watch": "npm run gulp && tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "package": "vsce package --allow-missing-repository --allow-star-activation --skip-license"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.5",
@@ -46,7 +47,11 @@
   "dependencies": {
     "@sourcegraph/scip-python": "^0.6.0",
     "@sourcegraph/scip-typescript": "^0.3.9",
+    "@vscode/vsce": "^2.22.0",
     "google-protobuf": "^3.21.2",
     "graphology": "^0.25.4"
+  },
+  "vsce": {
+    "dependencies": false
   }
 }

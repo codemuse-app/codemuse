@@ -3,6 +3,7 @@
 
 const gulp = require('gulp');
 const fs = require('fs');
+const path = require('path');
 
 const clearBinFolder = () => {
   if (fs.existsSync('./bin')) {
@@ -24,13 +25,18 @@ const copyScipTypescript = () => {
 
 const copyScipPython = () => {
   // Find the package.json
-  const scipPythonPath = require.resolve('@sourcegraph/scip-python/package.json');
+  const scipPythonPath = path.resolve('../scip-python/packages/pyright-scip/');
 
   // Copy all the files in the parent directory of the scip-python package, including subdirectories
-  return gulp.src(`${scipPythonPath}/../**/*`).pipe(gulp.dest('./bin/scip-python'));
+  return Promise.all([
+    gulp.src(`${scipPythonPath}/dist/**/*`).pipe(gulp.dest('./bin/scip-python/dist')),
+    gulp.src(`${scipPythonPath}/index.js`).pipe(gulp.dest('./bin/scip-python/'))]);
 };
 
-const copyExternalLibs = gulp.parallel(copyScipTypescript, copyScipPython);
+const copyExternalLibs = gulp.parallel(
+  // copyScipTypescript,
+  copyScipPython
+);
 
 module.exports = {
   default: gulp.series(clearBinFolder, copyExternalLibs)

@@ -7,6 +7,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "sync:scip-python": "rsync -ax --exclude='node_modules/' --exclude='.git/' ../scip-python/* ./packages/scip-python && cd ./packages/scip-python && npm install && cd packages/pyright-scip && npm run build && cd ../../.."
+  },
   "author": "CodeMuse <contact@codemuse.app>",
   "dependencies": {}
 }
