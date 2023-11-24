@@ -142,6 +142,16 @@ export const buildGraph = async (cwd: string, scipIndexPath: string) => {
 
       const parentSymbol = getParentSymbol(occurrence.range, occurrence.symbol);
 
+      if (occurrence.symbol.split("(").length > 2) {
+        // Parameter syntax form is ().()
+        continue;
+      }
+
+      if (occurrence.symbol.indexOf(" builtins/") !== -1) {
+        // Skip builtins
+        continue;
+      }
+
       graph.mergeNode(parentSymbol);
       graph.mergeNode(occurrence.symbol, {
         symbol: occurrence.symbol,
