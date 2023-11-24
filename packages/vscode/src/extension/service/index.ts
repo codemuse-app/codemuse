@@ -3,6 +3,8 @@ import * as vscode from "vscode";
 import * as Languages from "../languages";
 import { Status } from "../status";
 import { buildGraph } from "./graph/build";
+import { buildFlattenedGraph } from "./graph/flatten";  // Import the function
+import { findCycles, printCycles } from "./graph/utils_graph";  // Import the function
 
 export class Index {
   private static instance: Index;
@@ -49,11 +51,26 @@ export class Index {
 
               const scipPath = await language.run(workspace.uri.fsPath);
 
-              await buildGraph(workspace.uri.fsPath, scipPath);
-
+              const originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
+              
               progress.report({
                 message: `Indexing ${language.languageId} complete`,
               });
+
+              const original_cycles = findCycles(originalGraph);
+              console.log("Original cycles:");
+              printCycles(original_cycles);
+
+              // Generate the flattened version of the graph
+              const flattenedGraph = buildFlattenedGraph(originalGraph);
+              const flattened_cycles = findCycles(flattenedGraph);
+              console.log("Flattened cycles:");
+              printCycles(flattened_cycles);
+
+              progress.report({
+                message: `Generation of the FlattenedGraph complete`,
+              });
+
             } else {
               console.log("Did not detect language");
             }
