@@ -157,11 +157,6 @@ export const buildGraph = async (cwd: string, scipIndexPath: string) => {
     }
   }
 
-  writeFileSync(
-    "/Users/titouanlaunay/Desktop/graph.json",
-    JSON.stringify(graph.export(), null, 2)
-  );
-
   return graph;
 };
 
