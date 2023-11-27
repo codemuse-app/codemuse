@@ -64,7 +64,7 @@ export class Index {
               // Generate the flattened version of the graph
               const flattenedGraph = buildFlattenedGraph(originalGraph);
               const flattened_cycles = findCycles(flattenedGraph);
-              console.log("Flattened cycles:");
+              console.log("Flattened cycles (should be NONE):");
               printCycles(flattened_cycles);
 
               progress.report({

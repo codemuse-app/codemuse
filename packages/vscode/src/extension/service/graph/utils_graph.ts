@@ -53,26 +53,24 @@ export function findCycles(graph: MultiDirectedGraph): string[][] {
   return cycles;
 }
 
-// Function to find the order in which the nodes should be updated given an updated node
-  function getUpdateOrder(graph: MultiDirectedGraph, startNode: string): string[] {
+/* perform a reverse topological sort starting from the updated node, moving upwards to all 
+   its ancestors (parent nodes) up to the root nodes. The reverse topological sort ensures that 
+   a node is only processed after all its descendants (in this case, the nodes that depend on it) 
+   have been processed. */
+
+   function findUpdateOrder(graph: MultiDirectedGraph, updatedNode: string): string[] {
+    let order: string[] = [];
     let visited: Set<string> = new Set();
-    let stack: string[] = [];
   
-    // Function to perform DFS and collect nodes in post-order (topological sort)
-    const dfs = (node: string) => {
-      visited.add(node);
-      graph.inNeighbors(node).forEach(parent => {
-        if (!visited.has(parent)) {
-          dfs(parent);
-        }
-      });
-      stack.push(node);
+    const visit = (node: string) => {
+      if (!visited.has(node)) {
+        visited.add(node);
+        graph.inNeighbors(node).forEach(visit); // Visit parent nodes
+        order.push(node); // Add the node after visiting parents (reverse topological sort)
+      }
     };
   
-    // Starting DFS from the updated node
-    dfs(startNode);
-  
-    // The stack now contains the nodes in the order they should be updated
-    return stack.reverse();
+    visit(updatedNode); // Start from the updated node
+    return order.reverse(); // Reverse to get the correct update order
   }
   
