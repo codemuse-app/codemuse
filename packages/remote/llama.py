@@ -1,6 +1,6 @@
 import os
 
-from modal import Image, Secret, Stub, method
+from modal import Image, Secret, Stub, method, web_endpoint
 
 MODEL_DIR = "/model"
 BASE_MODEL = "codellama/CodeLlama-7b-Instruct-hf"
@@ -39,7 +39,7 @@ image = (
 
 stub = Stub("example-vllm-inference", image=image)
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"))
+@stub.cls(gpu="L4", secret=Secret.from_name("huggingface"), concurrency_limit=1)
 class Model:
     def __enter__(self):
         from vllm import LLM
@@ -56,28 +56,63 @@ class Model:
     def generate(self, user_questions):
         from vllm import SamplingParams
 
+        print('Generating...')
+
         prompts = [
             self.template.format(system="", user=q) for q in user_questions
         ]
 
+        print(prompts)
+
         sampling_params = SamplingParams(
-            temperature=0.75,
+            temperature=0.0,
             top_p=1,
             max_tokens=800,
             presence_penalty=1.15,
         )
         result = self.llm.generate(prompts, sampling_params)
+
+        print(result)
+
         num_tokens = 0
+
         for output in result:
             num_tokens += len(output.outputs[0].token_ids)
             print(output.prompt, output.outputs[0].text, "\n\n", sep="")
+
         print(f"Generated {num_tokens} tokens")
 
-@stub.local_entrypoint()
-def main():
-    model = Model()
-    questions = [
-        # Coding questions
-        "Implement a Python function to compute the Fibonacci numbers.",
-    ]
-    model.generate.remote(questions)
+        return result[0].outputs[0].text
+
+# @stub.local_entrypoint()
+# def main():
+#     model = Model()
+#     questions = [
+#         # Coding questions
+#         "Implement a Python function to compute the Fibonacci numbers.",
+#     ]
+#     model.generate.remote(questions)
+
+@stub.function()
+@web_endpoint(method="POST")
+def generate_documentation(item: dict):
+    code = item["code"]
+
+    if not code:
+        return "No code provided. Please provide a JSON object with a `code` key."
+
+    prompt = f"""```python
+{code}
+```
+
+Given the above code, write a short description of what the snippet does in simple language. You should describe as much of the specificities and business meaning rather than generic framework inforamtion. Keep it under three sentences.
+
+Good example:
+
+This function computes the price of aluminium given the current tonnage and delivery month.
+
+Bad example:
+
+This is a Django Viewset which has various methods."""
+
+    return Model().generate.remote([prompt]).strip()
