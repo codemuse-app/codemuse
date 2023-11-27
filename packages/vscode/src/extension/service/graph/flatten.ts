@@ -2,6 +2,13 @@ import { MultiDirectedGraph } from 'graphology';
 import { GraphNode, type Graph } from "./types";
 import { readFile, writeFileSync } from "fs";
 
+/* DFS for Back Edge Detection: The dfsRemoveBackEdges function performs DFS on the graph to find back edges 
+(edges that contribute to cycles). The order in which nodes are visited is based on the order returned by graph.nodes() 
+and graph.outNeighbors(node). If these methods return nodes in a consistent order every time, this part of the code is deterministic.
+To ensure determinism, you can sort the nodes before performing DFS. This guarantees that the order of node traversal is consistent 
+across different executions. */
+
+
 
 type NodeColor = 'white' | 'grey' | 'black';
 
@@ -26,7 +33,16 @@ function dfsRemoveBackEdges(graph: MultiDirectedGraph): [string, string][] {
     nodesColor.set(node, 'black');  // black: already visited
   };
 
-  graph.nodes().forEach(node => {
+  // Visit all nodes in the graph
+  // graph.nodes().forEach(node => {
+  //   if (nodesColor.get(node) === 'white') {
+  //     dfsVisitRecursively(node);
+  //   }
+  // });
+  
+  //  Sort the nodes before performing DFS to ensure determinism.
+  const sortedNodes = [...graph.nodes()].sort();
+  sortedNodes.forEach(node => {
     if (nodesColor.get(node) === 'white') {
       dfsVisitRecursively(node);
     }
