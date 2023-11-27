@@ -59,6 +59,7 @@ export function findCycles(graph: MultiDirectedGraph): string[][] {
    have been processed. */
 
 export function findUpdateOrder(graph: MultiDirectedGraph, updatedNode: string): string[] {
+  // TODO: to be tested
   let order: string[] = [];
   let visited: Set<string> = new Set();
   
@@ -81,6 +82,7 @@ export function findUpdateOrder(graph: MultiDirectedGraph, updatedNode: string):
     should be updated. */
 
 export function findMultiUpdateOrder(graph: MultiDirectedGraph, updatedNodes: string[]): string[] {
+  // TODO: to be tested
   let depths: Map<string, number> = new Map();
   let allNodes: Set<string> = new Set();
 

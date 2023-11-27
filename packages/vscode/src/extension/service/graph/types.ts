@@ -10,6 +10,7 @@ export interface LocalGraphNode extends BasicGraphNode {
   file: string;
   range: Range;
   content: string;
+  hash: string;  // Hash of the content + outbouds links
 }
 
 export type GraphNode = ExternalGraphNode | LocalGraphNode;
