@@ -1,5 +1,5 @@
 import { MultiDirectedGraph } from 'graphology';
-import { GraphNode, type Graph } from "./types";
+import { GraphNode, LocalGraphNode, type Graph } from "./types";
 
 export function printCycles(cycles: string[][]): void {
     if (cycles.length === 0) {
@@ -99,5 +99,44 @@ export function findMultiUpdateOrder(graph: MultiDirectedGraph, updatedNodes: st
   return Array.from(allNodes)
     .sort((a, b) => depths.get(b)! - depths.get(a)!) // Sort by depth in descending order
     .filter((node, index, self) => self.indexOf(node) === index); // Remove duplicates
+}
+
+// Function that detect if GraphNode is LocalGraphNode or ExternalGraphNode --> TODO: remove this function and use type check in TS instead
+function isLocalGraphNode(node: GraphNode): node is LocalGraphNode {
+  return (node as LocalGraphNode).hash !== undefined;
+}
+
+// Function that compare two graphs and return the added, updated and deleted nodes
+export function compareGraphs(
+  oldGraph: MultiDirectedGraph<GraphNode>,
+  newGraph: MultiDirectedGraph<GraphNode>
+): {
+  // TODO: to be tested
+  addedNodes: string[];
+  updatedNodes: string[];
+  deletedNodes: string[];
+} {
+  let addedNodes: string[] = [];
+  let updatedNodes: string[] = [];
+  let deletedNodes: string[] = [];
+  let oldGraphNodes: Set<string> = new Set(oldGraph.nodes());
+
+  // Check for added or updated nodes
+  newGraph.forEachNode((node, attributes) => {
+    if (!oldGraph.hasNode(node)) {
+      addedNodes.push(node);
+    } else if (isLocalGraphNode(attributes) && isLocalGraphNode(oldGraph.getNodeAttributes(node))) {
+      const oldAttributes = oldGraph.getNodeAttributes(node) as LocalGraphNode;
+      if (oldAttributes.hash !== attributes.hash) {
+        updatedNodes.push(node);
+      }
+    }
+    oldGraphNodes.delete(node); // Remove from oldGraphNodes to track deletions
+  });
+
+  // Remaining nodes in oldGraphNodes are deleted
+  deletedNodes = Array.from(oldGraphNodes);
+
+  return { addedNodes, updatedNodes, deletedNodes };
 }
   
