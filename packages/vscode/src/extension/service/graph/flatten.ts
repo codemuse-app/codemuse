@@ -1,5 +1,5 @@
 import { MultiDirectedGraph } from 'graphology';
-import { GraphNode, type Graph } from "./types";
+import { type Graph, GraphNode, GraphEdge } from "./types";
 import { readFile, writeFileSync } from "fs";
 
 /* DFS for Back Edge Detection: The dfsRemoveBackEdges function performs DFS on the graph to find back edges 
@@ -13,16 +13,16 @@ across different executions. */
 type NodeColor = 'white' | 'grey' | 'black';
 
 // Function to perform DFS and identify back edges
-function dfsRemoveBackEdges(graph: MultiDirectedGraph): [string, string][] {
+function dfsRemoveBackEdges(graph: Graph): [string, string][] {
   let nodesColor: Map<string, NodeColor> = new Map();
   let edgesToBeRemoved: [string, string][] = [];
 
   graph.nodes().forEach(node => {
-    nodesColor.set(node, 'white');  // white: not visited
+    nodesColor.set(node, 'white'); // white: not visited
   });
 
   const dfsVisitRecursively = (node: string) => {
-    nodesColor.set(node, 'grey');  // grey: being visited
+    nodesColor.set(node, 'grey'); // grey: being visited
     graph.outNeighbors(node).forEach(child => {
       if (nodesColor.get(child) === 'white') {
         dfsVisitRecursively(child);
@@ -30,17 +30,9 @@ function dfsRemoveBackEdges(graph: MultiDirectedGraph): [string, string][] {
         edgesToBeRemoved.push([node, child]);
       }
     });
-    nodesColor.set(node, 'black');  // black: already visited
+    nodesColor.set(node, 'black'); // black: already visited
   };
 
-  // Visit all nodes in the graph
-  // graph.nodes().forEach(node => {
-  //   if (nodesColor.get(node) === 'white') {
-  //     dfsVisitRecursively(node);
-  //   }
-  // });
-  
-  //  Sort the nodes before performing DFS to ensure determinism.
   const sortedNodes = [...graph.nodes()].sort();
   sortedNodes.forEach(node => {
     if (nodesColor.get(node) === 'white') {
@@ -52,8 +44,8 @@ function dfsRemoveBackEdges(graph: MultiDirectedGraph): [string, string][] {
 }
 
 // Main function to build the flattened graph
-export const buildFlattenedGraph = (originalGraph: MultiDirectedGraph): MultiDirectedGraph => {
-  const flattenedGraph = new MultiDirectedGraph();
+export const buildFlattenedGraph = (originalGraph: Graph): Graph => {
+  const flattenedGraph: Graph = new MultiDirectedGraph();
 
   // Clone nodes from the original graph
   originalGraph.nodes().forEach(node => {
@@ -61,7 +53,7 @@ export const buildFlattenedGraph = (originalGraph: MultiDirectedGraph): MultiDir
   });
 
   // Clone edges from the original graph, excluding self loops
-  originalGraph.forEachEdge((edge, attributes, source, target) => {
+  originalGraph.forEachEdge((edge, attributes: GraphEdge, source, target) => {
     if (source !== target) {
       flattenedGraph.addEdgeWithKey(edge, source, target, attributes);
     }
@@ -71,11 +63,11 @@ export const buildFlattenedGraph = (originalGraph: MultiDirectedGraph): MultiDir
   const edgesToRemove = dfsRemoveBackEdges(flattenedGraph);
 
   // Remove the identified back edges
-  edgesToRemove.forEach(edge => {
-    edgesToRemove.forEach(([source, target]) => {
-      if (flattenedGraph.hasEdge(source, target)) {
-        flattenedGraph.dropEdge(source, target);
-      }})});
+  edgesToRemove.forEach(([source, target]) => {
+    if (flattenedGraph.hasEdge(source, target)) {
+      flattenedGraph.dropEdge(source, target);
+    }
+  });
 
   return flattenedGraph;
 };

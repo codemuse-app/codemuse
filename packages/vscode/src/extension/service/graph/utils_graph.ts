@@ -1,55 +1,52 @@
 import { MultiDirectedGraph } from 'graphology';
-import { GraphNode, LocalGraphNode, type Graph } from "./types";
+import { type Graph, GraphNode, LocalGraphNode, ExternalGraphNode } from "./types";
 
 export function printCycles(cycles: string[][]): void {
-    if (cycles.length === 0) {
-        console.log("NO CYCLE");
-      } else {
-        cycles.forEach((cycle, index) => {
-          console.log(`Cycle ${index + 1}: ${cycle.join(" -> ")}`);
-        });
-      }
+  if (cycles.length === 0) {
+    console.log("NO CYCLE");
+  } else {
+    cycles.forEach((cycle, index) => {
+      console.log(`Cycle ${index + 1}: ${cycle.join(" -> ")}`);
+    });
   }
+}
 
-export function findCycles(graph: MultiDirectedGraph): string[][] {
+/* The findCycles function takes a graph and returns a list of cycles in the graph. */
+export function findCycles(graph: Graph): string[][] {
   let visited: Set<string> = new Set();
   let path: string[] = [];
   let cycles: string[][] = [];
 
   const dfsVisit = (node: string, parent: string | null) => {
     if (path.includes(node)) {
-      // Cycle found, extract the cycle
       const cycle = path.slice(path.indexOf(node));
       cycles.push(cycle);
       return;
     }
-
+  
     if (!visited.has(node)) {
       visited.add(node);
       path.push(node);
 
-      // Visit all neighbors including the parent
       graph.outNeighbors(node).forEach(neighbor => {
         if (!visited.has(neighbor) || neighbor === parent) {
           dfsVisit(neighbor, node);
         } else if (path.includes(neighbor)) {
-          // Check if the neighbor is already in the path (cycle detected)
           const cycle = path.slice(path.indexOf(neighbor));
           cycles.push(cycle);
         }
       });
-
-      // Backtrack
+  
       path.pop();
     }
   };
-
+  
   graph.nodes().forEach(node => {
     if (!visited.has(node)) {
       dfsVisit(node, null);
     }
   });
-
+  
   return cycles;
 }
 
@@ -58,22 +55,23 @@ export function findCycles(graph: MultiDirectedGraph): string[][] {
    a node is only processed after all its descendants (in this case, the nodes that depend on it) 
    have been processed. */
 
-export function findUpdateOrder(graph: MultiDirectedGraph, updatedNode: string): string[] {
-  // TODO: to be tested
+export function findUpdateOrder(graph: Graph, updatedNode: string): string[] {
   let order: string[] = [];
   let visited: Set<string> = new Set();
-  
+    
   const visit = (node: string) => {
     if (!visited.has(node)) {
       visited.add(node);
-      graph.inNeighbors(node).forEach(visit); // Visit parent nodes
-      order.push(node); // Add the node after visiting parents (reverse topological sort)
+      graph.inNeighbors(node).forEach(visit);
+      order.push(node);
     }
   };
-  
-  visit(updatedNode); // Start from the updated node
-  return order.reverse(); // Reverse to get the correct update order
+    
+  visit(updatedNode);
+  return order.reverse();
 }
+  
+
 
 /* The findMultiUpdateOrder function takes a list of updated nodes and returns a list of nodes
     in the order in which they should be updated. The function first performs a DFS on the graph 
@@ -81,11 +79,10 @@ export function findUpdateOrder(graph: MultiDirectedGraph, updatedNode: string):
     performs a reverse topological sort on the affected nodes to determine the order in which they 
     should be updated. */
 
-export function findMultiUpdateOrder(graph: MultiDirectedGraph, updatedNodes: string[]): string[] {
-  // TODO: to be tested
+export function findMultiUpdateOrder(graph: Graph, updatedNodes: string[]): string[] {
   let depths: Map<string, number> = new Map();
   let allNodes: Set<string> = new Set();
-
+    
   const visit = (node: string, depth: number) => {
     if (!allNodes.has(node) || depths.get(node)! < depth) {
       allNodes.add(node);
@@ -97,21 +94,20 @@ export function findMultiUpdateOrder(graph: MultiDirectedGraph, updatedNodes: st
   updatedNodes.forEach(node => visit(node, 0));
 
   return Array.from(allNodes)
-    .sort((a, b) => depths.get(b)! - depths.get(a)!) // Sort by depth in descending order
-    .filter((node, index, self) => self.indexOf(node) === index); // Remove duplicates
+    .sort((a, b) => depths.get(b)! - depths.get(a)!)
+    .filter((node, index, self) => self.indexOf(node) === index);
 }
 
-// Function that detect if GraphNode is LocalGraphNode or ExternalGraphNode --> TODO: remove this function and use type check in TS instead
+/* Function that detect if GraphNode is LocalGraphNode or ExternalGraphNode --> TODO: remove this function and use type check in TS instead */
 function isLocalGraphNode(node: GraphNode): node is LocalGraphNode {
   return (node as LocalGraphNode).hash !== undefined;
 }
 
-// Function that compare two graphs and return the added, updated and deleted nodes
+/* Function that compare two graphs and return the added, updated and deleted nodes between the two graphs. */
 export function compareGraphs(
-  oldGraph: MultiDirectedGraph<GraphNode>,
-  newGraph: MultiDirectedGraph<GraphNode>
+  oldGraph: Graph,
+  newGraph: Graph
 ): {
-  // TODO: to be tested
   addedNodes: string[];
   updatedNodes: string[];
   deletedNodes: string[];
@@ -121,7 +117,6 @@ export function compareGraphs(
   let deletedNodes: string[] = [];
   let oldGraphNodes: Set<string> = new Set(oldGraph.nodes());
 
-  // Check for added or updated nodes
   newGraph.forEachNode((node, attributes) => {
     if (!oldGraph.hasNode(node)) {
       addedNodes.push(node);
@@ -131,12 +126,10 @@ export function compareGraphs(
         updatedNodes.push(node);
       }
     }
-    oldGraphNodes.delete(node); // Remove from oldGraphNodes to track deletions
+    oldGraphNodes.delete(node);
   });
 
-  // Remaining nodes in oldGraphNodes are deleted
   deletedNodes = Array.from(oldGraphNodes);
 
   return { addedNodes, updatedNodes, deletedNodes };
 }
-  

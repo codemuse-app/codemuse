@@ -3,12 +3,15 @@ import * as vscode from "vscode";
 import * as Languages from "../languages";
 import { Status } from "../status";
 import { buildGraph } from "./graph/build";
-import { buildFlattenedGraph } from "./graph/flatten";  // Import the function
-import { findCycles, printCycles } from "./graph/utils_graph";  // Import the function
-
+import { buildFlattenedGraph} from "./graph/flatten";  // Import the function
+import { findCycles, printCycles, compareGraphs} from "./graph/utils_graph";  // Import the function
+import { Graph, GraphNode, LocalGraphNode, ExternalGraphNode } from "./graph/types";
+import { MultiDirectedGraph } from 'graphology';
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
+  private originalGraph?: Graph;
+  private flattenedGraph?: Graph;
 
   constructor() {}
 
@@ -51,19 +54,31 @@ export class Index {
 
               const scipPath = await language.run(workspace.uri.fsPath);
 
-              const originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
+              // const originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
+              instance.originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
               
               progress.report({
                 message: `Indexing ${language.languageId} complete`,
               });
 
-              const original_cycles = findCycles(originalGraph);
+              const original_cycles = findCycles(instance.originalGraph);
               console.log("Original cycles:");
               printCycles(original_cycles);
 
               // Generate the flattened version of the graph
-              const flattenedGraph = buildFlattenedGraph(originalGraph);
-              const flattened_cycles = findCycles(flattenedGraph);
+              // case 1: if the flattenedGraph is not yet generated, generate it
+              if (!instance.flattenedGraph) {
+                instance.flattenedGraph = buildFlattenedGraph(instance.originalGraph);
+              } else { // case 2: if the flattenedGraph is already generated, compare it with the new graph, and replace it with the new graph
+                const newFlattenedGraph = buildFlattenedGraph(instance.originalGraph);
+                const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(instance.flattenedGraph, newFlattenedGraph);
+                instance.flattenedGraph = newFlattenedGraph; // Replace with the new graph
+
+                // Then perform the documentation update:
+              }
+              
+        
+              const flattened_cycles = findCycles(instance.flattenedGraph);
               console.log("Flattened cycles (should be NONE):");
               printCycles(flattened_cycles);
 
