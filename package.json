@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "sync:scip-python": "rsync -ax --exclude='node_modules/' --exclude='.git/' ../scip-python/* ./packages/scip-python && cd ./packages/scip-python && npm install && cd packages/pyright-scip && npm run build && cd ../../.."
+    "sync:scip-python": "rsync -ax --exclude='node_modules/' --exclude='.git/' ../scip-python/* ./packages/scip-python && npm install --workspace=pyright-root && cd packages/scip-python/packages/pyright-scip && npm run build"
   },
   "author": "CodeMuse <contact@codemuse.app>",
   "dependencies": {}
