@@ -121,16 +121,19 @@ export function compareGraphs(
 
   newGraph.forEachNode((node, attributes) => {
     if (!oldGraph.hasNode(node)) {
+      "Added node"
       addedNodes.push(node);
-    } else if (
-      isLocalGraphNode(attributes) &&
-      isLocalGraphNode(oldGraph.getNodeAttributes(node))
-    ) {
+    } else {
       const oldAttributes = oldGraph.getNodeAttributes(node) as LocalGraphNode;
-      if (oldAttributes.hash !== attributes.hash) {
+      console.log("Check Hashing...");
+      console.log("hash original node: ", oldAttributes.hash);
+      console.log("hash new node: ", (attributes as LocalGraphNode).hash);
+      console.log("node name: ", node);
+      if (oldAttributes.hash !== (attributes as LocalGraphNode).hash) {
         updatedNodes.push(node);
       }
     }
+    console.log("Delete node");
     oldGraphNodes.delete(node);
   });
 

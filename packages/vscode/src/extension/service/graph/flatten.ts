@@ -1,5 +1,5 @@
 import { MultiDirectedGraph } from 'graphology';
-import { type Graph, GraphNode, GraphEdge } from "./types";
+import { type Graph, GraphNode, GraphEdge, LocalGraphNode } from "./types";
 import { readFile, writeFileSync } from "fs";
 
 /* DFS for Back Edge Detection: The dfsRemoveBackEdges function performs DFS on the graph to find back edges 
@@ -49,7 +49,8 @@ export const buildFlattenedGraph = (originalGraph: Graph): Graph => {
 
   // Clone nodes from the original graph
   originalGraph.nodes().forEach(node => {
-    flattenedGraph.addNode(node);
+    const { hash, file, range, content, symbol, language } = originalGraph.getNodeAttributes(node) as LocalGraphNode;
+    flattenedGraph.addNode(node, { hash, file, range, content, symbol, language });
   });
 
   // Clone edges from the original graph, excluding self loops

@@ -82,7 +82,7 @@ export class Index {
                 );
                 const { addedNodes, updatedNodes, deletedNodes } =
                   compareGraphs(instance.flattenedGraph, newFlattenedGraph);
-                instance.flattenedGraph = newFlattenedGraph; // Replace with the new graph
+              instance.flattenedGraph = newFlattenedGraph; // Replace with the new graph
 
                 // Then perform the documentation update:
               }
