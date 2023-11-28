@@ -122,12 +122,9 @@ export function compareGraphs(
   newGraph.forEachNode((node, attributes) => {
     if (!oldGraph.hasNode(node)) {
       addedNodes.push(node);
-    } else if (
-      isLocalGraphNode(attributes) &&
-      isLocalGraphNode(oldGraph.getNodeAttributes(node))
-    ) {
+    } else {
       const oldAttributes = oldGraph.getNodeAttributes(node) as LocalGraphNode;
-      if (oldAttributes.hash !== attributes.hash) {
+      if (oldAttributes.hash !== (attributes as LocalGraphNode).hash) {
         updatedNodes.push(node);
       }
     }
