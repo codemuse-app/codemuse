@@ -3,8 +3,9 @@ import { promisify } from "util";
 import { MultiDirectedGraph } from "graphology";
 import { join } from "path";
 
-import { GraphNode, type Graph } from "./types";
+import { GraphNode, type Graph, LocalGraphNode } from "./types";
 import { scip } from "../scip";
+import { hashNode } from "./utils_graph";
 
 export const buildGraph = async (cwd: string, scipIndexPath: string) => {
   // Load the SCIP index into a buffer
@@ -109,12 +110,17 @@ export const buildGraph = async (cwd: string, scipIndexPath: string) => {
     };
 
     for (const range of documentRanges) {
-      graph.mergeNode(range.symbol, {
+      const localNode = {
         symbol: range.symbol,
         range: formatRange(range.range),
         content: range.content,
         file: document.relative_path,
-      } satisfies GraphNode);
+      };
+
+      graph.mergeNode(range.symbol, {
+        ...localNode,
+        hash: hashNode(localNode),
+      } satisfies LocalGraphNode);
 
       const parentSymbol = getParentSymbol(range.range, range.symbol);
 
