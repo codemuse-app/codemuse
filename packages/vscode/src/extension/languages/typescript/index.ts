@@ -6,12 +6,11 @@ import { promisify } from "util";
 import { createHash } from "crypto";
 
 import { LanguageProvider } from "../provider";
-import { SupportedLanguage } from "../../service/graph/types";
 
 const execFileAsync = promisify(execFile);
 
 export class Typescript extends LanguageProvider {
-  languageId = "typescript" as SupportedLanguage;
+  languageId = "typescript" as const;
 
   async run(cwd: string) {
     const path = resolve(

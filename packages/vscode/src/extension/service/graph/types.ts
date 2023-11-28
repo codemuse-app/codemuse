@@ -2,7 +2,7 @@ import { type MultiDirectedGraph } from "graphology";
 
 export type Range = [number, number, number, number];
 
-export type SupportedLanguage = "python";
+export type SupportedLanguage = "python" | "typescript";
 
 export interface BasicGraphNode {
   symbol: string;

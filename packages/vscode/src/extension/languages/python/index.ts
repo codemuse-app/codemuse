@@ -7,7 +7,6 @@ import * as path from "path";
 
 import { LanguageProvider } from "../provider";
 import { writeFileSync } from "fs";
-import { SupportedLanguage } from "../../service/graph/types";
 
 const execFileAsync = promisify(execFile);
 
@@ -68,7 +67,7 @@ class PythonPackage {
 }
 
 export class Python extends LanguageProvider {
-  languageId = "python" as SupportedLanguage;
+  languageId = "python" as const;
 
   private async getPythonPath(cwd: string) {
     // Detect the presence of the python extension, if it is installed use its global python path (for the workspace)
