@@ -3,11 +3,20 @@ import { promisify } from "util";
 import { MultiDirectedGraph } from "graphology";
 import { join } from "path";
 
-import { GraphNode, type Graph, LocalGraphNode } from "./types";
+import {
+  GraphNode,
+  type Graph,
+  LocalGraphNode,
+  SupportedLanguage,
+} from "./types";
 import { scip } from "../scip";
 import { hashNode } from "./utils_graph";
 
-export const buildGraph = async (cwd: string, scipIndexPath: string) => {
+export const buildGraph = async (
+  cwd: string,
+  scipIndexPath: string,
+  language: SupportedLanguage
+) => {
   // Load the SCIP index into a buffer
   const buffer = await promisify(readFile)(scipIndexPath);
 
@@ -115,6 +124,7 @@ export const buildGraph = async (cwd: string, scipIndexPath: string) => {
         range: formatRange(range.range),
         content: range.content,
         file: document.relative_path,
+        language,
       };
 
       graph.mergeNode(range.symbol, {
@@ -161,6 +171,7 @@ export const buildGraph = async (cwd: string, scipIndexPath: string) => {
       graph.mergeNode(parentSymbol);
       graph.mergeNode(occurrence.symbol, {
         symbol: occurrence.symbol,
+        language,
       } satisfies GraphNode);
       graph.addDirectedEdge(parentSymbol, occurrence.symbol, {
         type: "uses",

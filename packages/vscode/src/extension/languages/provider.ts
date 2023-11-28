@@ -1,9 +1,10 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync } from "fs";
 import * as vscode from "vscode";
+import { SupportedLanguage } from "../service/graph/types";
 
 export abstract class LanguageProvider {
-  abstract languageId: string;
+  abstract languageId: SupportedLanguage;
   protected context: vscode.ExtensionContext;
 
   constructor(context: vscode.ExtensionContext) {
