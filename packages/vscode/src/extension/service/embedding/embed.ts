@@ -1,14 +1,16 @@
 import path = require('path');
 import fetch from 'node-fetch';
 import { LocalIndex } from 'vectra';
+import * as vscode from 'vscode';
 
 const TOPK = 10; // Top K results to return
 
 export class VectraManager {
     private index: LocalIndex;
 
-    constructor() {
-        this.index = new LocalIndex(path.join(__dirname, '..', 'index'));
+    constructor(context: vscode.ExtensionContext) {
+        //this.index = new LocalIndex(path.join(__dirname, '..', 'index'));
+        this.index = new LocalIndex(context!.storageUri!.fsPath)
     }
 
     async initializeIndex() {
@@ -93,6 +95,7 @@ export class VectraManager {
             throw error;
         }
     }
+
     async query(text: string) {
         const vector = await this.getVector(text);
         const results = await this.index.queryItems(vector, TOPK);

@@ -6,7 +6,6 @@ import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten"; // Import the function
 import { findCycles, printCycles, compareGraphs } from "./graph/utils_graph"; // Import the function
 import { Graph, LocalGraphNode } from "./graph/types";
-import { LocalIndex } from 'vectra';
 import { VectraManager } from './embedding/embed'; // Assuming these functions are defined in 'embedding.ts'
 
 
@@ -15,26 +14,29 @@ export class Index {
   private languages: Languages.LanguageProvider[] = [];
   private originalGraph?: Graph;
   private flattenedGraph?: Graph;
+  private context: vscode.ExtensionContext;
 
-  constructor() {}
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context;
+  }
 
   static setContext(context: vscode.ExtensionContext) {
-    Index.getInstance().languages = [
+    Index.getInstance(context).languages = [
       // new Languages.Typescript(context),
       new Languages.Python(context),
     ];
   }
 
-  static getInstance() {
+  static getInstance(context: vscode.ExtensionContext) {
     if (!Index.instance) {
-      Index.instance = new Index();
+      Index.instance = new Index(context);
     }
 
     return Index.instance;
   }
 
-  async run() {
-    const instance = Index.getInstance();
+  async run(context: vscode.ExtensionContext) {
+    const instance = Index.getInstance(context);
 
     // Show a notification with progress bar
     vscode.window.withProgress(
@@ -74,7 +76,7 @@ export class Index {
               printCycles(original_cycles);
 
               // Create the Vectra Index Instance to store embeddings
-              const vectraManager = new VectraManager();
+              const vectraManager = new VectraManager(this.context);
 
               
               // Generate the flattened version of the graph
@@ -122,7 +124,7 @@ export class Index {
                   // Upsert the item in the Vectra index
                   await vectraManager.upsertItem(content, id, hash, filePath);
                 }
-                
+
                 // Then perform the documentation update:
                 // TODO
 

@@ -10,7 +10,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   // Create a command called "CodeMuse: Index Workspace" that will run the index
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.index", () => {
-      Index.getInstance().run();
+      Index.getInstance(context).run(context);
     })
   );
 
