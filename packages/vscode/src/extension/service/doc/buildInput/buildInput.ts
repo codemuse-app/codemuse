@@ -42,10 +42,13 @@ export function getComponentBodyAndIndentation(componentType:string, code: strin
 
         if (match) {
             // Assuming getClosestUpcomingCodeLine is defined elsewhere and returns a tuple [number, string]
-            const [_, nonEmptyClosestLine] = getClosestUpcomingCodeLine(index, lines);
+            const [_, nonEmptyClosestLine] = getClosestUpcomingCodeLine(index+1, lines);
 
-            const result = lines.slice(index).join('\n');
-            const indentation = nonEmptyClosestLine.replace(nonEmptyClosestLine.trimStart(), "");
+            const result = lines.slice(index+1).join('\n');
+
+            
+            const indentation =nonEmptyClosestLine.replace(nonEmptyClosestLine.trimStart(),"");
+         
             return [result, indentation];
         }
     }
