@@ -48,9 +48,11 @@
     "vscode:prepublish": "npm run compile",
     "compile": "npm run gulp && webpack --mode production --devtool hidden-source-map",
     "watch": "npm run gulp && webpack --watch",
-    "pretest": "npm run compile",
+    "pretest": "npm run compile-tests && npm run compile",
     "lint": "eslint src --ext ts",
-    "test": "rm -rf .vscode-test && vscode-test",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "test": "vscode-test",
     "package": "vsce package --allow-missing-repository --no-dependencies --allow-star-activation --skip-license",
     "selfinstall": "npm run package && code --install-extension vscode-0.0.0.vsix --force"
   },
