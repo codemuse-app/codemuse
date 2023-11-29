@@ -41,9 +41,9 @@ image = (
 
 stub = Stub("example-vllm-inference", image=image)
 
-@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), allow_concurrent_inputs=30)
+@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), allow_concurrent_inputs=30, container_idle_timeout=30)
 class Model:
-    def __init__(self):
+    def __enter__(self):
         from vllm.engine.arg_utils import AsyncEngineArgs
         from vllm.engine.async_llm_engine import AsyncLLMEngine
 
@@ -101,14 +101,14 @@ class Model:
 #     model.generate.remote(questions)
 
 @stub.function()
-@web_endpoint()
 @utils.with_sentry
+@web_endpoint()
 def test_sentry():
     raise ValueError("Test exception")
 
 @stub.function()
-@web_endpoint(method="POST", label="generate-documentation")
 @utils.with_sentry
+@web_endpoint(method="POST", label="generate-documentation")
 def generate_documentation(item: dict):
     code = item["code"]
 
