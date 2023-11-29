@@ -54,7 +54,7 @@ class Model:
       self.model = SentenceTransformer(MODEL_DIR, trust_remote_code=True, revision='v1.0.0')
 
     @method()
-    def generate(self, elements: list(str)):
+    def generate(self, elements):
       return self.model.encode(elements)
 
 @stub.function()
