@@ -11,5 +11,8 @@
     "sync:scip-python": "rsync -ax --exclude='node_modules/' --exclude='.git/' ../scip-python/* ./packages/scip-python && npm install --workspace=pyright-root && cd packages/scip-python/packages/pyright-scip && npm run build"
   },
   "author": "CodeMuse <contact@codemuse.app>",
-  "dependencies": {}
+  "devDependencies": {
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.8"
+  }
 }

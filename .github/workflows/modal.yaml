@@ -1,0 +1,35 @@
+name: Deployment
+
+on:
+  push:
+    #paths:
+    #  - "packages/remote/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+          cache: "pip"
+
+      - name: Install Modal
+        run: pip install modal sentry-sdk
+
+      - name: Deploy LLM
+        run: modal deploy llama.py --name llm
+        working-directory: packages/remote
+
+      - name: Deploy embeddings
+        run: modal deploy embeddings.py --name embeddings
+        working-directory: packages/remote
