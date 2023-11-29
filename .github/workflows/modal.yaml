@@ -1,0 +1,35 @@
+name: Deployment
+
+on:
+  push:
+    paths:
+      - "packages/remote/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Move to packages/remote
+        run: cd packages/remote
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install Modal
+        run: pip install modal
+
+      - name: Setup modal profile
+        run: modal profile activate codemuse-app
+
+      - name: Deploy LLM
+        run: modal deploy llama.py
