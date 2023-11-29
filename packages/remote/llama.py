@@ -1,6 +1,5 @@
 import os
 import time
-import asyncio
 from modal import Image, Secret, Stub, method, web_endpoint
 
 MODEL_DIR = "/model"
