@@ -5,7 +5,10 @@ import { Status } from "../status";
 import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten"; // Import the function
 import { findCycles, printCycles, compareGraphs } from "./graph/utils_graph"; // Import the function
-import { Graph } from "./graph/types";
+import { Graph, LocalGraphNode } from "./graph/types";
+import { LocalIndex } from 'vectra';
+import { VectraManager } from './embedding/embed'; // Assuming these functions are defined in 'embedding.ts'
+
 
 export class Index {
   private static instance: Index;
@@ -65,16 +68,29 @@ export class Index {
                 message: `Indexing ${language.languageId} complete`,
               });
 
+              // check the number of cycles in the original graph
               const original_cycles = findCycles(instance.originalGraph);
               console.log("Original cycles:");
               printCycles(original_cycles);
 
+              // Create the Vectra Index Instance to store embeddings
+              const vectraManager = new VectraManager();
+
+              
               // Generate the flattened version of the graph
               // case 1: if the flattenedGraph is not yet generated, generate it
               if (!instance.flattenedGraph) {
                 instance.flattenedGraph = buildFlattenedGraph(
                   instance.originalGraph
                 );
+                // Create embedding for each node and store in Vectra DB
+                for (const node of instance.flattenedGraph.nodes()) {
+                  const nodeData = instance.flattenedGraph.getNodeAttributes(node) as LocalGraphNode;
+                  if (nodeData.content) {
+                  const vector = await vectraManager.getVector(nodeData.content);
+                await vectraManager.addItem(nodeData.content, node, nodeData.hash, nodeData.file); 
+                  }
+                }
               } else {
                 // case 2: if the flattenedGraph is already generated, compare it with the new graph, and replace it with the new graph
                 const newFlattenedGraph = buildFlattenedGraph(
@@ -84,7 +100,33 @@ export class Index {
                   compareGraphs(instance.flattenedGraph, newFlattenedGraph);
               instance.flattenedGraph = newFlattenedGraph; // Replace with the new graph
 
+                // Delete embeddings for deleted nodes
+                for (const node of deletedNodes) {
+                  await vectraManager.deleteItem(node);
+                }
+
+                // Update or create embeddings for added or updated nodes using upsertItem
+                // Concatenate addedNodes and updatedNodes
+                const allNodesToUpdate = addedNodes.concat(updatedNodes);
+
+                // Iterate over all nodes to update or create embeddings
+                for (const nodeId of allNodesToUpdate) {
+                  const nodeData = newFlattenedGraph.getNodeAttributes(nodeId) as LocalGraphNode;
+
+                  // Extracting the relevant information from the node
+                  const content = nodeData.content;  // Replace with actual attribute names if different
+                  const id = nodeId            // Metadata ID
+                  const hash = nodeData.hash;        // Unique hash
+                  const filePath = nodeData.file;    // File path
+
+                  // Upsert the item in the Vectra index
+                  await vectraManager.upsertItem(content, id, hash, filePath);
+                }
+                
                 // Then perform the documentation update:
+                // TODO
+
+
               }
 
               const flattened_cycles = findCycles(instance.flattenedGraph);

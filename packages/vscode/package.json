@@ -50,7 +50,9 @@
     "@sourcegraph/scip-typescript": "^0.3.9",
     "@vscode/vsce": "^2.22.0",
     "google-protobuf": "^3.21.2",
-    "graphology": "^0.25.4"
+    "graphology": "^0.25.4",
+    "node-fetch": "^3.3.2",
+    "vectra": "^0.4.4"
   },
   "vsce": {
     "dependencies": false
