@@ -6,8 +6,7 @@ import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten"; // Import the function
 import { findCycles, printCycles, compareGraphs } from "./graph/utils_graph"; // Import the function
 import { Graph, LocalGraphNode } from "./graph/types";
-import { VectraManager } from './embedding/embed'; // Assuming these functions are defined in 'embedding.ts'
-
+import { VectraManager } from "./embedding/embed"; // Assuming these functions are defined in 'embedding.ts'
 
 export class Index {
   private static instance: Index;
@@ -77,8 +76,8 @@ export class Index {
 
               // Create the Vectra Index Instance to store embeddings
               const vectraManager = new VectraManager(this.context);
+              await vectraManager.initializeIndex();
 
-              
               // Generate the flattened version of the graph
               // case 1: if the flattenedGraph is not yet generated, generate it
               if (!instance.flattenedGraph) {
@@ -88,10 +87,17 @@ export class Index {
 
                 await Promise.all(
                   instance.flattenedGraph.nodes().map(async (node) => {
-                    const nodeData = instance.flattenedGraph!.getNodeAttributes(node) as LocalGraphNode;
+                    const nodeData = instance.flattenedGraph!.getNodeAttributes(
+                      node
+                    ) as LocalGraphNode;
                     if (nodeData.content) {
-                    //await vectraManager.addItem(nodeData.content, node, nodeData.hash, nodeData.file); 
-                    await vectraManager.upsertItem(nodeData.content, node, nodeData.hash, nodeData.file);
+                      //await vectraManager.addItem(nodeData.content, node, nodeData.hash, nodeData.file);
+                      await vectraManager.upsertItem(
+                        nodeData.content,
+                        node,
+                        nodeData.hash,
+                        nodeData.file
+                      );
                     }
                   })
                 );
@@ -102,7 +108,7 @@ export class Index {
                 );
                 const { addedNodes, updatedNodes, deletedNodes } =
                   compareGraphs(instance.flattenedGraph, newFlattenedGraph);
-              instance.flattenedGraph = newFlattenedGraph; // Replace with the new graph
+                instance.flattenedGraph = newFlattenedGraph; // Replace with the new graph
 
                 // Delete embeddings for deleted nodes
                 for (const node of deletedNodes) {
@@ -130,13 +136,15 @@ export class Index {
                 await Promise.all(
                   // Iterate over all nodes to update or create embeddings
                   allNodesToUpdate.map(async (nodeId) => {
-                    const nodeData = newFlattenedGraph.getNodeAttributes(nodeId) as LocalGraphNode;
+                    const nodeData = newFlattenedGraph.getNodeAttributes(
+                      nodeId
+                    ) as LocalGraphNode;
 
                     // Extracting the relevant information from the node
-                    const content = nodeData.content;  // Replace with actual attribute names if different
-                    const id = nodeId;            // Metadata ID
-                    const hash = nodeData.hash;        // Unique hash
-                    const filePath = nodeData.file;    // File path
+                    const content = nodeData.content; // Replace with actual attribute names if different
+                    const id = nodeId; // Metadata ID
+                    const hash = nodeData.hash; // Unique hash
+                    const filePath = nodeData.file; // File path
 
                     // Upsert the item in the Vectra index
                     await vectraManager.upsertItem(content, id, hash, filePath);
@@ -145,8 +153,6 @@ export class Index {
 
                 // Then perform the documentation update:
                 // TODO
-
-
               }
 
               const flattened_cycles = findCycles(instance.flattenedGraph);

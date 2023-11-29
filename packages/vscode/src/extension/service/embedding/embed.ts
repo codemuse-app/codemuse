@@ -11,7 +11,6 @@ export class VectraManager {
   constructor(context: vscode.ExtensionContext) {
     //this.index = new LocalIndex(path.join(__dirname, '..', 'index'));
     this.index = new LocalIndex(context!.storageUri!.fsPath);
-    this.initializeIndex();
   }
 
   async initializeIndex() {
@@ -71,33 +70,31 @@ export class VectraManager {
 
   // Update or insert an item with the given node ID
   async upsertItem(text: string, id: string, hash: string, filePath: string) {
+    let recompute = true;
+
+    const existingItems = await this.index.listItemsByMetadata({ id });
+
+    if (existingItems.length && existingItems[0].metadata.hash === hash) {
+      recompute = false;
+    }
+
+    if (!recompute) {
+      return;
+    }
+
     const vector = await this.getVector(text);
     const metadata = { id, hash, path: filePath };
 
-    await this.index.beginUpdate();
-    try {
-      // Find existing items by metadata id
-      const items = await this.index.listItemsByMetadata({ id });
-      const existingItem = items.length > 0 ? items[0] : null; // Assume there is only one item with the given ID (at most)
+    const existingItem = existingItems[0];
 
-      if (existingItem) {
-        // Update existing item
-        existingItem.vector = vector;
-        existingItem.metadata = metadata;
-        await this.index.upsertItem(existingItem);
-      } else {
-        // Add new item with a unique internal ID (Vectra's item ID)
-        await this.index.insertItem({
-          vector,
-          metadata,
-        });
-      }
-      await this.index.endUpdate();
-    } catch (error) {
-      console.error(`Error in upserting item with metadata ID ${id}:`, error);
-      this.index.cancelUpdate();
-      throw error;
-    }
+    await this.index.upsertItem({
+      id: existingItem.id,
+      vector,
+      metadata: {
+        ...existingItem.metadata,
+        ...metadata,
+      },
+    });
   }
 
   async query(text: string) {
