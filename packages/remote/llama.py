@@ -99,7 +99,7 @@ class Model:
 #     model.generate.remote(questions)
 
 @stub.function()
-@web_endpoint(method="POST")
+@web_endpoint(method="POST", label="generate")
 def generate_documentation(item: dict):
     code = item["code"]
 

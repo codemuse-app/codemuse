@@ -1,6 +1,6 @@
 import os
 
-from modal import Image, Secret, Stub, method
+from modal import Image, Secret, Stub, method, web_endpoint
 
 MODEL_DIR = "/model"
 BASE_MODEL = "Hum-Works/lodestone-base-4096-v1"
@@ -55,6 +55,12 @@ class Model:
     @method()
     def generate(self, user_questions):
       return self.model.encode(user_questions)
+
+@stub.function()
+@web_endpoint(label='generate')
+def get_embedding(snippet: str):
+   model = Model()
+   return model.generate(snippet)
 
 @stub.local_entrypoint()
 def main():

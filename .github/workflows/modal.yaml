@@ -28,3 +28,7 @@ jobs:
       - name: Deploy LLM
         run: modal deploy llama.py --name llm
         working-directory: packages/remote
+
+      - name: Deploy embeddings
+        run: modal deploy embeddings.py --name embeddings
+        working-directory: packages/remote
