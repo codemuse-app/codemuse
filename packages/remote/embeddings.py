@@ -1,4 +1,6 @@
+import asyncio
 import os
+from typing import List
 from modal import Image, Secret, Stub, method, web_endpoint
 
 import utils
@@ -33,7 +35,7 @@ image = (
     )
     .pip_install("einops")
     # Use the barebones hf-transfer package for maximum download speeds. No progress bar, but expect 700MB/s.
-    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "TOKENIZERS_PARALLELISM": "true"})
     .run_function(
         download_model_to_folder,
         secret=Secret.from_name("huggingface"),
@@ -45,17 +47,43 @@ image = (
 
 stub = Stub("example-embeddings", image=image)
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=30)
+@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=30, allow_concurrent_inputs=10)
 class Model:
     def __enter__(self):
-      from sentence_transformers import SentenceTransformer
+        from sentence_transformers import SentenceTransformer
 
         # Load the model. Tip: MPT models may require `trust_remote_code=true`.
-      self.model = SentenceTransformer(MODEL_DIR, trust_remote_code=True, revision='v1.0.0')
+        self.model = SentenceTransformer(MODEL_DIR, trust_remote_code=True, revision='v1.0.0')
+
+        # Create a queue and a batch size
+        self.queue = asyncio.Queue()
+        self.batch_size = 10
+
+        async def process_batches():
+            while True:
+                # Collect a batch of inputs
+                batch = [await self.queue.get() for _ in range(self.batch_size)]
+
+                # Process the batch
+                results = self.model.encode([item[0] for item in batch], batch_size=self.batch_size)
+
+                # Set the results for each item in the batch
+                for item, result in zip(batch, results):
+                    item[1].set_result(result)
+
+        # Start the background task
+        self.task = asyncio.create_task(process_batches())
 
     @method()
-    def generate(self, elements):
-      return self.model.encode(elements)
+    async def generate(self, elements: List[str]) -> List[float]:
+        # Create a Future for the result
+        result = asyncio.Future()
+
+        # Add the elements and the Future to the queue
+        await self.queue.put((elements, result))
+
+        # Wait for the result
+        return await result
 
 @stub.function()
 @utils.with_sentry
