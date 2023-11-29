@@ -28,8 +28,5 @@ jobs:
       - name: Install Modal
         run: pip install modal
 
-      - name: Setup modal profile
-        run: modal profile activate codemuse-app
-
       - name: Deploy LLM
         run: modal deploy llama.py --name llm
