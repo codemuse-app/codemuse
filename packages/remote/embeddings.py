@@ -66,7 +66,7 @@ def get_embedding(snippet: dict):
         raise ValueError("Snippet must contain a single key, 'code'.")
 
     model = Model()
-    return model.generate.remote([snippet["code"]])[0]
+    return list(model.generate.remote([snippet["code"]])[0])
 
 @stub.local_entrypoint()
 def main():
