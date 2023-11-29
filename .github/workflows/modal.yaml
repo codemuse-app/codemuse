@@ -2,8 +2,8 @@ name: Deployment
 
 on:
   push:
-    paths:
-      - "packages/remote/**"
+    #paths:
+    #  - "packages/remote/**"
 
 jobs:
   deploy:
@@ -27,6 +27,9 @@ jobs:
 
       - name: Install Modal
         run: pip install modal
+
+      - name: List files
+        run: ls -la
 
       - name: Deploy LLM
         run: modal deploy llama.py --name llm
