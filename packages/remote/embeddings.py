@@ -20,6 +20,14 @@ def download_model_to_folder():
         token=os.environ["HUGGINGFACE_TOKEN"],
     )
 
+def model_init():
+    from sentence_transformers import SentenceTransformer
+
+    # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
+    model = SentenceTransformer(MODEL_DIR, trust_remote_code=True, revision='v1.0.0')
+
+    return model
+
 image = (
     Image.from_registry(
        "nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04",
@@ -44,6 +52,7 @@ image = (
     )
     .run_commands('pip uninstall -y triton triton-python')
     .pip_install('triton==2.0.0.dev20221202')
+    .run_function(model_init)
 )
 
 stub = Stub("example-embeddings", image=image)
@@ -51,10 +60,8 @@ stub = Stub("example-embeddings", image=image)
 @stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=30, allow_concurrent_inputs=10)
 class Model:
     def __enter__(self):
-        from sentence_transformers import SentenceTransformer
-
-        # Load the model. Tip: MPT models may require `trust_remote_code=true`.
-        self.model = SentenceTransformer(MODEL_DIR, trust_remote_code=True, revision='v1.0.0')
+        # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
+        self.model = model_init()
 
         # Create a queue and a batch size
         self.queue = asyncio.Queue()
