@@ -1,5 +1,6 @@
 import os
-
+import time
+import asyncio
 from modal import Image, Secret, Stub, method, web_endpoint
 
 MODEL_DIR = "/model"
@@ -39,13 +40,14 @@ image = (
 
 stub = Stub("example-vllm-inference", image=image)
 
-@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), concurrency_limit=2)
+@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), allow_concurrent_inputs=30)
 class Model:
-    def __enter__(self):
-        from vllm import LLM
+    def __init__(self):
+        from vllm.engine.arg_utils import AsyncEngineArgs
+        from vllm.engine.async_llm_engine import AsyncLLMEngine
 
-        # Load the model. Tip: MPT models may require `trust_remote_code=true`.
-        self.llm = LLM(MODEL_DIR)
+        engine_args = AsyncEngineArgs(model=MODEL_DIR, gpu_memory_utilization=0.95)
+        self.llm = AsyncLLMEngine.from_engine_args(engine_args)
         self.template = """<s>[INST] <<SYS>>
 {system}
 <</SYS>>
@@ -53,16 +55,16 @@ class Model:
 {user} [/INST] """
 
     @method(keep_warm=False)
-    def generate(self, user_questions):
+    async def generate(self, code: str):
         from vllm import SamplingParams
+        from vllm.utils import random_uuid
 
         print('Generating...')
 
-        prompts = [
-            self.template.format(system="", user=q) for q in user_questions
-        ]
-
-        print(prompts)
+        prompt = self.template.format(
+            system="",
+            user="\n".join(code),
+        )
 
         sampling_params = SamplingParams(
             temperature=0.0,
@@ -70,19 +72,23 @@ class Model:
             max_tokens=800,
             presence_penalty=1.15,
         )
-        result = self.llm.generate(prompts, sampling_params)
+        request_id = random_uuid()
+        results_generator = self.llm.generate(prompt, sampling_params, request_id)
 
-        print(result)
+        t0 = time.time()
+        index, tokens = 0, 0
+        async for request_output in results_generator:
+            if "\ufffd" == request_output.outputs[0].text[-1]:
+                continue
+            yield request_output.outputs[0].text[index:]
+            index = len(request_output.outputs[0].text)
 
-        num_tokens = 0
+            # Token accounting
+            new_tokens = len(request_output.outputs[0].token_ids)
+            tokens = new_tokens
 
-        for output in result:
-            num_tokens += len(output.outputs[0].token_ids)
-            print(output.prompt, output.outputs[0].text, "\n\n", sep="")
-
-        print(f"Generated {num_tokens} tokens")
-
-        return result[0].outputs[0].text
+        throughput = tokens / (time.time() - t0)
+        print(f"Request completed: {throughput:.4f} tokens/s")
 
 # @stub.local_entrypoint()
 # def main():
@@ -107,7 +113,12 @@ def generate_documentation(item: dict):
 
 Write a short description of this code. You should describe as much of the specificities and business meaning rather than generic framework inforamtion. Keep the description as short as possible. Ideally, it should be a single sentence."""
 
-    return Model().generate.remote([prompt]).strip()
+    answer = ""
+
+    for chunk in Model().generate.remote_gen([prompt]):
+        answer += chunk
+
+    return answer.strip()
 
 @stub.local_entrypoint()
 def main():
@@ -179,4 +190,18 @@ def main():
         "Who were the 'Dog-Headed Saint' and the 'Lion-Faced Saint' in medieval Christian traditions?",
         "What is the story of the 'Globsters', unidentified organic masses washed up on the shores?",
     ]
-    model.generate.remote(questions)
+
+    from concurrent.futures import ThreadPoolExecutor
+
+    def process_question(question):
+        print(question)
+        for chunk in model.generate.remote_gen(question):
+            print(chunk, end="")
+        print()
+
+    def main():
+        with ThreadPoolExecutor() as executor:
+            executor.map(process_question, questions)
+
+    # Run the main function
+    main()
