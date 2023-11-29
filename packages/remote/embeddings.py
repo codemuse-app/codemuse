@@ -60,7 +60,7 @@ class Model:
 @web_endpoint(label='generate-embedding')
 def get_embedding(snippet: str):
    model = Model()
-   return model.generate(snippet)
+   return model.generate([snippet])
 
 @stub.local_entrypoint()
 def main():
