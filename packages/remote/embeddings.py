@@ -54,8 +54,8 @@ class Model:
       self.model = SentenceTransformer(MODEL_DIR, trust_remote_code=True, revision='v1.0.0')
 
     @method()
-    def generate(self, user_questions):
-      return self.model.encode(user_questions)
+    def generate(self, elements: list(str)):
+      return self.model.encode(elements)
 
 @stub.function()
 @utils.with_sentry
@@ -66,7 +66,7 @@ def get_embedding(snippet: dict):
         raise ValueError("Snippet must contain a single key, 'code'.")
 
     model = Model()
-    return model.generate([snippet["code"]])[0]
+    return model.generate.remote([snippet["code"]])[0]
 
 @stub.local_entrypoint()
 def main():
