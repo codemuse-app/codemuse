@@ -24,7 +24,7 @@ jobs:
           cache: "pip"
 
       - name: Install Modal
-        run: pip install modal sentry-sdk
+        run: pip install modal sentry-sdk posthog
 
       - name: Deploy LLM
         run: modal deploy llama.py --name llm
