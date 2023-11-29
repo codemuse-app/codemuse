@@ -101,13 +101,13 @@ class Model:
 #     model.generate.remote(questions)
 
 @stub.function()
-@utils.with_sentry()
+@utils.with_sentry
 @web_endpoint()
 def test_sentry():
     raise ValueError("Test exception")
 
 @stub.function()
-@utils.with_sentry()
+@utils.with_sentry
 @web_endpoint(method="POST", label="generate-documentation")
 def generate_documentation(item: dict):
     code = item["code"]

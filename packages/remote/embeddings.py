@@ -58,7 +58,7 @@ class Model:
       return self.model.encode(user_questions)
 
 @stub.function()
-@utils.with_sentry()
+@utils.with_sentry
 @web_endpoint(label='generate-embedding')
 def get_embedding(snippet: str):
    model = Model()
