@@ -2,6 +2,7 @@ import asyncio
 import os
 from typing import List
 from modal import Image, Secret, Stub, method, web_endpoint
+import time
 
 import utils
 
@@ -59,20 +60,43 @@ class Model:
         self.queue = asyncio.Queue()
         self.batch_size = 10
 
-        async def process_batches():
-            while True:
-                # Collect a batch of inputs
-                batch = [await self.queue.get() for _ in range(self.batch_size)]
-
-                # Process the batch
-                results = self.model.encode([item[0] for item in batch], batch_size=self.batch_size)
-
-                # Set the results for each item in the batch
-                for item, result in zip(batch, results):
-                    item[1].set_result(result)
-
         # Start the background task
-        self.task = asyncio.create_task(process_batches())
+        self.task = asyncio.create_task(self.process_batches())
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.task.cancel()
+
+    async def process_batches(self):
+        while True:
+            # Collect a batch of inputs
+            batch = []
+            start_time = time.time()
+
+            for _ in range(self.batch_size):
+                try:
+                    timeout = 1.0 - (time.time() - start_time)
+
+                    if timeout <= 0:
+                        timeout = 0
+
+                    item = await asyncio.wait_for(self.queue.get(), timeout=timeout)
+
+                    if item is None:
+                        break
+
+                    batch.append(item)
+                except asyncio.TimeoutError:
+                    break
+
+            if len(batch) == 0:
+                continue
+
+            # Process the batch
+            results = self.model.encode([item[0] for item in batch])
+
+            # Set the results for each item in the batch
+            for item, result in zip(batch, results):
+                item[1].set_result(result)
 
     @method()
     async def generate(self, elements: List[str]) -> List[float]:
@@ -95,7 +119,7 @@ def get_embedding(snippet: dict):
 
     model = Model()
     return {
-       "embedding": model.generate.remote([snippet["code"]])[0].tolist()
+       "embedding": model.generate.remote(snippet["code"]).tolist()
     }
 
 @stub.local_entrypoint()
@@ -105,5 +129,8 @@ def main():
         # Coding questions
         "Implement a Python function to compute the Fibonacci numbers.",
     ]
-    result = model.generate.remote(questions)[0]
+    result = model.generate.remote(questions[0])
+
+    print(result)
+
     return result
