@@ -30,7 +30,7 @@ def with_sentry(fn):
 def with_posthog(fn):
     @functools.wraps(fn)
     async def fn_wrapped(*args, **kwargs):
-        posthog.capture(fn.__name__)
+        # posthog.capture(fn.__name__)
         await fn(*args, **kwargs)
 
     return fn_wrapped
