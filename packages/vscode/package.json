@@ -1,5 +1,5 @@
 {
-  "name": "vscode",
+  "name": "codemuse",
   "displayName": "CodeMuse",
   "description": "AI onboarding and peer programming.",
   "version": "0.0.0",
@@ -17,7 +17,32 @@
     "onLanguage:typescriptreact"
   ],
   "main": "./dist/extension/index.js",
-  "contributes": {},
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codemuse",
+          "title": "CodeMuse",
+          "icon": "media/sidebar.svg"
+        }
+      ]
+    },
+    "views": {
+      "codemuse": [
+        {
+          "type": "webview",
+          "id": "codemuse.sidebar",
+          "name": "CodeMuse"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "codemuse.openSidebar",
+        "title": "Open CodeMuse sidebar"
+      }
+    ]
+  },
   "scripts": {
     "gulp": "gulp",
     "vscode:prepublish": "npm run compile",
@@ -32,6 +57,8 @@
   "devDependencies": {
     "@types/mocha": "^10.0.5",
     "@types/node": "^20.9.3",
+    "@types/react": "^18.2.39",
+    "@types/react-dom": "^18.2.17",
     "@types/vscode": "^1.84.2",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
@@ -48,9 +75,16 @@
   "dependencies": {
     "@sourcegraph/scip-python": "^0.6.0",
     "@sourcegraph/scip-typescript": "^0.3.9",
+    "@types/vscode-webview": "^1.57.4",
     "@vscode/vsce": "^2.22.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "google-protobuf": "^3.21.2",
-    "graphology": "^0.25.4"
+    "graphology": "^0.25.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "vsce": {
     "dependencies": false

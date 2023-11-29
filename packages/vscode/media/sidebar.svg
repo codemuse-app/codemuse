@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
+  <style type="text/css">
+	.st0{fill:#D7DAE0;}
+  </style>
+  <path class="st0" d="M12,2c5.51,0,10,4.49,10,10s-4.49,10-10,10S2,17.51,2,12S6.49,2,12,2 M12,0C5.37,0,0,5.37,0,12s5.37,12,12,12
+	s12-5.37,12-12S18.63,0,12,0L12,0z"/>
+  <g>
+    <rect x="5" y="11" class="st0" width="2" height="2"/>
+  </g>
+  <g>
+    <rect x="9" y="11" class="st0" width="2" height="2"/>
+  </g>
+  <g>
+    <rect x="13" y="13" class="st0" width="2" height="2"/>
+  </g>
+  <g>
+    <rect x="17" y="13" class="st0" width="2" height="2"/>
+  </g>
+  <g>
+    <rect x="11" y="17" class="st0" width="2" height="2"/>
+  </g>
+  <g>
+    <rect x="5" y="15" class="st0" width="4" height="2"/>
+  </g>
+  <g>
+    <rect x="15" y="9" class="st0" width="4" height="2"/>
+  </g>
+  <g>
+    <rect x="13" y="5" class="st0" width="2" height="4"/>
+  </g>
+</svg>

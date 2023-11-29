@@ -82,6 +82,7 @@ export class Python extends LanguageProvider {
     }
 
     if (pythonExtension) {
+      console.log("here");
       const pythonPath =
         await pythonExtension.exports.settings.getExecutionDetails(
           vscode.Uri.file("")
@@ -92,37 +93,41 @@ export class Python extends LanguageProvider {
       }
     }
 
-    // If the python extension is not installed, try calling pipenv
-    const pipenvPath = execSync("which pipenv", {
-      encoding: "utf-8",
-      cwd,
-    }).trim();
-
-    // If pipenv is installed, use it to get the python path
-    if (pipenvPath) {
-      const pythonPath = execSync(`${pipenvPath} --py`, {
+    try {
+      // If the python extension is not installed, try calling pipenv
+      const pipenvPath = execSync("which pipenv", {
         encoding: "utf-8",
         cwd,
       }).trim();
 
-      return pythonPath;
-    }
+      // If pipenv is installed, use it to get the python path
+      if (pipenvPath) {
+        const pythonPath = execSync(`${pipenvPath} --py`, {
+          encoding: "utf-8",
+          cwd,
+        }).trim();
 
-    // If pipenv is not installed, try calling poetry
-    const poetryPath = execSync("which poetry", {
-      encoding: "utf-8",
-      cwd,
-    }).trim();
+        return pythonPath;
+      }
+    } catch (e) {}
 
-    // If poetry is installed, use it to get the python path
-    if (poetryPath) {
-      const pythonPath = execSync(`${poetryPath} run which python`, {
+    try {
+      // If pipenv is not installed, try calling poetry
+      const poetryPath = execSync("which poetry", {
         encoding: "utf-8",
         cwd,
       }).trim();
 
-      return pythonPath;
-    }
+      // If poetry is installed, use it to get the python path
+      if (poetryPath) {
+        const pythonPath = execSync(`${poetryPath} run which python`, {
+          encoding: "utf-8",
+          cwd,
+        }).trim();
+
+        return pythonPath;
+      }
+    } catch (e) {}
 
     // If poetry is not installed, try calling python
     const pythonPath = execSync("which python", {

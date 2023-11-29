@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 modal = "*"
 numpy = "*"
+sentry-sdk = "*"
 
 [dev-packages]
 

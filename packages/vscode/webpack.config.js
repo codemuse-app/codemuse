@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require('path');
+const webpack = require('webpack');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -45,4 +46,56 @@ const extensionConfig = {
     level: "log", // enables logging required for problem matchers
   },
 };
-module.exports = [extensionConfig];
+
+
+/** @type WebpackConfig */
+const frontendConfig = {
+  target: 'web',
+  mode: 'none',
+  entry: './src/app/index.tsx',
+  output: {
+    path: path.resolve(__dirname, 'dist', 'app'),
+    filename: 'index.js',
+  },
+  externals: {
+    vscode: 'commonjs vscode',
+  },
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
+  ],
+  resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
+  },
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        default: false,
+      }
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'ts-loader'
+          }
+        ]
+      },
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      }
+    ]
+  },
+  devtool: 'nosources-source-map',
+  infrastructureLogging: {
+    level: "log", // enables logging required for problem matchers
+  },
+};
+
+module.exports = [extensionConfig, frontendConfig];

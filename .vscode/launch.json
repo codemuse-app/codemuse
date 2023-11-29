@@ -6,6 +6,7 @@
       "type": "extensionHost",
       "request": "launch",
       "args": [
+        "--profile-temp",
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
         // With a temporary profile
       ],
@@ -21,6 +22,7 @@
       "type": "extensionHost",
       "request": "launch",
       "args": [
+        "--profile-temp",
         "--extensionDevelopmentPath=${workspaceFolder}/packages/vscode",
         "--extensionTestsPath=${workspaceFolder}/packages/vscode/out/test/suite/index"
       ],
