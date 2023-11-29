@@ -17,9 +17,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Move to packages/remote
-        run: cd packages/remote
-
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -28,8 +25,6 @@ jobs:
       - name: Install Modal
         run: pip install modal
 
-      - name: List files
-        run: ls -la
-
       - name: Deploy LLM
         run: modal deploy llama.py --name llm
+        working-directory: packages/remote
