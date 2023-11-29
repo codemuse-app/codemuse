@@ -1,4 +1,4 @@
-import { getClosestUpcomingCodeLine, getContentInFile, getIndentationAtLine, removeLastOccurrenceCharacter } from "../helpers/file_helper";
+import { getClosestUpcomingCodeLine, getContentInFile, getIndentationAtLine, removeLastOccurrenceCharacter } from "../helpers/fileHelper";
 /**
  * Extracts the body of a specified component and its indentation from a string of code.
  *
