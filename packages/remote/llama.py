@@ -2,6 +2,8 @@ import os
 import time
 from modal import Image, Secret, Stub, method, web_endpoint
 
+from . import utils
+
 MODEL_DIR = "/model"
 BASE_MODEL = "codellama/CodeLlama-7b-Instruct-hf"
 
@@ -28,7 +30,7 @@ image = (
         "vllm @ git+https://github.com/vllm-project/vllm.git@665cbcec4b963f6ab7b696f3d7e3393a7909003d"
     )
     # Use the barebones hf-transfer package for maximum download speeds. No progress bar, but expect 700MB/s.
-    .pip_install("hf-transfer~=0.1")
+    .pip_install(["hf-transfer", "sentry-sdk"])
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
     .run_function(
         download_model_to_folder,
@@ -99,6 +101,13 @@ class Model:
 #     model.generate.remote(questions)
 
 @stub.function()
+@utils.with_sentry()
+@web_endpoint()
+def test_sentry():
+    raise ValueError("Test exception")
+
+@stub.function()
+@utils.with_sentry()
 @web_endpoint(method="POST", label="generate-documentation")
 def generate_documentation(item: dict):
     code = item["code"]

@@ -1,6 +1,7 @@
 import os
-
 from modal import Image, Secret, Stub, method, web_endpoint
+
+from . import utils
 
 MODEL_DIR = "/model"
 BASE_MODEL = "Hum-Works/lodestone-base-4096-v1"
@@ -25,7 +26,7 @@ image = (
     .pip_install(
         "torch==2.1.0+cu121", index_url="https://download.pytorch.org/whl"
     )
-    .pip_install(["hf_transfer"])
+    .pip_install(["hf_transfer", "sentry-sdk"])
     # Pinned to 10/16/23
     .pip_install(
         "sentence-transformers @ git+https://github.com/Hum-Works/sentence-transformers.git@4595d69ca0e1ab1bd19064a54d48905b4dbff335"
@@ -57,6 +58,7 @@ class Model:
       return self.model.encode(user_questions)
 
 @stub.function()
+@utils.with_sentry()
 @web_endpoint(label='generate-embedding')
 def get_embedding(snippet: str):
    model = Model()
