@@ -1,4 +1,5 @@
 dist
+out
 bin
 *.vsix
 *.vscode-test/

@@ -59,6 +59,8 @@ export const serve = <T extends Router>(
       throw new Error("Target not found");
     }
 
+    //TODO: ts error ?
+    //@ts-ignore
     const value = await target(...message.params);
 
     webview.postMessage({

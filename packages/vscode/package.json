@@ -52,7 +52,7 @@
     "lint": "eslint src --ext ts",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "test": "vscode-test",
+    "test": "rm -rf .vscode-test && vscode-test",
     "package": "vsce package --allow-missing-repository --no-dependencies --allow-star-activation --skip-license",
     "selfinstall": "npm run package && code --install-extension vscode-0.0.0.vsix --force"
   },
@@ -61,6 +61,7 @@
     "@types/node": "^20.9.3",
     "@types/react": "^18.2.39",
     "@types/react-dom": "^18.2.17",
+    "@types/uuid": "^9.0.7",
     "@types/vscode": "^1.84.2",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
@@ -86,9 +87,9 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "google-protobuf": "^3.21.2",
     "graphology": "^0.25.4",
+    "node-fetch": "^3.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "node-fetch": "^3.3.2",
     "vectra": "^0.4.4"
   },
   "vsce": {
