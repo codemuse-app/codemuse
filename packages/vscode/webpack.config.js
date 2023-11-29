@@ -32,10 +32,12 @@ const extensionConfig = {
     rules: [
       {
         test: /\.ts$/,
-        exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader'
+            loader: 'ts-loader',
+            options: {
+              allowTsInNodeModules: true,
+            }
           }
         ]
       }

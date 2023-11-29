@@ -8,12 +8,12 @@
 			"DOM"
 		],
 		"sourceMap": true,
-		"rootDir": "src",
 		"strict": true,
 		"noFallthroughCasesInSwitch": true
 	},
 	"include": [
 		"src/**/*.ts",
+		"node_modules/vectra"
 	],
 	"exclude": [
 		"src/app/*"
