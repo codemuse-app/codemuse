@@ -57,7 +57,7 @@ image = (
 
 stub = Stub("example-embeddings", image=image)
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=30, allow_concurrent_inputs=10)
+@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=30, allow_concurrent_inputs=10, concurrency_limit=1)
 class Model:
     def __enter__(self):
         # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
@@ -116,7 +116,7 @@ class Model:
         # Wait for the result
         return await result
 
-@stub.function()
+@stub.function(concurrency_limit=10)
 @utils.with_sentry
 @web_endpoint(method="POST", label='generate-embedding')
 def get_embedding(snippet: dict):
