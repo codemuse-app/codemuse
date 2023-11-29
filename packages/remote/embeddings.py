@@ -60,9 +60,13 @@ class Model:
 @stub.function()
 @utils.with_sentry
 @web_endpoint(label='generate-embedding')
-def get_embedding(snippet: str):
-   model = Model()
-   return model.generate([snippet])
+def get_embedding(snippet: dict):
+   # The snippet should contain a single key, "code" which is a string of code. Otherwise, raise an error.
+    if len(snippet) != 1 or "code" not in snippet:
+        raise ValueError("Snippet must contain a single key, 'code'.")
+
+    model = Model()
+    return model.generate([snippet["code"]])[0]
 
 @stub.local_entrypoint()
 def main():
