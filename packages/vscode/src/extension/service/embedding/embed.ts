@@ -11,6 +11,7 @@ export class VectraManager {
   constructor(context: vscode.ExtensionContext) {
     //this.index = new LocalIndex(path.join(__dirname, '..', 'index'));
     this.index = new LocalIndex(context!.storageUri!.fsPath);
+    this.initializeIndex();
   }
 
   async initializeIndex() {

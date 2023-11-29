@@ -85,14 +85,16 @@ export class Index {
                 instance.flattenedGraph = buildFlattenedGraph(
                   instance.originalGraph
                 );
-                // Create embedding for each node and store in Vectra DB
-                for (const node of instance.flattenedGraph.nodes()) {
-                  const nodeData = instance.flattenedGraph.getNodeAttributes(node) as LocalGraphNode;
-                  if (nodeData.content) {
-                  const vector = await vectraManager.getVector(nodeData.content);
-                await vectraManager.addItem(nodeData.content, node, nodeData.hash, nodeData.file); 
-                  }
-                }
+
+                await Promise.all(
+                  instance.flattenedGraph.nodes().map(async (node) => {
+                    const nodeData = instance.flattenedGraph!.getNodeAttributes(node) as LocalGraphNode;
+                    if (nodeData.content) {
+                    //await vectraManager.addItem(nodeData.content, node, nodeData.hash, nodeData.file); 
+                    await vectraManager.upsertItem(nodeData.content, node, nodeData.hash, nodeData.file);
+                    }
+                  })
+                );
               } else {
                 // case 2: if the flattenedGraph is already generated, compare it with the new graph, and replace it with the new graph
                 const newFlattenedGraph = buildFlattenedGraph(
@@ -111,19 +113,35 @@ export class Index {
                 // Concatenate addedNodes and updatedNodes
                 const allNodesToUpdate = addedNodes.concat(updatedNodes);
 
-                // Iterate over all nodes to update or create embeddings
-                for (const nodeId of allNodesToUpdate) {
-                  const nodeData = newFlattenedGraph.getNodeAttributes(nodeId) as LocalGraphNode;
+                // // Iterate over all nodes to update or create embeddings
+                // for (const nodeId of allNodesToUpdate) {
+                //   const nodeData = newFlattenedGraph.getNodeAttributes(nodeId) as LocalGraphNode;
 
-                  // Extracting the relevant information from the node
-                  const content = nodeData.content;  // Replace with actual attribute names if different
-                  const id = nodeId            // Metadata ID
-                  const hash = nodeData.hash;        // Unique hash
-                  const filePath = nodeData.file;    // File path
+                //   // Extracting the relevant information from the node
+                //   const content = nodeData.content;  // Replace with actual attribute names if different
+                //   const id = nodeId            // Metadata ID
+                //   const hash = nodeData.hash;        // Unique hash
+                //   const filePath = nodeData.file;    // File path
 
-                  // Upsert the item in the Vectra index
-                  await vectraManager.upsertItem(content, id, hash, filePath);
-                }
+                //   // Upsert the item in the Vectra index
+                //   await vectraManager.upsertItem(content, id, hash, filePath);
+                // }
+
+                await Promise.all(
+                  // Iterate over all nodes to update or create embeddings
+                  allNodesToUpdate.map(async (nodeId) => {
+                    const nodeData = newFlattenedGraph.getNodeAttributes(nodeId) as LocalGraphNode;
+
+                    // Extracting the relevant information from the node
+                    const content = nodeData.content;  // Replace with actual attribute names if different
+                    const id = nodeId;            // Metadata ID
+                    const hash = nodeData.hash;        // Unique hash
+                    const filePath = nodeData.file;    // File path
+
+                    // Upsert the item in the Vectra index
+                    await vectraManager.upsertItem(content, id, hash, filePath);
+                  })
+                );
 
                 // Then perform the documentation update:
                 // TODO
