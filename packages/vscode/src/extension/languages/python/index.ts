@@ -129,19 +129,27 @@ export class Python extends LanguageProvider {
       }
     } catch (e) {}
 
-    // If poetry is not installed, try calling python
-    const pythonPath = execSync("which python", {
-      encoding: "utf-8",
-      cwd,
-    }).trim();
+    try {
+      const pythonPath = execSync("which python", {
+        encoding: "utf-8",
+        cwd,
+      }).trim();
 
-    // If python is installed, use it to get the python path
-    if (pythonPath) {
       return pythonPath;
-    } else {
-      // If python is not installed, throw an error
-      throw new Error("Python is not installed");
-    }
+    } catch (e) {}
+
+    try {
+      // Try with python3
+      const pythonPath = execSync("which python3", {
+        encoding: "utf-8",
+        cwd,
+      }).trim();
+
+      return pythonPath;
+    } catch (e) {}
+
+    // If python is not installed, throw an error
+    throw new Error("Python is not installed");
   }
 
   private async createEnvironment(cwd: string) {
