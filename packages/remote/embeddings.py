@@ -45,7 +45,7 @@ image = (
 
 stub = Stub("example-embeddings", image=image)
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"))
+@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=30)
 class Model:
     def __enter__(self):
       from sentence_transformers import SentenceTransformer
@@ -67,7 +67,7 @@ def get_embedding(snippet: dict):
 
     model = Model()
     return {
-       "embedding": model.generate.remote([snippet["code"]])[0]
+       "embedding": model.generate.remote([snippet["code"]])[0].tolist()
     }
 
 @stub.local_entrypoint()
@@ -77,5 +77,5 @@ def main():
         # Coding questions
         "Implement a Python function to compute the Fibonacci numbers.",
     ]
-    result = model.generate.remote(questions)
-    print(result)
+    result = model.generate.remote(questions)[0]
+    return result
