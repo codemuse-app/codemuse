@@ -126,7 +126,9 @@ Write a short description of this code. You should describe as much of the speci
     for chunk in Model().generate.remote_gen([prompt]):
         answer += chunk
 
-    return answer.strip()
+    return {
+        "documentation": answer.strip()
+    }
 
 @stub.local_entrypoint()
 def main():
