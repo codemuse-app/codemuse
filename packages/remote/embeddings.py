@@ -37,7 +37,7 @@ image = (
     .pip_install(
         "torch==2.1.0+cu121", index_url="https://download.pytorch.org/whl"
     )
-    .pip_install(["hf_transfer", "sentry-sdk"])
+    .pip_install(["hf_transfer", "sentry-sdk", "posthog"])
     # Pinned to 10/16/23
     .pip_install(
         "sentence-transformers @ git+https://github.com/Hum-Works/sentence-transformers.git@4595d69ca0e1ab1bd19064a54d48905b4dbff335"
