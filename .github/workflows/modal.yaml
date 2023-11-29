@@ -2,8 +2,8 @@ name: Deployment
 
 on:
   push:
-    paths:
-      - "packages/remote/**"
+    #paths:
+    #  - "packages/remote/**"
 
 jobs:
   deploy:
@@ -24,7 +24,7 @@ jobs:
           cache: "pip"
 
       - name: Install Modal
-        run: pip install modal
+        run: pip install modal sentry-sdk
 
       - name: Deploy LLM
         run: modal deploy llama.py --name llm
