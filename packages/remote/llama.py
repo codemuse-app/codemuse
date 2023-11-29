@@ -2,7 +2,7 @@ import os
 import time
 from modal import Image, Secret, Stub, method, web_endpoint
 
-from . import utils
+import utils
 
 MODEL_DIR = "/model"
 BASE_MODEL = "codellama/CodeLlama-7b-Instruct-hf"

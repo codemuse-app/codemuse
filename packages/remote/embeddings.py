@@ -1,7 +1,7 @@
 import os
 from modal import Image, Secret, Stub, method, web_endpoint
 
-from . import utils
+import utils
 
 MODEL_DIR = "/model"
 BASE_MODEL = "Hum-Works/lodestone-base-4096-v1"
