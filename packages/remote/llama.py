@@ -103,12 +103,14 @@ class Model:
 @stub.function()
 @utils.with_sentry
 @web_endpoint()
+@utils.with_posthog
 def test_sentry():
     raise ValueError("Test exception")
 
 @stub.function()
 @utils.with_sentry
 @web_endpoint(method="POST", label="generate-documentation")
+@utils.with_posthog
 def generate_documentation(item: dict):
     code = item["code"]
 

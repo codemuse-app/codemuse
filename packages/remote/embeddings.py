@@ -119,6 +119,7 @@ class Model:
 @stub.function(concurrency_limit=10)
 @utils.with_sentry
 @web_endpoint(method="POST", label='generate-embedding')
+@utils.with_posthog
 def get_embedding(snippet: dict):
    # The snippet should contain a single key, "code" which is a string of code. Otherwise, raise an error.
     if len(snippet) != 1 or "code" not in snippet:

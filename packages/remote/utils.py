@@ -1,5 +1,8 @@
 import functools
 import sentry_sdk
+from posthog import Posthog
+
+posthog = Posthog('phc_DgRmIFV3DxfEZ2PT968d9hwS9vNme86Cvm2Ic4KUqT0', host='https://app.posthog.com')
 
 sentry_sdk.init(
     dsn="https://5778b258c3b19d7b1a11f8ca575bc494@o4506308721115136.ingest.sentry.io/4506308722688000",
@@ -20,5 +23,14 @@ def with_sentry(fn):
         except Exception as exc:
             sentry_sdk.capture_exception(exc)
             raise exc
+
+    return fn_wrapped
+
+# Create a decorator named with_posthog that wraps a function and gets the function name, then reports to posthog when the function is called. It should pass errors through to the caller.
+def with_posthog(fn):
+    @functools.wraps(fn)
+    async def fn_wrapped(*args, **kwargs):
+        posthog.capture(fn.__name__)
+        await fn(*args, **kwargs)
 
     return fn_wrapped
