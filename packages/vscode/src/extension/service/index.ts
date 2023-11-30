@@ -111,94 +111,30 @@ export class Index {
               console.log("Original cycles:");
               printCycles(original_cycles);
 
-              // Generate the flattened version of the graph
-              // case 1: if the flattenedGraph is not yet generated, generate it
-              if (!instance.flattenedGraph) {
-                instance.flattenedGraph = buildFlattenedGraph(
-                  instance.originalGraph
-                );
+              // Rebuild the flattened graph and update the Vectra index
+              const newFlattenedGraph = buildFlattenedGraph(instance.originalGraph);
+              const { addedNodes, updatedNodes, deletedNodes } = 
+              compareGraphs(instance.flattenedGraph || new MultiDirectedGraph(), newFlattenedGraph);
+              instance.flattenedGraph = newFlattenedGraph; // Update the flattened graph
 
-                this.vectraManager.refreshIndex();
-                await this.vectraManager.beginUpdate();
+              // Update the Vectra index
+              await this.vectraManager.refreshIndex();
+              await this.vectraManager.beginUpdate();
+              const allNodesToUpdate = addedNodes.concat(updatedNodes);
 
-                await Promise.all(
-                  instance.flattenedGraph.nodes().map(async (node) => {
-                    const nodeData = instance.flattenedGraph!.getNodeAttributes(
-                      node
-                    ) as LocalGraphNode;
-                    if (nodeData.content) {
-                      //await vectraManager.addItem(nodeData.content, node, nodeData.hash, nodeData.file);
-                      await this.vectraManager.upsertItem(
-                        nodeData.content,
-                        node,
-                        nodeData.hash,
-                        nodeData.file
-                      );
-                    }
-                  })
-                );
-
-                await this.vectraManager.endUpdate();
-              } else {
-                // case 2: if the flattenedGraph is already generated, compare it with the new graph, and replace it with the new graph
-                const newFlattenedGraph = buildFlattenedGraph(
-                  instance.originalGraph
-                );
-                const { addedNodes, updatedNodes, deletedNodes } =
-                  compareGraphs(instance.flattenedGraph, newFlattenedGraph);
-                instance.flattenedGraph = newFlattenedGraph; // Replace with the new graph
-
-                // Delete embeddings for deleted nodes
-                for (const node of deletedNodes) {
-                  await this.vectraManager.deleteItem(node);
+              await Promise.all(allNodesToUpdate.map(async (nodeId) => {
+                const nodeData = newFlattenedGraph.getNodeAttributes(nodeId) as LocalGraphNode;
+                if (nodeData.content) {
+                  await this.vectraManager.upsertItem(nodeData.content, nodeId, nodeData.hash, nodeData.file);
                 }
+              }));
 
-                // Update or create embeddings for added or updated nodes using upsertItem
-                // Concatenate addedNodes and updatedNodes
-                const allNodesToUpdate = addedNodes.concat(updatedNodes);
-
-                // // Iterate over all nodes to update or create embeddings
-                // for (const nodeId of allNodesToUpdate) {
-                //   const nodeData = newFlattenedGraph.getNodeAttributes(nodeId) as LocalGraphNode;
-
-                //   // Extracting the relevant information from the node
-                //   const content = nodeData.content;  // Replace with actual attribute names if different
-                //   const id = nodeId            // Metadata ID
-                //   const hash = nodeData.hash;        // Unique hash
-                //   const filePath = nodeData.file;    // File path
-
-                //   // Upsert the item in the Vectra index
-                //   await vectraManager.upsertItem(content, id, hash, filePath);
-                // }
-
-                await Promise.all(
-                  // Iterate over all nodes to update or create embeddings
-                  allNodesToUpdate.map(async (nodeId) => {
-                    const nodeData = newFlattenedGraph.getNodeAttributes(
-                      nodeId
-                    ) as LocalGraphNode;
-
-                    // Extracting the relevant information from the node
-                    const content = nodeData.content; // Replace with actual attribute names if different
-                    const id = nodeId; // Metadata ID
-                    const hash = nodeData.hash; // Unique hash
-                    const filePath = nodeData.file; // File path
-
-                    // Upsert the item in the Vectra index
-                    await this.vectraManager.upsertItem(
-                      content,
-                      id,
-                      hash,
-                      filePath
-                    );
-                  })
-                );
-
-                // Then perform the documentation update:
-                // TODO
-                
-              
+              // Delete embeddings for deleted nodes
+              for (const node of deletedNodes) {
+                await this.vectraManager.deleteItem(node);
               }
+
+              await this.vectraManager.endUpdate();
 
               const flattened_cycles = findCycles(instance.flattenedGraph);
               console.log("Flattened cycles (should be NONE):");
