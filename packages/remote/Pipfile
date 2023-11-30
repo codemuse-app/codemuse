@@ -9,6 +9,7 @@ numpy = "*"
 fastapi = "*"
 posthog = "*"
 sentry-sdk = {extras = ["fastapi"], version = "*"}
+pydantic = "*"
 
 [dev-packages]
 

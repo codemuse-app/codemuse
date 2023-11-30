@@ -106,12 +106,12 @@ class Model:
                 item[1].set_result(result)
 
     @method()
-    async def generate(self, elements: List[str]) -> List[float]:
+    async def generate(self, element: str) -> List[float]:
         # Create a Future for the result
         result = asyncio.Future()
 
-        # Add the elements and the Future to the queue
-        await self.queue.put((elements, result))
+        # Add the element and the Future to the queue
+        await self.queue.put((element, result))
 
         # Wait for the result
         return await result
