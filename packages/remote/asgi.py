@@ -7,7 +7,7 @@ from modal import Image, Stub, asgi_app, Function
 web_app = FastAPI()
 stub = Stub("api")
 
-image = Image.debian_slim()
+image = Image.debian_slim().pip_install(["sentry-sdk[fastapi]"])
 
 sentry_sdk.init(
     dsn="https://5778b258c3b19d7b1a11f8ca575bc494@o4506308721115136.ingest.sentry.io/4506308722688000",
