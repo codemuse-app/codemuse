@@ -2,8 +2,8 @@ name: Deployment
 
 on:
   push:
-    #paths:
-    #  - "packages/remote/**"
+    paths:
+      - "packages/remote/**"
 
 jobs:
   deploy:
@@ -21,15 +21,25 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
-          cache: "pip"
+          cache: "pipenv"
+          cache-dependency-path: |
+            packages/remote/Pipfile.lock
 
-      - name: Install Modal
-        run: pip install modal sentry-sdk
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        run: pipenv install --dev
+        working-directory: packages/remote
 
       - name: Deploy LLM
-        run: modal deploy llama.py --name llm
+        run: pipenv run modal deploy llama.py
         working-directory: packages/remote
 
       - name: Deploy embeddings
-        run: modal deploy embeddings.py --name embeddings
+        run: pipenv run modal deploy embeddings.py
+        working-directory: packages/remote
+
+      - name: Deploy ASGI
+        run: pipenv run modal deploy asgi.py
         working-directory: packages/remote

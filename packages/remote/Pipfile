@@ -6,7 +6,10 @@ name = "pypi"
 [packages]
 modal = "*"
 numpy = "*"
-sentry-sdk = "*"
+fastapi = "*"
+posthog = "*"
+sentry-sdk = {extras = ["fastapi"], version = "*"}
+pydantic = "*"
 
 [dev-packages]
 

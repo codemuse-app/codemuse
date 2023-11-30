@@ -39,7 +39,7 @@ image = (
     )
 )
 
-stub = Stub("example-vllm-inference", image=image)
+stub = Stub("documentation", image=image)
 
 @stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), allow_concurrent_inputs=30, container_idle_timeout=30)
 class Model:
@@ -53,7 +53,11 @@ class Model:
 {system}
 <</SYS>>
 
-{user} [/INST] """
+```python
+{code}
+````
+
+Briefly explain the above code. Focus on business aspects, and be as concise as possible. If possible, only use one short sentence.[/INST] """
 
     @method(keep_warm=False)
     async def generate(self, code: str):
@@ -63,8 +67,8 @@ class Model:
         print('Generating...')
 
         prompt = self.template.format(
-            system="",
-            user="\n".join(code),
+            system="You are a skilled senior developer who is asked to explain the code to a new hire. You are synthetic, and you are trying to explain the code to a human. You focus on business aspects rather than framework details. You use simple english language, with declarative sentences. You do not talk about 'this code' or 'that snippet', but just explain straight to the point.",
+            code=code
         )
 
         sampling_params = SamplingParams(
@@ -115,15 +119,7 @@ def generate_documentation(item: dict):
     if not code:
         return "No code provided. Please provide a JSON object with a `code` key."
 
-    prompt = f"""```python
-{code}
-```
-
-Write a short description of this code. You should describe as much of the specificities and business meaning rather than generic framework inforamtion. Keep the description as short as possible. Ideally, it should be a single sentence."""
-
-    answer = ""
-
-    for chunk in Model().generate.remote_gen([prompt]):
+    for chunk in Model().generate.remote_gen(code):
         answer += chunk
 
     return {

@@ -1,4 +1,6 @@
 import * as vscode from "vscode";
+import { serve } from "../../vrpc/server";
+import { router } from "../router";
 
 export class GenericViewProvider implements vscode.WebviewViewProvider {
   private context: vscode.ExtensionContext;
@@ -55,11 +57,13 @@ export class GenericViewProvider implements vscode.WebviewViewProvider {
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext<unknown>,
     token: vscode.CancellationToken
-  ): void | Thenable<void> {
+  ) {
     this.view = webviewView;
     webviewView.webview.options = {
       enableScripts: true,
     };
     webviewView.webview.html = this.getHtmlForWebview(webviewView.webview);
+
+    serve(router, webviewView.webview);
   }
 }
