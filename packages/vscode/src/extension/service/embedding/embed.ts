@@ -20,6 +20,12 @@ export class VectraManager {
     if (!(await this.index.isIndexCreated())) {
       await this.index.createIndex();
     }
+
+    await this.refreshIndex();
+  }
+
+  async refreshIndex() {
+    await this.index.listItemsByMetadata({});
   }
 
   async getVector(text: string): Promise<number[]> {
@@ -74,6 +80,14 @@ export class VectraManager {
       this.index.cancelUpdate();
       throw error;
     }
+  }
+
+  async beginUpdate() {
+    await this.index.beginUpdate();
+  }
+
+  async endUpdate() {
+    await this.index.endUpdate();
   }
 
   // Update or insert an item with the given node ID
