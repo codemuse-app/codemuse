@@ -52,7 +52,7 @@
     "lint": "eslint src --ext ts",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "test": "rm -rf .vscode-test && vscode-test",
+    "test": "vscode-test",
     "package": "vsce package --allow-missing-repository --no-dependencies --allow-star-activation --skip-license",
     "selfinstall": "npm run package && code --install-extension vscode-0.0.0.vsix --force"
   },
