@@ -22,7 +22,7 @@ export class VectraManager {
   async getVector(text: string): Promise<number[]> {
     try {
       const response = await fetch(
-        "https://codemuse-app--generate-embedding.modal.run",
+        "https://codemuse-app--api-asgi.modal.run/embedding",
         {
           method: "POST",
           headers: {
@@ -44,6 +44,7 @@ export class VectraManager {
     }
   }
 
+  // Add an item with the given node ID
   async addItem(text: string, id: string, hash: string, path: string) {
     await this.index.insertItem({
       vector: await this.getVector(text),
@@ -97,6 +98,7 @@ export class VectraManager {
     });
   }
 
+  // Query the index for the given text
   async query(text: string) {
     const vector = await this.getVector(text);
     const results = await this.index.queryItems(vector, TOPK);
