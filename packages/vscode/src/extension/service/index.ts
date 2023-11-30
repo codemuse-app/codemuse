@@ -38,23 +38,24 @@ export class Index {
     return queryResults;
 }
 
-  static setContext(context: vscode.ExtensionContext) {
-    Index.getInstance(context).languages = [
+  static setContext() {
+    Index.getInstance().languages = [
       // new Languages.Typescript(context),
-      new Languages.Python(context),
+      new Languages.Python(this.instance.context),
     ];
   }
 
-  static getInstance(context: vscode.ExtensionContext) {
+  static getInstance() {
     if (!Index.instance) {
-      Index.instance = new Index(context);
+      // Index.instance = new Index(this.context);
+      throw new Error("Index not initialized");
     }
 
     return Index.instance;
   }
 
   async run(context: vscode.ExtensionContext) {
-    const instance = Index.getInstance(context);
+    const instance = Index.getInstance();
 
     // Show a notification with progress bar
     vscode.window.withProgress(
