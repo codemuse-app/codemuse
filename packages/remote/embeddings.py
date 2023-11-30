@@ -65,7 +65,7 @@ stub = Stub("embeddings", image=image)
 BATCH_SIZE = 50
 TIMEOUT = 0.5
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs= 5 * BATCH_SIZE, concurrency_limit=1)
+@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs= 10 * BATCH_SIZE, concurrency_limit=1)
 class Model:
     def __enter__(self):
         # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
@@ -78,12 +78,19 @@ class Model:
         # Start the background task
         self.task = asyncio.create_task(self.process_batches())
 
+        self.processed = 0
+        self.minute = time.time()
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.task.cancel()
 
     async def process_batches(self):
         while True:
-            print("Waiting for batch")
+            # Detect if a minute has passed, and print the processed count then reset it
+            if time.time() - self.minute >= 60:
+                print(f"Processed {self.processed} in the last minute")
+                self.processed = 0
+                self.minute = time.time()
 
             # Collect a batch of inputs
             batch = []
@@ -108,18 +115,14 @@ class Model:
             if len(batch) == 0:
                 continue
 
-            print("Processing batch")
-
             # Process the batch
             results = self.model.encode([item[0] for item in batch]).tolist()
 
-            print(str(len(results)) + ' results')
+            self.processed += len(batch)
 
             # Set the results for each item in the batch
             for item, result in zip(batch, results):
                 item[1].set_result(result)
-
-            print("Processed batch")
 
     @method()
     async def generate(self, element: str) -> List[float]:
