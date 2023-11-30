@@ -4,9 +4,12 @@ import * as Languages from "../languages";
 import { Status } from "../status";
 import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten"; // Import the function
-import { findCycles, printCycles, compareGraphs } from "./graph/utils_graph"; // Import the function
-import { Graph, LocalGraphNode } from "./graph/types";
+import { findCycles, printCycles, compareGraphs} from "./graph/utils_graph"; // Import the function
+import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed"; // Assuming these functions are defined in 'embedding.ts'
+import path = require("path");
+import * as fs from 'fs';
+
 
 export class Index {
   private static instance: Index;
@@ -20,8 +23,8 @@ export class Index {
     this.context = context;
     // Create the Vectra Index Instance to store embeddings
     this.vectraManager = new VectraManager(this.context);
-    this.vectraManager.initializeIndex(); // what about "await"?
-  }
+    this.vectraManager.initializeIndex();
+}
 
   static initialize(context: vscode.ExtensionContext) {
     Index.instance = new Index(context);
@@ -32,18 +35,23 @@ export class Index {
     ];
   }
 
-  // Query the Vectra Index for the given text and return the results with the node ID, score, and content
-  async query(text: string): Promise<[string, number, string][]> {
+  // Function that queries the Vectra index and returns the top K results as a list of ResultGraphNode objects
+  async query(text: string): Promise<ResultGraphNode[]> {
     const vectraResults = await this.vectraManager.query(text);
-    let queryResults: [string, number, string][] = [];
+    let queryResults: ResultGraphNode[] = [];
 
     for (const [nodeId, score] of vectraResults) {
       if (this.originalGraph && this.originalGraph.hasNode(nodeId)) {
-        const nodeData = this.originalGraph.getNodeAttributes(
-          nodeId
-        ) as LocalGraphNode;
-        const content = nodeData.content;
-        queryResults.push([nodeId, score, content]);
+        const nodeData = this.originalGraph.getNodeAttributes(nodeId) as LocalGraphNode;
+        const resultNode: ResultGraphNode = {
+          score: score,
+          symbol: nodeData.symbol,
+          language: nodeData.language,
+          file: nodeData.file,
+          range: nodeData.range,
+          content: nodeData.content
+        };
+        queryResults.push(resultNode);
       }
     }
     return queryResults;
@@ -183,6 +191,8 @@ export class Index {
 
                 // Then perform the documentation update:
                 // TODO
+                
+              
               }
 
               const flattened_cycles = findCycles(instance.flattenedGraph);

@@ -16,6 +16,10 @@ export interface LocalGraphNode extends BasicGraphNode {
   hash: string; // Hash of the content + outbouds links
 }
 
+export interface ResultGraphNode extends Omit<LocalGraphNode, "hash"> {
+  score: number;
+}
+
 export type GraphNode = ExternalGraphNode | LocalGraphNode;
 
 export interface GraphEdge {
