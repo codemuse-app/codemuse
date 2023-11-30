@@ -55,7 +55,7 @@ image = (
     .run_function(model_init)
 )
 
-stub = Stub("example-embeddings", image=image)
+stub = Stub("embeddings", image=image)
 
 @stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=30, allow_concurrent_inputs=10, concurrency_limit=1)
 class Model:

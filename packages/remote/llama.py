@@ -39,7 +39,7 @@ image = (
     )
 )
 
-stub = Stub("example-vllm-inference", image=image)
+stub = Stub("documentation", image=image)
 
 @stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), allow_concurrent_inputs=30, container_idle_timeout=30)
 class Model:

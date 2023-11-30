@@ -27,9 +27,13 @@ jobs:
         run: pip install modal sentry-sdk posthog
 
       - name: Deploy LLM
-        run: modal deploy llama.py --name llm
+        run: modal deploy llama.py
         working-directory: packages/remote
 
       - name: Deploy embeddings
-        run: modal deploy embeddings.py --name embeddings
+        run: modal deploy embeddings.py
+        working-directory: packages/remote
+
+      - name: Deploy ASGI
+        run: modal deploy asgi.py
         working-directory: packages/remote
