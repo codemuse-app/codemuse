@@ -14,9 +14,13 @@ export class Index {
   private originalGraph?: Graph;
   private flattenedGraph?: Graph;
   private context: vscode.ExtensionContext;
+  private vectraManager: VectraManager;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
+    // Create the Vectra Index Instance to store embeddings
+    this.vectraManager = new VectraManager(this.context);
+    this.vectraManager.initializeIndex(); // what about "await"?
   }
 
   static setContext(context: vscode.ExtensionContext) {
@@ -74,10 +78,6 @@ export class Index {
               console.log("Original cycles:");
               printCycles(original_cycles);
 
-              // Create the Vectra Index Instance to store embeddings
-              const vectraManager = new VectraManager(this.context);
-              await vectraManager.initializeIndex();
-
               // Generate the flattened version of the graph
               // case 1: if the flattenedGraph is not yet generated, generate it
               if (!instance.flattenedGraph) {
@@ -92,7 +92,7 @@ export class Index {
                     ) as LocalGraphNode;
                     if (nodeData.content) {
                       //await vectraManager.addItem(nodeData.content, node, nodeData.hash, nodeData.file);
-                      await vectraManager.upsertItem(
+                      await this.vectraManager.upsertItem(
                         nodeData.content,
                         node,
                         nodeData.hash,
@@ -112,7 +112,7 @@ export class Index {
 
                 // Delete embeddings for deleted nodes
                 for (const node of deletedNodes) {
-                  await vectraManager.deleteItem(node);
+                  await this.vectraManager.deleteItem(node);
                 }
 
                 // Update or create embeddings for added or updated nodes using upsertItem
@@ -147,7 +147,7 @@ export class Index {
                     const filePath = nodeData.file; // File path
 
                     // Upsert the item in the Vectra index
-                    await vectraManager.upsertItem(content, id, hash, filePath);
+                    await this.vectraManager.upsertItem(content, id, hash, filePath);
                   })
                 );
 
