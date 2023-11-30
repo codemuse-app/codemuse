@@ -7,7 +7,7 @@ import time
 import utils
 
 MODEL_DIR = "/model"
-BASE_MODEL = "Hum-Works/lodestone-base-4096-v1"
+BASE_MODEL = "sentence-transformers/all-mpnet-base-v2"
 
 def download_model_to_folder():
     from huggingface_hub import snapshot_download
@@ -39,9 +39,10 @@ image = (
     )
     .pip_install(["hf_transfer", "sentry-sdk", "posthog"])
     # Pinned to 10/16/23
-    .pip_install(
-        "sentence-transformers @ git+https://github.com/Hum-Works/sentence-transformers.git@4595d69ca0e1ab1bd19064a54d48905b4dbff335"
-    )
+    # .pip_install(
+    #     "sentence-transformers @ git+https://github.com/Hum-Works/sentence-transformers.git@4595d69ca0e1ab1bd19064a54d48905b4dbff335"
+    # )
+    .pip_install("sentence-transformers")
     .pip_install("einops")
     # Use the barebones hf-transfer package for maximum download speeds. No progress bar, but expect 700MB/s.
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "TOKENIZERS_PARALLELISM": "true"})
