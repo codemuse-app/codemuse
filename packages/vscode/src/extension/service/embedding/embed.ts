@@ -29,32 +29,43 @@ export class VectraManager {
   }
 
   async getVector(text: string): Promise<number[]> {
-    try {
-      const response = await fetch(
-        "https://codemuse-app--api-asgi.modal.run/embedding",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            installationId: getInstallationId(this.context),
-            code: text,
-          }), // Ensure this matches the expected format
+    const maxRetries = 2;
+    let retries = 0;
+    let error: Error | undefined;
+
+    while (retries < maxRetries) {
+      try {
+        const response = await fetch(
+          "https://codemuse-app--api-asgi.modal.run/embedding",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              installationId: getInstallationId(this.context),
+              code: text,
+            }), // Ensure this matches the expected format
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = (await response.json()) as { embedding: number[] };
+
+        return data.embedding;
+      } catch (error) {
+        retries++;
+        error = error;
+        if (retries === maxRetries) {
+          throw error;
+        }
       }
-
-      const data = (await response.json()) as { embedding: number[] };
-
-      return data.embedding;
-    } catch (error) {
-      console.error("Error fetching embedding:", error);
-      throw error;
     }
+
+    throw error;
   }
 
   // Add an item with the given node ID
