@@ -75,6 +75,8 @@ class Model:
 
     async def process_batches(self):
         while True:
+            print("Waiting for batch")
+
             # Collect a batch of inputs
             batch = []
             start_time = time.time()
@@ -98,17 +100,25 @@ class Model:
             if len(batch) == 0:
                 continue
 
+            print("Processing batch")
+
             # Process the batch
             results = self.model.encode([item[0] for item in batch]).tolist()
+
+            print("Embeddings computed")
 
             # Set the results for each item in the batch
             for item, result in zip(batch, results):
                 item[1].set_result(result)
 
+            print("Processed batch")
+
     @method()
     async def generate(self, element: str) -> List[float]:
         # Create a Future for the result
         result = asyncio.Future()
+
+        print("Adding to queue")
 
         # Add the element and the Future to the queue
         await self.queue.put((element, result))
