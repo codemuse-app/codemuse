@@ -105,6 +105,9 @@ export class Index {
                   instance.originalGraph
                 );
 
+                this.vectraManager.refreshIndex();
+                await this.vectraManager.beginUpdate();
+
                 await Promise.all(
                   instance.flattenedGraph.nodes().map(async (node) => {
                     const nodeData = instance.flattenedGraph!.getNodeAttributes(
@@ -121,6 +124,8 @@ export class Index {
                     }
                   })
                 );
+
+                await this.vectraManager.endUpdate();
               } else {
                 // case 2: if the flattenedGraph is already generated, compare it with the new graph, and replace it with the new graph
                 const newFlattenedGraph = buildFlattenedGraph(
