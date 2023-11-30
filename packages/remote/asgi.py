@@ -21,6 +21,10 @@ async def documentation(request: Request):
     body = await request.json()
     return JSONResponse({"done": True})
 
+@web_app.get('/status')
+async def status():
+    return JSONResponse({"status": "ok"})
+
 
 @stub.function(image=image)
 @asgi_app()
