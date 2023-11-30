@@ -119,7 +119,7 @@ def generate_documentation(item: dict):
 {code}
 ```
 
-Write a short description of this code. You should describe as much of the specificities and business meaning rather than generic framework inforamtion. Keep the description as short as possible. Ideally, it should be a single sentence."""
+Write a short description of the code above. It should encompass the functionality of the code, and be written in a way that is understandable to a beginner."""
 
     answer = ""
 
