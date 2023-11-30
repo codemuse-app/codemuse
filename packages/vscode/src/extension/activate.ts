@@ -28,7 +28,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
       searchViewProvider,
       {
         webviewOptions: {
-          retainContextWhenHidden: true,
+          // TODO: switch to true
+          retainContextWhenHidden: false,
         },
       }
     )

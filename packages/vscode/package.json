@@ -82,6 +82,7 @@
     "@sourcegraph/scip-typescript": "^0.3.9",
     "@types/vscode-webview": "^1.57.4",
     "@vscode/vsce": "^2.22.0",
+    "css-loader": "^6.8.1",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-react": "^7.33.2",
@@ -91,6 +92,9 @@
     "node-fetch": "^3.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "sass": "^1.69.5",
+    "sass-loader": "^13.3.2",
+    "style-loader": "^3.3.3",
     "vectra": "^0.4.4"
   },
   "vsce": {

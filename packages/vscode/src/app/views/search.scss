@@ -1,0 +1,12 @@
+.search {
+  .result {
+    padding: 0 20px;
+    margin: 0 -20px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--vscode-list-hoverBackground);
+      color: var(--vscode-list-hoverForeground);
+    }
+  }
+}

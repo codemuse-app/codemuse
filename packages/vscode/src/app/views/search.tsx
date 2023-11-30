@@ -3,8 +3,56 @@ import { createClient } from "../../vrpc/client";
 import * as React from "react";
 import { VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
 
+import "./search.scss";
+
 const vscode = acquireVsCodeApi();
 const client = createClient<RouterType>(vscode);
+
+const getSymbolName = (symbol: string) => {
+  const [scipIndexer, language, packageName, _version, identifier] =
+    symbol.split(" ");
+
+  const moduleName = identifier.split("`")[1].split("`")[0];
+  const describer = identifier.split("/")[1].slice(0, -1);
+
+  let type = "module";
+
+  if (describer.indexOf("#") >= 0) {
+    type = "class";
+
+    if (describer.indexOf("(") >= 0) {
+      type = "method";
+    }
+  } else if (describer.indexOf("(") >= 0) {
+    type = "function";
+  }
+
+  return {
+    moduleName,
+    language,
+    type,
+    name: describer,
+  };
+};
+
+const getResultColors = (score: number) => {
+  if (score > 0.4) {
+    return {
+      backgroundColor: "#047857",
+      color: "#d1fae5",
+    };
+  } else if (score > 0.2) {
+    return {
+      backgroundColor: "#d97706",
+      color: "#fef3c7",
+    };
+  }
+
+  return {
+    backgroundColor: "#b91c1c",
+    color: "#fee2e2",
+  };
+};
 
 export const Search = () => {
   const [search, setSearch] = React.useState("");
@@ -30,7 +78,7 @@ export const Search = () => {
   }, [search, setResults]);
 
   return (
-    <div>
+    <div className="search">
       <div style={{ position: "relative" }}>
         <VSCodeTextField
           style={{
@@ -44,13 +92,57 @@ export const Search = () => {
           Search
         </VSCodeTextField>
       </div>
-      <div>
+      <div
+        style={{
+          paddingTop: "10px",
+        }}
+      >
         {results.map((result) => {
+          const { name, moduleName, type } = getSymbolName(result.symbol);
+          const { backgroundColor, color } = getResultColors(result.score);
+
           return (
-            <div style={{ paddingBottom: "5px" }}>
-              {result.symbol}
-              <br />
-              <small>{result.file}</small>
+            <div
+              className="result"
+              style={{
+                paddingBottom: "5px",
+                paddingTop: "5px",
+                borderBottom: "1px solid var(--vscode-activityBar-border)",
+              }}
+            >
+              <div style={{ paddingBottom: "5px" }}>
+                <small style={{ fontSize: "0.8em", opacity: 0.7 }}>
+                  {type.toLocaleUpperCase()}
+                  <span
+                    style={{
+                      float: "right",
+                      backgroundColor,
+                      color,
+                      display: "inline-block",
+                      padding: "0px 2px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {result.score.toFixed(2)}
+                  </span>
+                </small>
+              </div>
+              <div
+                style={{
+                  width: "100%",
+                  paddingRight: "10px",
+                  paddingBottom: "5px",
+                }}
+              >
+                {name}
+              </div>
+              <small
+                style={{
+                  opacity: 0.5,
+                }}
+              >
+                {moduleName}
+              </small>
             </div>
           );
         })}
