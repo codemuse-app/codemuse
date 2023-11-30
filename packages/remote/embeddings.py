@@ -103,7 +103,7 @@ class Model:
 
             # Set the results for each item in the batch
             for item, result in zip(batch, results):
-                item[1].set_result(result)
+                item[1].set_result(result.tolist())
 
     @method()
     async def generate(self, element: str) -> List[float]:
@@ -127,7 +127,7 @@ def get_embedding(snippet: dict):
 
     model = Model()
     return {
-       "embedding": model.generate.remote(snippet["code"]).tolist()
+       "embedding": model.generate.remote(snippet["code"])
     }
 
 @stub.local_entrypoint()
