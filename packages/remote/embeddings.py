@@ -62,7 +62,10 @@ image = (
 
 stub = Stub("embeddings", image=image)
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs=50, concurrency_limit=1)
+BATCH_SIZE = 50
+TIMEOUT = 0.5
+
+@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs= 5 * BATCH_SIZE, concurrency_limit=1)
 class Model:
     def __enter__(self):
         # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
@@ -70,7 +73,7 @@ class Model:
 
         # Create a queue and a batch size
         self.queue = asyncio.Queue()
-        self.batch_size = 10
+        self.batch_size = BATCH_SIZE
 
         # Start the background task
         self.task = asyncio.create_task(self.process_batches())
@@ -88,7 +91,7 @@ class Model:
 
             for _ in range(self.batch_size):
                 try:
-                    timeout = 1.0 - (time.time() - start_time)
+                    timeout = TIMEOUT - (time.time() - start_time)
 
                     if timeout <= 0:
                         timeout = 0
@@ -110,7 +113,7 @@ class Model:
             # Process the batch
             results = self.model.encode([item[0] for item in batch]).tolist()
 
-            print("Embeddings computed")
+            print(str(len(results)) + ' results')
 
             # Set the results for each item in the batch
             for item, result in zip(batch, results):
