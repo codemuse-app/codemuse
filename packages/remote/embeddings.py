@@ -103,6 +103,7 @@ class Model:
 
             # Set the results for each item in the batch
             for item, result in zip(batch, results):
+                print('returning')
                 item[1].set_result(result)
 
     @method()
@@ -120,14 +121,16 @@ class Model:
 @utils.with_sentry
 @web_endpoint(method="POST", label='generate-embedding')
 @utils.with_posthog
-def get_embedding(snippet: dict):
+async def get_embedding(snippet: dict):
    # The snippet should contain a single key, "code" which is a string of code. Otherwise, raise an error.
     if len(snippet) != 1 or "code" not in snippet:
         raise ValueError("Snippet must contain a single key, 'code'.")
 
     model = Model()
+    embedding = await model.generate.remote(snippet["code"])
+
     return {
-       "embedding": model.generate.remote(snippet["code"])
+       "embedding": embedding
     }
 
 @stub.local_entrypoint()
