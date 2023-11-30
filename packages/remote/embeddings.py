@@ -99,11 +99,11 @@ class Model:
                 continue
 
             # Process the batch
-            results = self.model.encode([item[0] for item in batch])
+            results = self.model.encode([item[0] for item in batch]).tolist()
 
             # Set the results for each item in the batch
             for item, result in zip(batch, results):
-                item[1].set_result(result.tolist())
+                item[1].set_result(result)
 
     @method()
     async def generate(self, element: str) -> List[float]:
