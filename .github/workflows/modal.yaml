@@ -2,8 +2,8 @@ name: Deployment
 
 on:
   push:
-    paths:
-      - "packages/remote/**"
+    #paths:
+    #  - "packages/remote/**"
 
 jobs:
   deploy:
@@ -21,7 +21,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
-          cache: "pip"
+          cache: "pipenv"
+          cache-dependency-path: |
+            packages/remote/Pipfile.lock
 
       - name: Install pipenv
         run: pip install pipenv
