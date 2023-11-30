@@ -16,7 +16,11 @@ sentry_sdk.init(
     enable_tracing=True,
 )
 
-class EmbeddingRequest(BaseModel):
+class ExtensionRequest(BaseModel):
+    # VSCode extension installation ID
+    installationId: str
+
+class EmbeddingRequest(ExtensionRequest):
     code: str
 
 class EmbeddingResponse(BaseModel):
@@ -32,13 +36,16 @@ async def embedding(request: Request):
     # Validate the body
     embedding_request = EmbeddingRequest(**body)
 
+    # Set the sentry user to the installation ID
+    sentry_sdk.set_user({"id": embedding_request.installationId})
+
     # Call the function
     embedding = generate_embedding.remote(embedding_request.code)
 
     # Return the response
     return EmbeddingResponse(embedding=embedding)
 
-class DocumentationRequest(BaseModel):
+class DocumentationRequest(ExtensionRequest):
     code: str
 
 class DocumentationResponse(BaseModel):
@@ -52,12 +59,15 @@ async def documentation(request: Request):
     generate_documentation = Function.lookup("documentation", "Model.generate")
 
     # Validate the body
-    embedding_request = DocumentationRequest(**body)
+    documentation_request = DocumentationRequest(**body)
+
+    # Set the sentry user to the installation ID
+    sentry_sdk.set_user({"id": documentation_request.installationId})
 
     # Call the function
     documentation = ''
 
-    for chunk in generate_documentation.remote_gen(embedding_request.code):
+    for chunk in generate_documentation.remote_gen(documentation_request.code):
         documentation += chunk
 
     # Return the response

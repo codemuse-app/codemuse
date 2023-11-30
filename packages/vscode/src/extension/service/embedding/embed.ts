@@ -7,10 +7,12 @@ const TOPK = 10; // Top K results to return
 
 export class VectraManager {
   private index: LocalIndex;
+  private context: vscode.ExtensionContext;
 
   constructor(context: vscode.ExtensionContext) {
     //this.index = new LocalIndex(path.join(__dirname, '..', 'index'));
     this.index = new LocalIndex(context!.storageUri!.fsPath);
+    this.context = context;
   }
 
   async initializeIndex() {
@@ -28,7 +30,12 @@ export class VectraManager {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ code: text }), // Ensure this matches the expected format
+          body: JSON.stringify({
+            installationId: this.context.globalState.get(
+              "codemuse:installationId"
+            ),
+            code: text,
+          }), // Ensure this matches the expected format
         }
       );
 
