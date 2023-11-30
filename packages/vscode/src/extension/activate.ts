@@ -1,10 +1,20 @@
 import * as vscode from "vscode";
+import { v4 as uuidv4 } from "uuid";
 
 import { Status } from "./status";
 import { Index } from "./service/index";
 import { SearchViewProvider } from "./views/search";
 
 export const activate = async (context: vscode.ExtensionContext) => {
+  const insallationId = context.globalState.get<string>(
+    "codemuse:installationId"
+  );
+
+  if (!insallationId) {
+    const uuid = uuidv4();
+    context.globalState.update("codemuse:installationId", uuid);
+  }
+
   Status.getInstance();
   Index.setContext(context);
 
