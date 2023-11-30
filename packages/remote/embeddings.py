@@ -57,7 +57,7 @@ image = (
 
 stub = Stub("embeddings", image=image)
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=30, allow_concurrent_inputs=10, concurrency_limit=1)
+@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs=50, concurrency_limit=1)
 class Model:
     def __enter__(self):
         # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
@@ -129,15 +129,40 @@ def get_embedding(snippet: dict):
        "embedding": model.generate.remote(snippet["code"])
     }
 
+from concurrent.futures import ThreadPoolExecutor
+
 @stub.local_entrypoint()
 def main():
     model = Model()
-    questions = [
-        # Coding questions
-        "Implement a Python function to compute the Fibonacci numbers.",
+
+    code_snippets = [
+        "print('Hello, World!')",
+        "for i in range(10):\n    print(i)",
+        "def greet(name):\n    return f'Hello, name!'",
+        "import math\nprint(math.pi)",
+        "numbers = [1, 2, 3, 4, 5]\nprint(sum(numbers))",
+        "with open('file.txt', 'r') as f:\n    print(f.read())",
+        "try:\n    x = 1 / 0\nexcept ZeroDivisionError:\n    print('Cannot divide by zero')",
+        "class MyClass:\n    def __init__(self, name):\n        self.name = name",
+        "import requests\nresponse = requests.get('https://www.example.com')",
+        "import os\nprint(os.getcwd())",
+        "import sys\nprint(sys.version)",
+        "import datetime\nprint(datetime.datetime.now())",
+        "list_comprehension = [i * 2 for i in range(10)]",
+        "dictionary = {'key': 'value'}\nprint(dictionary['key'])",
+        "def recursive_function(n):\n    if n == 0:\n        return 1\n    else:\n        return n * recursive_function(n-1)",
+        "import random\nprint(random.randint(1, 10))",
+        "string = 'Hello, World!'\nprint(string.split(','))",
+        "import json\njson_string = json.dumps({'key': 'value'})",
+        "from functools import reduce\nnumbers = [1, 2, 3, 4, 5]\nproduct = reduce((lambda x, y: x * y), numbers)",
+        "import numpy as np\narray = np.array([1, 2, 3, 4, 5])\nprint(array.mean())"
     ]
-    result = model.generate.remote(questions[0])
 
-    print(result)
+    with ThreadPoolExecutor(max_workers=20) as executor:
+        tasks = [executor.submit(model.generate.remote, snippet) for snippet in code_snippets]
+        results = [task.result() for task in tasks]
 
-    return result
+    for result in results:
+        print(result)
+
+    return results
