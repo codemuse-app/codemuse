@@ -24,7 +24,11 @@ def model_init():
     from sentence_transformers import SentenceTransformer
 
     # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
-    model = SentenceTransformer(MODEL_DIR, trust_remote_code=True, revision='v1.0.0')
+    model = SentenceTransformer(
+        MODEL_DIR,
+        # trust_remote_code=True,
+        # revision='v1.0.0'
+    )
 
     return model
 
@@ -45,7 +49,7 @@ image = (
     .pip_install("sentence-transformers")
     .pip_install("einops")
     # Use the barebones hf-transfer package for maximum download speeds. No progress bar, but expect 700MB/s.
-    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "TOKENIZERS_PARALLELISM": "true"})
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
     .run_function(
         download_model_to_folder,
         secret=Secret.from_name("huggingface"),
