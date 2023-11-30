@@ -121,16 +121,14 @@ class Model:
 @utils.with_sentry
 @web_endpoint(method="POST", label='generate-embedding')
 @utils.with_posthog
-async def get_embedding(snippet: dict):
+def get_embedding(snippet: dict):
    # The snippet should contain a single key, "code" which is a string of code. Otherwise, raise an error.
     if len(snippet) != 1 or "code" not in snippet:
         raise ValueError("Snippet must contain a single key, 'code'.")
 
     model = Model()
-    embedding = await model.generate.remote(snippet["code"])
-
     return {
-       "embedding": embedding
+       "embedding": model.generate.remote(snippet["code"])
     }
 
 @stub.local_entrypoint()
