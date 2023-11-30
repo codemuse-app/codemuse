@@ -67,12 +67,18 @@ export function getIndentationAtLine(line: string): string {
  * getContentInFile('example.txt', [2, 4]);
  */
 export function getContentInFile(filePath: string, position?: [number, number]): string {
-    const content = readFileSync(filePath, 'utf-8');
+    const content:string = readFileSync(filePath, 'utf-8');
     if (!position) {
         return content;
     }
-    const lines = content.split('\n');
-    return lines.slice(position[0] - 1, position[1]).join('\n');
+    const lines:string[] = content.split('\n')
+    const preSubLines:string[] = lines.slice(position[0] - 1, position[1])
+    const lastString:string = preSubLines[preSubLines.length - 1];
+    const lastChar:string = lastString[lastString.length -1]
+    console.log(lastChar)
+    console.log("lastChar")
+    const subLines = lastChar != "\n" ? preSubLines.concat([""]) : preSubLines ;
+    return subLines.join('\n');
 }
 /**
  * Fin*8as the closest non-empty line of code after a given index in an array of lines.

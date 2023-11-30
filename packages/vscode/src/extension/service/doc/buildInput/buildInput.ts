@@ -57,43 +57,47 @@ export function getComponentBodyAndIndentation(componentType:string, code: strin
 }
 
 /**
- * Replaces specific sections of code with documentation comments in a given code string.
- * 
- * This function processes a string of code and replaces specified code sections with 
- * documentation strings. It works by iterating through a list of 
- * locations and their corresponding documentation strings. For each location, it uses 
- * an external function (`getComponentBodyAndIndentation`) to determine the code segment to 
- * replace and its indentation level. The specified code segment is then replaced with 
- * a documentation comment, followed by a 'pass' statement to maintain the code's structure.
- * 
- * @param componentType - A string representing the type of the component being documented.
- * @param code - The original code as a string.
- * @param locationsAndDocumentations - An array of tuples, where each tuple contains two 
- *                                     numbers (start and end line numbers for the code 
- *                                     segment to be replaced) and a string (the 
- *                                     documentation to be inserted).
- * @returns The modified code string with documentation comments inserted.
- * 
- * @example
- * // Example usage
- * let componentType = 'function';
- * let code = `def functionA():\n    x = 10\n    return x`;
- * let locationsAndDocumentations = [[1, 3, 'This is function A.\nIt returns the value of x.']];
- * // returns `def functionA():\n    """This is function A.\n    It returns the value of x."""\n    pass\n`
- * replaceCodeByDocumentation(componentType, code, locationsAndDocumentations);
+ * Replaces specified sections of code with documentation comments in a given file.
+ *
+ * This function processes a string of code and replaces specific code sections, as defined
+ * in the 'locationsAndDocumentations' array, with corresponding documentation strings. Each
+ * documentation string is inserted as a Python-style multiline comment, followed by a 'pass'
+ * statement. The function is useful for programmatically adding documentation to code.
+ *
+ * @param {string} filePath - The path to the file containing the code. This is used to extract
+ *                            specific content from the file based on line numbers.
+ * @param {string} code - The original code as a string, where the documentation will be inserted.
+ * @param {Array<[number, number, string]>} locationsAndDocumentations - An array of tuples. Each
+ *                            tuple contains two numbers representing the start and end line
+ *                            numbers (1-based indexing) of the code segment to be replaced,
+ *                            and a string representing the documentation to be inserted.
+ *
+ * @returns {string} The modified code string with the documentation comments inserted.
+ *
+ * Example:
+ *  let filePath = 'path/to/code.py';
+ *  let originalCode = `def myFunction():\n    a = 1\n    return a\n`;
+ *  let locationsAndDocs = [[1, 2, 'This function returns 1.']];
+ *  let newCode = replaceCodeByDocumentation(filePath, originalCode, locationsAndDocs);
+ *  // newCode now contains the originalCode with the specified section replaced by the documentation.
  */
-export function replaceCodeByDocumentation(componentType:string, code: string, locationsAndDocumentations: [number,number,string]): string {
+export function replaceCodeByDocumentation(filePath:string, code: string, locationsAndDocumentations: [[number,number,string]]): string { // note that indexes in locationsAndDocumentations start at 1, first line is 1 not, zero
 
-    var newContent = code
+    let newContent = code
 
     for (let i = 0; i < locationsAndDocumentations.length ; i++){
 
-        let [contentToRemove, indentation]: [string, string] = getComponentBodyAndIndentation(componentType, code)
+        let contentToRemove:string = getContentInFile(filePath, [locationsAndDocumentations[i][0],locationsAndDocumentations[i][1]])
+        console.log(contentToRemove)
+        console.log("contentToRemove")
+        let indentation:string = getIndentationAtLine(getClosestUpcomingCodeLine(0,contentToRemove.split("\n"))[1])
          
-        let documentation = locationsAndDocumentations[2]
+        let documentation = locationsAndDocumentations[i][2]
 
         if(documentation && documentation !== ""){
-            newContent = newContent.replace(contentToRemove, indentation+'"""'+documentation+'""""\n'+indentation+'pass\n')
+          
+            newContent = newContent.replace(contentToRemove, indentation+'"""'+documentation+'"""\n'+indentation+'pass\n')
+
         }
 
     }
@@ -175,8 +179,7 @@ export function insertDocumentationInCode(code: string, filePath:string, locatio
         }else if(uniqueDocumentationsToInsert.length == 1){ // case with unique documentation to insert per line
             const [componentName,documentation] = uniqueDocumentationsToInsert[0]
             const codeLineAtIndexWithDocumentation:string = removeLastOccurrenceCharacter(codeLineAtIndex,"\n")+" #"+documentation+"\n" //removes last \n occurence to insert documentation at line end
-
-            newCode = newCode.replace(codeLineAtIndex, codeLineAtIndexWithDocumentation)
+            newCode = newCode.replace(codeLineAtIndex,codeLineAtIndexWithDocumentation)
             alreadyInserted.add([componentName, documentation])
         }
 
