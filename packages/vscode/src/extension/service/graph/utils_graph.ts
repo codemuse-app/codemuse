@@ -1,6 +1,9 @@
 import { MultiDirectedGraph } from "graphology";
 import { createHash } from "crypto";
 import { type Graph, GraphNode, LocalGraphNode } from "./types";
+import * as vscode from "vscode";
+import path = require("path");
+import * as fs from "fs";
 
 export function printCycles(cycles: string[][]): void {
   if (cycles.length === 0) {
@@ -139,3 +142,4 @@ export function compareGraphs(
 export const hashNode = (node: Omit<LocalGraphNode, "hash">): string => {
   return createHash("sha256").update(node.content).digest("hex");
 };
+
