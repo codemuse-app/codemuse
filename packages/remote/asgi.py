@@ -36,9 +36,7 @@ async def embedding(request: Request):
     embedding = generate_embedding.remote(embedding_request.code)
 
     # Return the response
-    return JSONResponse(
-        EmbeddingResponse(embedding=embedding).model_dump()
-    )
+    return EmbeddingResponse(embedding=embedding)
 
 class DocumentationRequest(BaseModel):
     code: str
@@ -60,9 +58,8 @@ async def documentation(request: Request):
     documentation = generate_documentation.remote(embedding_request.code)
 
     # Return the response
-    return JSONResponse(
-        DocumentationResponse(documentation=documentation).model_dump()
-    )
+    return DocumentationResponse(documentation=documentation)
+
 
 @web_app.get('/status')
 async def status():
