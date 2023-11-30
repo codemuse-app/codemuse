@@ -24,8 +24,10 @@ class EmbeddingResponse(BaseModel):
 
 @web_app.post("/embedding")
 async def embedding(request: Request):
-    generate_embedding = Function.lookup("embeddings", "Model.generate")
     body = await request.json()
+
+    # Get the function
+    generate_embedding = Function.lookup("embeddings", "Model.generate")
 
     # Validate the body
     embedding_request = EmbeddingRequest(**body)
@@ -35,14 +37,32 @@ async def embedding(request: Request):
 
     # Return the response
     return JSONResponse(
-        EmbeddingResponse(embedding=embedding).model_dump_json()
+        EmbeddingResponse(embedding=embedding).model_dump()
     )
 
+class DocumentationRequest(BaseModel):
+    code: str
+
+class DocumentationResponse(BaseModel):
+    documentation: str
 
 @web_app.post("/documentation")
 async def documentation(request: Request):
     body = await request.json()
-    return JSONResponse({"done": True})
+
+    # Get the function
+    generate_documentation = Function.lookup("documentation", "Model.generate")
+
+    # Validate the body
+    embedding_request = DocumentationRequest(**body)
+
+    # Call the function
+    documentation = generate_documentation.remote(embedding_request.code)
+
+    # Return the response
+    return JSONResponse(
+        DocumentationResponse(documentation=documentation).model_dump()
+    )
 
 @web_app.get('/status')
 async def status():
