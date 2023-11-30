@@ -55,7 +55,10 @@ async def documentation(request: Request):
     embedding_request = DocumentationRequest(**body)
 
     # Call the function
-    documentation = generate_documentation.remote(embedding_request.code)
+    documentation = ''
+
+    for chunk in generate_documentation.remote_gen(embedding_request.code):
+        documentation += chunk
 
     # Return the response
     return DocumentationResponse(documentation=documentation)
