@@ -1,13 +1,7 @@
 import { RouterType } from "../../extension/router";
 import { createClient } from "../../vrpc/client";
 import * as React from "react";
-import {
-  VSCodeDataGrid,
-  VSCodeDataGridRow,
-  VSCodeDataGridCell,
-  VSCodeButton,
-  VSCodeTextField,
-} from "@vscode/webview-ui-toolkit/react";
+import { VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
 
 const vscode = acquireVsCodeApi();
 const client = createClient<RouterType>(vscode);
@@ -43,7 +37,7 @@ export const Search = () => {
             width: "100%",
           }}
           name="Search"
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setSearch(e.target.value);
           }}
         >
@@ -54,9 +48,9 @@ export const Search = () => {
         {results.map((result) => {
           return (
             <div style={{ paddingBottom: "5px" }}>
-              {result[0]}
+              {result.symbol}
               <br />
-              <small>{result[1]}</small>
+              <small>{result.file}</small>
             </div>
           );
         })}

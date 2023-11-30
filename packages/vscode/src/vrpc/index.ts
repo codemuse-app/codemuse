@@ -1,22 +1,21 @@
-type JsonSerializable =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonSerializable[]
-  | { [key: string]: JsonSerializable };
+type JsonPrimitive = string | number | boolean | null;
+type JsonObject = {
+  [key: string | number]: JsonSerializable;
+};
+type JsonArray = JsonSerializable[];
+export type JsonSerializable = JsonPrimitive | JsonArray | JsonObject;
 
 export const procedure = <
   A extends JsonSerializable[] = any[],
-  R extends JsonSerializable = JsonSerializable
+  R extends any = any
 >(
   fn: (...args: A) => R | Promise<R> | void | Promise<void>
 ) => fn;
 
 export type Procedure<
   A extends JsonSerializable[] = any[],
-  R extends JsonSerializable = JsonSerializable
-> = (...args: A) => R | Promise<R> | void | Promise<void>;
+  R extends JsonSerializable = any
+> = (...args: A) => R | Promise<R>;
 
 export const emitter = <T extends JsonSerializable = JsonSerializable>() => ({
   emit: (message: T) => {},
