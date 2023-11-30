@@ -57,7 +57,7 @@ class Model:
 {code}
 ````
 
-Briefly explain the above code. Focus on business aspects, and be as concise as possible. [/INST] """
+Briefly explain the above code. Focus on business aspects, and be as concise as possible. If possible, only use one short sentence.[/INST] """
 
     @method(keep_warm=False)
     async def generate(self, code: str):
