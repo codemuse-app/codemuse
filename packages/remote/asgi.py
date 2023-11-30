@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from modal import Image, Stub, asgi_app, Function
 
 web_app = FastAPI()
-stub = Stub()
+stub = Stub("api")
 
 image = Image.debian_slim()
 
