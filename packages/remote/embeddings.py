@@ -86,9 +86,9 @@ class Model:
 
     async def process_batches(self):
         while True:
-            # Detect if a minute has passed, and print the processed count then reset it
-            if time.time() - self.minute >= 60:
-                print(f"Processed {self.processed} in the last minute")
+            # Show average throughput (items/sec)
+            if time.time() - self.minute >= 10:
+                print(f"Throughput: {self.processed / 10:.2f} items/sec")
                 self.processed = 0
                 self.minute = time.time()
 
@@ -128,8 +128,6 @@ class Model:
     async def generate(self, element: str) -> List[float]:
         # Create a Future for the result
         result = asyncio.Future()
-
-        print("Adding to queue")
 
         # Add the element and the Future to the queue
         await self.queue.put((element, result))
