@@ -139,6 +139,23 @@ export function compareGraphs(
   return { addedNodes, updatedNodes, deletedNodes };
 }
 
+export function saveGraphToFile(graph: MultiDirectedGraph, filename: string, context: vscode.ExtensionContext) {
+  const filePath = path.join(context.storageUri!.fsPath, filename);
+  const graphData = graph.export();
+  fs.writeFileSync(filePath, JSON.stringify(graphData));
+}
+
+export function loadGraphFromFile(filename: string, context: vscode.ExtensionContext): MultiDirectedGraph | undefined {
+  const filePath = path.join(context.storageUri!.fsPath, filename);
+  if (fs.existsSync(filePath)) {
+      const graphData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      const graph = new MultiDirectedGraph();
+      graph.import(graphData);
+      return graph;
+  }
+  return undefined;
+}
+
 export const hashNode = (node: Omit<LocalGraphNode, "hash">): string => {
   return createHash("sha256").update(node.content).digest("hex");
 };

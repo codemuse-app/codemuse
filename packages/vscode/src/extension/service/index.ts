@@ -4,11 +4,12 @@ import * as Languages from "../languages";
 import { Status } from "../status";
 import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten"; // Import the function
-import { findCycles, printCycles, compareGraphs} from "./graph/utils_graph"; // Import the function
+import { findCycles, printCycles, compareGraphs, loadGraphFromFile, saveGraphToFile} from "./graph/utils_graph"; // Import the function
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed"; // Assuming these functions are defined in 'embedding.ts'
 import path = require("path");
 import * as fs from 'fs';
+import { MultiDirectedGraph } from "graphology";
 
 
 export class Index {
@@ -24,6 +25,10 @@ export class Index {
     // Create the Vectra Index Instance to store embeddings
     this.vectraManager = new VectraManager(this.context);
     this.vectraManager.initializeIndex();
+
+    // Load graphs if they exist
+    this.originalGraph = loadGraphFromFile('originalGraph.json', this.context) as Graph;
+    this.flattenedGraph = loadGraphFromFile('flattenedGraph.json', this.context) as Graph;
 }
 
   static initialize(context: vscode.ExtensionContext) {
@@ -206,6 +211,13 @@ export class Index {
               console.log("Did not detect language");
             }
 
+            // At the end of the run method, save the graphs
+            if (this.originalGraph) {
+              saveGraphToFile(this.originalGraph, 'originalGraph.json', this.context);
+            }
+            if (this.flattenedGraph) {
+              saveGraphToFile(this.flattenedGraph, 'flattenedGraph.json', this.context);
+            }
             done();
           }
         }
