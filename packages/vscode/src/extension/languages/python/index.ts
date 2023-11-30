@@ -105,7 +105,11 @@ export class Python extends LanguageProvider {
         const pythonPath = execSync(`${pipenvPath} --py`, {
           encoding: "utf-8",
           cwd,
-        }).trim();
+        })
+          .trim()
+          .replace("\n", "");
+
+        console.log(pythonPath);
 
         return pythonPath;
       }

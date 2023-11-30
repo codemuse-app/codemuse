@@ -23,23 +23,43 @@ export class Index {
     this.vectraManager.initializeIndex(); // what about "await"?
   }
 
-  static setContext(context: vscode.ExtensionContext) {
-    Index.getInstance(context).languages = [
+  static initialize(context: vscode.ExtensionContext) {
+    Index.instance = new Index(context);
+
+    Index.getInstance().languages = [
       // new Languages.Typescript(context),
-      new Languages.Python(context),
+      new Languages.Python(this.instance.context),
     ];
   }
 
-  static getInstance(context: vscode.ExtensionContext) {
+  // Query the Vectra Index for the given text and return the results with the node ID, score, and content
+  async query(text: string): Promise<[string, number, string][]> {
+    const vectraResults = await this.vectraManager.query(text);
+    let queryResults: [string, number, string][] = [];
+
+    for (const [nodeId, score] of vectraResults) {
+      if (this.originalGraph && this.originalGraph.hasNode(nodeId)) {
+        const nodeData = this.originalGraph.getNodeAttributes(
+          nodeId
+        ) as LocalGraphNode;
+        const content = nodeData.content;
+        queryResults.push([nodeId, score, content]);
+      }
+    }
+    return queryResults;
+  }
+
+  static getInstance() {
     if (!Index.instance) {
-      Index.instance = new Index(context);
+      // Index.instance = new Index(this.context);
+      throw new Error("Index not initialized");
     }
 
     return Index.instance;
   }
 
-  async run(context: vscode.ExtensionContext) {
-    const instance = Index.getInstance(context);
+  async run() {
+    const instance = Index.getInstance();
 
     // Show a notification with progress bar
     vscode.window.withProgress(
@@ -147,7 +167,12 @@ export class Index {
                     const filePath = nodeData.file; // File path
 
                     // Upsert the item in the Vectra index
-                    await this.vectraManager.upsertItem(content, id, hash, filePath);
+                    await this.vectraManager.upsertItem(
+                      content,
+                      id,
+                      hash,
+                      filePath
+                    );
                   })
                 );
 

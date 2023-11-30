@@ -8,13 +8,14 @@ import { getInstallationId } from "./track";
 export const activate = async (context: vscode.ExtensionContext) => {
   getInstallationId(context);
 
+  Index.initialize(context);
+
   Status.getInstance();
-  Index.setContext(context);
 
   // Create a command called "CodeMuse: Index Workspace" that will run the index
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.index", () => {
-      Index.getInstance(context).run(context);
+      Index.getInstance().run();
     })
   );
 
