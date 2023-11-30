@@ -75,5 +75,5 @@ async def trigger_error():
 
 @stub.function(image=image)
 @asgi_app()
-def fastapi_app():
+def asgi():
     return web_app
