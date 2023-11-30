@@ -71,6 +71,11 @@ export class Index {
     return Index.instance;
   }
 
+  // A getter that returns the original graph
+  getOriginalGraph() {
+    return this.originalGraph;
+  }
+
   async run() {
     const instance = Index.getInstance();
 
