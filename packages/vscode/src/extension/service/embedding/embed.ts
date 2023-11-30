@@ -98,18 +98,24 @@ export class VectraManager {
     });
   }
 
-  // Query the index for the given text
-  async query(text: string) {
+  // Query the index for the given text and return the top K results as a list of tuples [node_id, score]
+  async query(text: string): Promise<[string, number][]> {
     const vector = await this.getVector(text);
     const results = await this.index.queryItems(vector, TOPK);
-    if (results.length > 0) {
-      for (const result of results) {
-        console.log(
-          `[${result.score}] ID: ${result.item.metadata.id}, Hash: ${result.item.metadata.hash}, Path: ${result.item.metadata.path}`
-        );
-      }
-    } else {
+
+    if (results.length === 0) {
       console.log(`No results found.`);
+      return [];
     }
+
+    // Build a list of tuples [node_id, score]
+    const tuples: [string, number][] = results.map((result) => {
+      return [result.item.metadata.id as string, result.score];
+    }); // warning: this assumes that the metadata ID is a string
+    
+    // Sort the tuples in descending order by score
+    tuples.sort((a, b) => b[1] - a[1]);
+
+    return tuples;
   }
 }

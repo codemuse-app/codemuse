@@ -23,6 +23,21 @@ export class Index {
     this.vectraManager.initializeIndex(); // what about "await"?
   }
 
+  // Query the Vectra Index for the given text and return the results with the node ID, score, and content
+  async query(text: string): Promise<[string, number, string][]> {
+    const vectraResults = await this.vectraManager.query(text);
+    let queryResults: [string, number, string][] = [];
+
+    for (const [nodeId, score] of vectraResults) {
+        if (this.originalGraph && this.originalGraph.hasNode(nodeId)) {
+            const nodeData = this.originalGraph.getNodeAttributes(nodeId) as LocalGraphNode;
+            const content = nodeData.content;
+            queryResults.push([nodeId, score, content]);
+        }
+    }
+    return queryResults;
+}
+
   static setContext(context: vscode.ExtensionContext) {
     Index.getInstance(context).languages = [
       // new Languages.Typescript(context),
