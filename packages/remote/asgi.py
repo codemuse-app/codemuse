@@ -31,7 +31,7 @@ async def embedding(request: Request):
     embedding_request = EmbeddingRequest(**body)
 
     # Call the function
-    embedding = await generate_embedding.remote(embedding_request.code)
+    embedding = generate_embedding.remote(embedding_request.code)
 
     # Return the response
     return JSONResponse(
