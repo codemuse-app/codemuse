@@ -25,12 +25,3 @@ def with_sentry(fn):
             raise exc
 
     return fn_wrapped
-
-# Create a decorator named with_posthog that wraps a function and gets the function name, then reports to posthog when the function is called. It should pass errors through to the caller.
-def with_posthog(fn):
-    @functools.wraps(fn)
-    async def fn_wrapped(*args, **kwargs):
-        # posthog.capture(fn.__name__)
-        await fn(*args, **kwargs)
-
-    return fn_wrapped
