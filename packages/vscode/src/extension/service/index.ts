@@ -90,7 +90,7 @@ export class Index {
     const instance = Index.getInstance();
 
     // Show a notification with progress bar
-    vscode.window.withProgress(
+    await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
         title: "CodeMuse is indexing your workspace",
