@@ -6,7 +6,7 @@ on:
       - "packages/vscode/**"
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
 
     env:
@@ -29,7 +29,7 @@ jobs:
             node_modules
 
       - name: Install dependencies
-        run: npm ci --workspace=codemuse
+        run: npm ci
 
       - name: Publish extension
         run: npm run publish
