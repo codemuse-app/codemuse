@@ -3,6 +3,7 @@ import { Index } from "./service";
 import { LocalGraphNode } from "./service/graph/types";
 import { get } from "http";
 import { getSymbolName } from "../shared/utils";
+import { hashContent} from "./service/graph/utils_graph";
 
 // Create a new VSCode CodeLens provider
 export class CodeMuseCodeLens implements vscode.CodeLensProvider {
@@ -29,7 +30,7 @@ export class CodeMuseCodeLens implements vscode.CodeLensProvider {
 
             const data = nodeData as LocalGraphNode;
 
-            if (data.file === document.fileName && data.range) {
+            if (data.file === document.fileName && data.range && data.fileHash === hashContent(document.getText())) {
                 records.push(data);
             }
         }
