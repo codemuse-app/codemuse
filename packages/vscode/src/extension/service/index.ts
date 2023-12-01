@@ -4,13 +4,19 @@ import * as Languages from "../languages";
 import { Status } from "../status";
 import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten"; // Import the function
-import { findCycles, printCycles, compareGraphs, loadGraphFromFile, saveGraphToFile} from "./graph/utils_graph"; // Import the function
+import {
+  findCycles,
+  printCycles,
+  compareGraphs,
+  loadGraphFromFile,
+  saveGraphToFile,
+} from "./graph/utils_graph"; // Import the function
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed"; // Assuming these functions are defined in 'embedding.ts'
 import path = require("path");
-import * as fs from 'fs';
+import * as fs from "fs";
 import { MultiDirectedGraph } from "graphology";
-
+import { batch } from "../../shared/utils";
 
 export class Index {
   private static instance: Index;
@@ -27,9 +33,15 @@ export class Index {
     this.vectraManager.initializeIndex();
 
     // Load graphs if they exist
-    this.originalGraph = loadGraphFromFile('originalGraph.json', this.context) as Graph;
-    this.flattenedGraph = loadGraphFromFile('flattenedGraph.json', this.context) as Graph;
-}
+    this.originalGraph = loadGraphFromFile(
+      "originalGraph.json",
+      this.context
+    ) as Graph;
+    this.flattenedGraph = loadGraphFromFile(
+      "flattenedGraph.json",
+      this.context
+    ) as Graph;
+  }
 
   static initialize(context: vscode.ExtensionContext) {
     Index.instance = new Index(context);
@@ -47,14 +59,16 @@ export class Index {
 
     for (const [nodeId, score] of vectraResults) {
       if (this.originalGraph && this.originalGraph.hasNode(nodeId)) {
-        const nodeData = this.originalGraph.getNodeAttributes(nodeId) as LocalGraphNode;
+        const nodeData = this.originalGraph.getNodeAttributes(
+          nodeId
+        ) as LocalGraphNode;
         const resultNode: ResultGraphNode = {
           score: score,
           symbol: nodeData.symbol,
           language: nodeData.language,
           file: nodeData.file,
           range: nodeData.range,
-          content: nodeData.content
+          content: nodeData.content,
         };
         queryResults.push(resultNode);
       }
@@ -117,22 +131,43 @@ export class Index {
               printCycles(original_cycles);
 
               // Rebuild the flattened graph and update the Vectra index
-              const newFlattenedGraph = buildFlattenedGraph(instance.originalGraph);
-              const { addedNodes, updatedNodes, deletedNodes } = 
-              compareGraphs(instance.flattenedGraph || new MultiDirectedGraph(), newFlattenedGraph);
+              const newFlattenedGraph = buildFlattenedGraph(
+                instance.originalGraph
+              );
+              const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(
+                instance.flattenedGraph || new MultiDirectedGraph(),
+                newFlattenedGraph
+              );
               instance.flattenedGraph = newFlattenedGraph; // Update the flattened graph
 
               // Update the Vectra index
               await this.vectraManager.refreshIndex();
-              await this.vectraManager.beginUpdate();
               const allNodesToUpdate = addedNodes.concat(updatedNodes);
 
-              await Promise.all(allNodesToUpdate.map(async (nodeId) => {
-                const nodeData = newFlattenedGraph.getNodeAttributes(nodeId) as LocalGraphNode;
-                if (nodeData.content) {
-                  await this.vectraManager.upsertItem(nodeData.content, nodeId, nodeData.hash, nodeData.file);
+              await batch(
+                allNodesToUpdate.map(async (nodeId) => {
+                  const nodeData = newFlattenedGraph.getNodeAttributes(
+                    nodeId
+                  ) as LocalGraphNode;
+                  if (nodeData.content) {
+                    await this.vectraManager.upsertItem(
+                      nodeData.content,
+                      nodeId,
+                      nodeData.hash,
+                      nodeData.file
+                    );
+                  }
+                }),
+                200,
+                async () => {
+                  await this.vectraManager.beginUpdate();
+                },
+                async () => {
+                  await this.vectraManager.endUpdate();
                 }
-              }));
+              );
+
+              await this.vectraManager.beginUpdate();
 
               // Delete embeddings for deleted nodes
               for (const node of deletedNodes) {
@@ -154,10 +189,18 @@ export class Index {
 
             // At the end of the run method, save the graphs
             if (this.originalGraph) {
-              saveGraphToFile(this.originalGraph, 'originalGraph.json', this.context);
+              saveGraphToFile(
+                this.originalGraph,
+                "originalGraph.json",
+                this.context
+              );
             }
             if (this.flattenedGraph) {
-              saveGraphToFile(this.flattenedGraph, 'flattenedGraph.json', this.context);
+              saveGraphToFile(
+                this.flattenedGraph,
+                "flattenedGraph.json",
+                this.context
+              );
             }
             done();
           }
