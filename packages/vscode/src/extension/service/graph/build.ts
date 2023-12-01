@@ -1,4 +1,4 @@
-import { readFile, writeFileSync } from "fs";
+import { readFile } from "fs";
 import { promisify } from "util";
 import { MultiDirectedGraph } from "graphology";
 import { join } from "path";
@@ -123,7 +123,7 @@ export const buildGraph = async (
         symbol: range.symbol,
         range: formatRange(range.range),
         content: range.content,
-        file: document.relative_path,
+        file: join(cwd, document.relative_path),
         language,
       };
 

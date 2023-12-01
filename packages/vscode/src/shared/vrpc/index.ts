@@ -1,4 +1,4 @@
-type JsonPrimitive = string | number | boolean | null;
+type JsonPrimitive = string | number | boolean | null | undefined;
 type JsonObject = {
   [key: string | number]: JsonSerializable;
 };

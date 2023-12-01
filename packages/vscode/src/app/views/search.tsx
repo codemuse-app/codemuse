@@ -112,6 +112,9 @@ export const Search = () => {
                 paddingTop: "5px",
                 borderBottom: "1px solid var(--vscode-activityBar-border)",
               }}
+              onClick={() => {
+                client.goTo(result.file, result.range);
+              }}
             >
               <div style={{ paddingBottom: "5px" }}>
                 <small style={{ fontSize: "0.8em", opacity: 0.7 }}>
