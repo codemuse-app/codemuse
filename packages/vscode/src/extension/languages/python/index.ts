@@ -82,14 +82,17 @@ export class Python extends LanguageProvider {
     }
 
     if (pythonExtension) {
-      console.log("here");
-      const pythonPath =
-        await pythonExtension.exports.settings.getExecutionDetails(
-          vscode.Uri.file("")
-        );
+      try {
+        const pythonPath =
+          await pythonExtension.exports.settings.getExecutionDetails(
+            vscode.Uri.file("")
+          );
 
-      if (pythonPath?.execCommand?.length > 0) {
-        return pythonPath.execCommand[0];
+        if (pythonPath?.execCommand?.length > 0) {
+          return pythonPath.execCommand[0];
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
 
