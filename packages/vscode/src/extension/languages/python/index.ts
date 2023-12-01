@@ -6,9 +6,10 @@ import { execSync } from "child_process";
 import * as path from "path";
 
 import { LanguageProvider } from "../provider";
-import { writeFileSync } from "fs";
+import { writeFile } from "fs";
 
 const execFileAsync = promisify(execFile);
+const writeFileAsync = promisify(writeFile);
 
 const validExtensions = new Set([".py", ".pyi"]);
 
@@ -162,24 +163,9 @@ export class Python extends LanguageProvider {
   private async createEnvironment(cwd: string) {
     const pythonPath = await this.getPythonPath(cwd);
 
-    const packages = JSON.parse(
-      execSync(pythonPath + " -m pip list --format=json", {
-        encoding: "utf-8",
-        cwd,
-        env: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          PIPENV_IGNORE_VIRTUALENVS: "1",
-        },
-      }).trim()
-    ) as {
-      name: string;
-      version: string;
-    }[];
-
-    const files = execSync(
-      pythonPath +
-        " -m pip show --files " +
-        packages.map((pkg) => pkg.name).join(" "),
+    const packageList = await execFileAsync(
+      pythonPath,
+      ["-m", "pip", "list", "--format=json"],
       {
         encoding: "utf-8",
         cwd,
@@ -187,9 +173,28 @@ export class Python extends LanguageProvider {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           PIPENV_IGNORE_VIRTUALENVS: "1",
         },
-        maxBuffer: 1024 * 1024 * 1024, // 1GB
       }
-    )
+    );
+
+    const packages = JSON.parse(packageList.stdout) as {
+      name: string;
+      version: string;
+    }[];
+
+    const packageFileContents = await execFileAsync(
+      pythonPath,
+      ["-m", "pip", "show", "--files", ...packages.map((pkg) => pkg.name)],
+      {
+        encoding: "utf-8",
+        cwd,
+        env: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          PIPENV_IGNORE_VIRTUALENVS: "1",
+        },
+      }
+    );
+
+    const files = packageFileContents.stdout
       .toString()
       .trim()
       .split("\n---")
@@ -199,7 +204,7 @@ export class Python extends LanguageProvider {
     // Write the JSON file
     const storagePath = this.getStoragePath(cwd) + "/environment.json";
 
-    writeFileSync(storagePath, JSON.stringify(files));
+    await writeFileAsync(storagePath, JSON.stringify(files));
 
     return storagePath;
   }
