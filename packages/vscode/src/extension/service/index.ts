@@ -69,6 +69,7 @@ export class Index {
           file: nodeData.file,
           range: nodeData.range,
           content: nodeData.content,
+          fileHash: nodeData.fileHash,
         };
         queryResults.push(resultNode);
       }
