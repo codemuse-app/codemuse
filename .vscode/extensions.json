@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-python.python",
+    "ms-vscode.vscode-typescript-next",
+    "gruntfuggly.todo-tree"
+  ]
+}
