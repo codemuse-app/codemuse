@@ -1,0 +1,47 @@
+name: Deployment
+
+on:
+  push:
+    paths:
+      - "packages/vscode/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: |
+            packages/vscode/package-lock.json
+            packages/vscode/node_modules
+            package-lock.json
+            node_modules
+
+      - name: Install dependencies
+        run: npm ci --workspace=codemuse
+
+      - name: Publish extension
+        run: npm run publish
+        working-directory: packages/vscode
+
+      - name: Commit version bump
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email ""
+          git add .
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "chore: bump version"
+            git push
+          fi
