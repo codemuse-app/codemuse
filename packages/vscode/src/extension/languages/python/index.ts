@@ -177,6 +177,8 @@ export class Python extends LanguageProvider {
       }
     );
 
+    packageList.stderr && console.error(packageList.stderr);
+
     const packages = JSON.parse(packageList.stdout) as {
       name: string;
       version: string;
@@ -195,6 +197,8 @@ export class Python extends LanguageProvider {
         maxBuffer: 1024 * 1024 * 1024,
       }
     );
+
+    packageFileContents.stderr && console.error(packageFileContents.stderr);
 
     const files = packageFileContents.stdout
       .toString()
