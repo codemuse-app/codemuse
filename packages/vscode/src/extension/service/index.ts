@@ -102,6 +102,7 @@ export class Index {
       },
       async (progress) => {
         for (const workspace of vscode.workspace.workspaceFolders!) {
+          //TODO: how to handle multiple languages??
           for (const language of instance.languages) {
             const done = Status.getInstance().loading(
               `indexing ${language.languageId}`
@@ -109,7 +110,7 @@ export class Index {
 
             if (await language.detect()) {
               progress.report({
-                message: `Indexing ${language.languageId}`,
+                message: `indexing ${language.languageId}`,
               });
 
               const scipPath = await language.run(workspace.uri.fsPath);
@@ -122,7 +123,7 @@ export class Index {
               );
 
               progress.report({
-                message: `Indexing ${language.languageId} complete`,
+                message: `parsing ${language.languageId} graph`,
               });
 
               // check the number of cycles in the original graph
@@ -144,6 +145,10 @@ export class Index {
               await this.vectraManager.refreshIndex();
               const allNodesToUpdate = addedNodes.concat(updatedNodes);
 
+              progress.report({
+                message: "getting embeddings",
+              });
+
               await batch(
                 allNodesToUpdate.map(async (nodeId) => {
                   const nodeData = newFlattenedGraph.getNodeAttributes(
@@ -156,6 +161,10 @@ export class Index {
                       nodeData.hash,
                       nodeData.file
                     );
+                    progress.report({
+                      message: "getting embeddings",
+                      increment: 100 / allNodesToUpdate.length,
+                    });
                   }
                 }),
                 200,
@@ -181,10 +190,12 @@ export class Index {
               printCycles(flattened_cycles);
 
               progress.report({
-                message: `Generation of the FlattenedGraph complete`,
+                message: `${language.languageId} indexed`,
               });
             } else {
-              console.log("Did not detect language");
+              vscode.window.showWarningMessage(
+                `CodeMuse: ${language.languageId} not found`
+              );
             }
 
             // At the end of the run method, save the graphs

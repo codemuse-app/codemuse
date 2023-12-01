@@ -1,5 +1,6 @@
 import { RouterType } from "../../extension/router";
 import { createClient } from "../../shared/vrpc/client";
+import { ProgressBar } from "../components/progressBar";
 import * as React from "react";
 import { VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
 
@@ -59,12 +60,14 @@ const getResultColors = (score: number) => {
 
 export const Search = () => {
   const [search, setSearch] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState<
     Exclude<Awaited<ReturnType<typeof client.query>>, void>
   >([]);
 
   React.useEffect(() => {
     (async (search, setResults) => {
+      setLoading(true);
       console.log("Called search", search);
 
       if (search === "") {
@@ -76,6 +79,7 @@ export const Search = () => {
 
       if (results) {
         setResults(results);
+        setLoading(false);
       }
     })(search, setResults);
   }, [search, setResults]);
@@ -94,6 +98,12 @@ export const Search = () => {
         >
           Search
         </VSCodeTextField>
+        <ProgressBar
+          loading={loading}
+          style={{
+            marginTop: "-2px",
+          }}
+        />
       </div>
       <div
         style={{
@@ -111,6 +121,9 @@ export const Search = () => {
                 paddingBottom: "5px",
                 paddingTop: "5px",
                 borderBottom: "1px solid var(--vscode-activityBar-border)",
+              }}
+              onClick={() => {
+                client.goTo(result.file, result.range);
               }}
             >
               <div style={{ paddingBottom: "5px" }}>
