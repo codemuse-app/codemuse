@@ -6,11 +6,14 @@ import { SearchViewProvider } from "./views/search";
 import { getInstallationId } from "./track";
 import { CodeMuseCodeLens } from "./codelense";
 
-import * as Sentry from "@sentry/node";
+import * as Sentry from "@sentry/browser";
 
 Sentry.init({
   dsn: "https://6ec7abf2f59c9bb9cd7c8679a248cc8f@o4506308721115136.ingest.sentry.io/4506321118035968",
-  integrations: [],
+  integrations: [
+    new Sentry.BrowserTracing(),
+    new Sentry.BrowserProfilingIntegration(),
+  ],
   tracesSampleRate: 1.0,
   profilesSampleRate: 1.0,
 });
@@ -19,12 +22,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
   // Sentry set the installation ID
   Sentry.setUser({ id: getInstallationId(context) });
 
-  const activation = Sentry.startTransaction({
-    name: "activate",
-    op: "activate",
-    description: "Activating the CodeMuse extension",
-  });
-
   Index.initialize(context);
 
   Status.getInstance();
@@ -32,15 +29,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
   // Create a command called "CodeMuse: Index Workspace" that will run the index
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.index", async () => {
-      const indexation = Sentry.startTransaction({
-        name: "indexation",
-        op: "indexation",
-        description: "Indexing the workspace",
+      Sentry.withScope(async (scope) => {
+        scope.setTransactionName("codemuse.index");
+        await Index.getInstance().run();
       });
-
-      await Index.getInstance().run();
-
-      indexation.finish();
     })
   );
 
@@ -66,6 +58,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
     })
   );
 
+  context.subscriptions.push(
+    // Command to trigger an error in Sentry
+    vscode.commands.registerCommand("codemuse.error", () => {
+      throw new Error("This is an error");
+    })
+  );
+
   // Attach the CodeLens provider
   let selector: vscode.DocumentSelector = {
     scheme: "file",
@@ -77,8 +76,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   // Run the index command on startup
   vscode.commands.executeCommand("codemuse.index");
-
-  activation.finish();
 };
 
 export const deactivate = () => {

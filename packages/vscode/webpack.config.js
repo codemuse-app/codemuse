@@ -5,6 +5,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
+const { CI } = process.env;
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -30,11 +31,12 @@ const extensionConfig = {
     extensions: ['.ts', '.js']
   },
   plugins: [
+    CI &&
     sentryWebpackPlugin({
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "codemuse",
       project: "extension",
-    }),
+    })
   ],
   module: {
     rules: [
@@ -74,7 +76,7 @@ const frontendConfig = {
     new webpack.ProvidePlugin({
       process: 'process/browser',
     }),
-    sentryWebpackPlugin({
+    CI && sentryWebpackPlugin({
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "codemuse",
       project: "extension",

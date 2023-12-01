@@ -41,7 +41,11 @@
     "commands": [
       {
         "command": "codemuse.openSidebar",
-        "title": "Open CodeMuse sidebar"
+        "title": "CodeMuse: open sidebar"
+      },
+      {
+        "command": "codemuse.error",
+        "title": "CodeMuse: trigger error"
       }
     ]
   },
@@ -83,8 +87,6 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@sentry/node": "^7.84.0",
-    "@sentry/profiling-node": "^1.2.6",
     "@sentry/react": "^7.84.0",
     "@sentry/webpack-plugin": "^2.10.2",
     "@sourcegraph/scip-python": "^0.6.0",
