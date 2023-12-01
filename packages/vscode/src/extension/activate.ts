@@ -16,6 +16,7 @@ Sentry.init({
   ],
   tracesSampleRate: 1.0,
   profilesSampleRate: 1.0,
+  tracePropagationTargets: ["https://codemuse-app--api-asgi.modal.run/"],
 });
 
 export const activate = async (context: vscode.ExtensionContext) => {
