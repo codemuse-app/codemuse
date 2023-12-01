@@ -173,6 +173,7 @@ export class Python extends LanguageProvider {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           PIPENV_IGNORE_VIRTUALENVS: "1",
         },
+        maxBuffer: 1024 * 1024 * 1024,
       }
     );
 
@@ -191,6 +192,7 @@ export class Python extends LanguageProvider {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           PIPENV_IGNORE_VIRTUALENVS: "1",
         },
+        maxBuffer: 1024 * 1024 * 1024,
       }
     );
 
