@@ -64,12 +64,7 @@ export class Index {
         ) as LocalGraphNode;
         const resultNode: ResultGraphNode = {
           score: score,
-          symbol: nodeData.symbol,
-          language: nodeData.language,
-          file: nodeData.file,
-          range: nodeData.range,
-          content: nodeData.content,
-          fileHash: nodeData.fileHash,
+          ...nodeData,
         };
         queryResults.push(resultNode);
       }
