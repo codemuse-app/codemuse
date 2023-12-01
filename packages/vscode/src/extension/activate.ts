@@ -50,9 +50,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.languages.registerCodeLensProvider(selector, new CodeMuseCodeLens())
   );
-
+  
   // Run the index command on startup
   vscode.commands.executeCommand("codemuse.index");
+
 };
 
 export const deactivate = () => {
