@@ -6,8 +6,19 @@ import { SearchViewProvider } from "./views/search";
 import { getInstallationId } from "./track";
 import { CodeMuseCodeLens } from "./codelense";
 
+import * as Sentry from "@sentry/node";
+import { ProfilingIntegration } from "@sentry/profiling-node";
+
 export const activate = async (context: vscode.ExtensionContext) => {
-  getInstallationId(context);
+  Sentry.init({
+    dsn: "https://6ec7abf2f59c9bb9cd7c8679a248cc8f@o4506308721115136.ingest.sentry.io/4506321118035968",
+    integrations: [new ProfilingIntegration()],
+    tracesSampleRate: 1.0,
+    profilesSampleRate: 1.0,
+  });
+
+  // Sentry set the installation ID
+  Sentry.setUser({ id: getInstallationId(context) });
 
   Index.initialize(context);
 
@@ -50,10 +61,9 @@ export const activate = async (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     vscode.languages.registerCodeLensProvider(selector, new CodeMuseCodeLens())
   );
-  
+
   // Run the index command on startup
   vscode.commands.executeCommand("codemuse.index");
-
 };
 
 export const deactivate = () => {
