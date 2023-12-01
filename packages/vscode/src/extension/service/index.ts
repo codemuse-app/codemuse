@@ -3,16 +3,16 @@ import * as vscode from "vscode";
 import * as Languages from "../languages";
 import { Status } from "../status";
 import { buildGraph } from "./graph/build";
-import { buildFlattenedGraph } from "./graph/flatten"; // Import the function
+import { buildFlattenedGraph } from "./graph/flatten"; 
 import {
   findCycles,
   printCycles,
   compareGraphs,
   loadGraphFromFile,
   saveGraphToFile,
-} from "./graph/utils_graph"; // Import the function
+} from "./graph/utils_graph"; 
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
-import { VectraManager } from "./embedding/embed"; // Assuming these functions are defined in 'embedding.ts'
+import { VectraManager } from "./embedding/embed"; 
 import path = require("path");
 import * as fs from "fs";
 import { MultiDirectedGraph } from "graphology";
