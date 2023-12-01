@@ -4,9 +4,7 @@ export const goTo = async (
   path: string,
   range?: [number, number, number, number]
 ) => {
-  const workspaceUri = vscode.workspace.workspaceFolders![0].uri.fsPath;
-
-  const uri = vscode.Uri.file(workspaceUri + "/" + path);
+  const uri = vscode.Uri.file(path);
 
   // Open the document
   const doc = await vscode.workspace.openTextDocument(uri);
