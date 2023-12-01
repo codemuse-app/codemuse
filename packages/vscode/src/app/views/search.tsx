@@ -1,5 +1,5 @@
 import { RouterType } from "../../extension/router";
-import { createClient } from "../../vrpc/client";
+import { createClient } from "../../shared/vrpc/client";
 import * as React from "react";
 import { VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
 

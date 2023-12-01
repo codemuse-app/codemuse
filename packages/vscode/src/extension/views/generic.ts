@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { serve } from "../../vrpc/server";
+import { serve } from "../../shared/vrpc/server";
 import { router } from "../router";
 
 export class GenericViewProvider implements vscode.WebviewViewProvider {

@@ -1,4 +1,4 @@
-import { router as vrpcRouter, procedure } from "../../vrpc";
+import { router as vrpcRouter, procedure } from "../../shared/vrpc";
 import { Index } from "../service";
 
 export const router = vrpcRouter({
