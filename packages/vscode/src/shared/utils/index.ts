@@ -37,3 +37,35 @@ export const batch = async (
 
   return results;
 };
+
+export const getSymbolName = (symbol: string) => {
+  const [scipIndexer, language, packageName, _version, identifier] =
+    symbol.split(" ");
+
+  console.log(symbol);
+  console.log(symbol.split(" "));
+
+  const moduleName = identifier.split("/")[0].replace("`", "");
+  const describer = identifier.split("/")[1].slice(0, -1);
+
+  let type = "module";
+
+  if (describer.indexOf("#") >= 0) {
+    type = "class";
+
+    if (describer.indexOf("(") >= 0) {
+      type = "method";
+    }
+  } else if (describer.indexOf("(") >= 0) {
+    type = "function";
+  }
+
+  return {
+    moduleName,
+    language,
+    type,
+    name: describer,
+    scipIndexer,
+    packageName,
+  };
+};

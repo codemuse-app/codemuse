@@ -1,43 +1,15 @@
+import * as React from "react";
+import { VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
+
 import { RouterType } from "../../extension/router";
 import { createClient } from "../../shared/vrpc/client";
 import { ProgressBar } from "../components/progressBar";
-import * as React from "react";
-import { VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
+import { getSymbolName } from "../../shared/utils";
 
 import "./search.scss";
 
 const vscode = acquireVsCodeApi();
 const client = createClient<RouterType>(vscode);
-
-const getSymbolName = (symbol: string) => {
-  const [scipIndexer, language, packageName, _version, identifier] =
-    symbol.split(" ");
-
-  console.log(symbol);
-  console.log(symbol.split(" "));
-
-  const moduleName = identifier.split("/")[0].replace("`", "");
-  const describer = identifier.split("/")[1].slice(0, -1);
-
-  let type = "module";
-
-  if (describer.indexOf("#") >= 0) {
-    type = "class";
-
-    if (describer.indexOf("(") >= 0) {
-      type = "method";
-    }
-  } else if (describer.indexOf("(") >= 0) {
-    type = "function";
-  }
-
-  return {
-    moduleName,
-    language,
-    type,
-    name: describer,
-  };
-};
 
 const getResultColors = (score: number) => {
   if (score > 0.4) {
