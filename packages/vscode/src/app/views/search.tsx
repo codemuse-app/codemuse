@@ -12,7 +12,10 @@ const getSymbolName = (symbol: string) => {
   const [scipIndexer, language, packageName, _version, identifier] =
     symbol.split(" ");
 
-  const moduleName = identifier.split("`")[1].split("`")[0];
+  console.log(symbol);
+  console.log(symbol.split(" "));
+
+  const moduleName = identifier.split("/")[0].replace("`", "");
   const describer = identifier.split("/")[1].slice(0, -1);
 
   let type = "module";
