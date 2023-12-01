@@ -104,6 +104,7 @@
     "sass": "^1.69.5",
     "sass-loader": "^13.3.2",
     "style-loader": "^3.3.3",
+    "uuid": "^9.0.1",
     "vectra": "^0.4.4"
   },
   "vsce": {
