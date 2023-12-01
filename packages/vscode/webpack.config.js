@@ -35,7 +35,7 @@ const extensionConfig = {
     sentryWebpackPlugin({
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "codemuse",
-      project: "extension",
+      project: "vscode",
     })
   ],
   module: {
@@ -79,7 +79,7 @@ const frontendConfig = {
     CI && sentryWebpackPlugin({
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "codemuse",
-      project: "extension",
+      project: "vscode",
     }),
   ],
   resolve: {
