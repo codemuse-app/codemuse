@@ -4,6 +4,7 @@ import { Status } from "./status";
 import { Index } from "./service/index";
 import { SearchViewProvider } from "./views/search";
 import { getInstallationId } from "./track";
+import { CodeMuseCodeLens } from "./codelense";
 
 export const activate = async (context: vscode.ExtensionContext) => {
   getInstallationId(context);
@@ -39,6 +40,15 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.commands.registerCommand("codemuse.openSidebar", () => {
       searchViewProvider.show();
     })
+  );
+
+  // Attach the CodeLens provider
+  let selector: vscode.DocumentSelector = {
+    scheme: "file",
+    language: "python",
+  };
+  context.subscriptions.push(
+    vscode.languages.registerCodeLensProvider(selector, new CodeMuseCodeLens())
   );
 
   // Run the index command on startup
