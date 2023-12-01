@@ -1,4 +1,4 @@
-name: Deployment
+name: Deploy to Modal
 
 on:
   push:
