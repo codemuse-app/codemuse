@@ -56,7 +56,7 @@ export const getSymbolName = (symbol: string) => {
   } else if (describer.indexOf("(") >= 0) {
     type = "function";
   }
-
+  
   return {
     moduleName,
     language,

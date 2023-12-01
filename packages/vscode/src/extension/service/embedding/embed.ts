@@ -78,17 +78,14 @@ export class VectraManager {
 
   // Delete items with the given node ID
   async deleteItem(id: string) {
-    await this.index.beginUpdate();
     try {
       // Filter items by metadata to find the item with the matching ID
       const itemsToDelete = await this.index.listItemsByMetadata({ id });
       for (const item of itemsToDelete) {
         await this.index.deleteItem(item.id); // Delete the item
       }
-      await this.index.endUpdate();
     } catch (error) {
       console.error(`Error deleting item with ID ${id}:`, error);
-      this.index.cancelUpdate();
       throw error;
     }
   }
