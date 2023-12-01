@@ -3,7 +3,7 @@
   "displayName": "CodeMuse",
   "description": "AI onboarding and peer programming.",
   "icon": "media/icon.png",
-  "version": "0.2.0",
+  "version": "0.6.0",
   "publisher": "codemuse-app",
   "engines": {
     "vscode": "^1.84.0"
@@ -56,7 +56,7 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "test": "rm -rf .vscode-test/user-data && vscode-test",
     "package": "vsce package --allow-missing-repository --no-dependencies --allow-star-activation --skip-license",
-    "publish": "vsce publish minor --allow-missing-repository --no-dependencies --skip-license && npx @sentry/wizard@latest -i sourcemaps",
+    "publish": "vsce publish minor --allow-missing-repository --no-dependencies --skip-license",
     "selfinstall": "npm run package && code --install-extension vscode-0.0.0.vsix --force"
   },
   "devDependencies": {
@@ -85,6 +85,7 @@
     "@sentry/node": "^7.84.0",
     "@sentry/profiling-node": "^1.2.6",
     "@sentry/react": "^7.84.0",
+    "@sentry/webpack-plugin": "^2.10.2",
     "@sourcegraph/scip-python": "^0.6.0",
     "@sourcegraph/scip-typescript": "^0.3.9",
     "@types/vscode-webview": "^1.57.4",

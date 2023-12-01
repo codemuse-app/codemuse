@@ -4,6 +4,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const { sentryWebpackPlugin } = require("@sentry/webpack-plugin");
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -28,6 +29,13 @@ const extensionConfig = {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
     extensions: ['.ts', '.js']
   },
+  plugins: [
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "codemuse",
+      project: "extension",
+    }),
+  ],
   module: {
     rules: [
       {
@@ -65,6 +73,11 @@ const frontendConfig = {
   plugins: [
     new webpack.ProvidePlugin({
       process: 'process/browser',
+    }),
+    sentryWebpackPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "codemuse",
+      project: "extension",
     }),
   ],
   resolve: {
