@@ -10,7 +10,7 @@ import {
   SupportedLanguage,
 } from "./types";
 import { scip } from "../scip";
-import { hashNode } from "./utils_graph";
+import { hashContent, hashNode } from "./utils_graph";
 
 export const buildGraph = async (
   cwd: string,
@@ -72,6 +72,8 @@ export const buildGraph = async (
       content: fileLines.join("\n"),
     });
 
+    const fileHash = hashContent(fileLines.join("\n"));
+
     for (const occurrence of document.occurrences) {
       if (occurrence.enclosing_range.length > 0) {
         documentRanges.push({
@@ -125,6 +127,7 @@ export const buildGraph = async (
         content: range.content,
         file: join(cwd, document.relative_path),
         language,
+        fileHash: fileHash,
       };
 
       graph.mergeNode(range.symbol, {

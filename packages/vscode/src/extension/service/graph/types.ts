@@ -14,6 +14,7 @@ export interface LocalGraphNode extends BasicGraphNode {
   range: Range;
   content: string;
   hash: string; // Hash of the content + outbouds links
+  fileHash: string;
 }
 
 export interface ResultGraphNode extends Omit<LocalGraphNode, "hash"> {
