@@ -35,13 +35,7 @@ jobs:
         run: npm run publish
         working-directory: packages/vscode
 
-      - name: Commit version bump
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email ""
-          git add .
-
-          if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "chore: bump version"
-            git push
-          fi
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: Bumps the package.json version
+          default_author: github_actions
