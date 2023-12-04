@@ -56,15 +56,6 @@ export function getIndentationAtLine(line: string): string {
  *                   omitted, the entire file content is returned.
  * @returns A string containing either the entire file content or the content 
  *          within the specified line range.
- * 
- * @example
- * // Assume 'example.txt' contains:
- * // Line 1
- * // Line 2
- * // Line 3
- * // Line 4
- * // returns 'Line 2\nLine 3\n'
- * getContentInFile('example.txt', [2, 4]);
  */
 export function getContentInFile(filePath: string, position?: [number, number]): string {
     const content:string = readFileSync(filePath, 'utf-8');
@@ -72,11 +63,10 @@ export function getContentInFile(filePath: string, position?: [number, number]):
         return content;
     }
     const lines:string[] = content.split('\n')
-    const preSubLines:string[] = lines.slice(position[0] - 1, position[1])
+
+    const preSubLines:string[] = lines.slice(position[0], position[1]+1)
     const lastString:string = preSubLines[preSubLines.length - 1];
     const lastChar:string = lastString[lastString.length -1]
-    console.log(lastChar)
-    console.log("lastChar")
     const subLines = lastChar != "\n" ? preSubLines.concat([""]) : preSubLines ;
     return subLines.join('\n');
 }

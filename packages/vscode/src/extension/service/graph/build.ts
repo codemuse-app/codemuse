@@ -175,7 +175,7 @@ export const buildGraph = async (
       graph.mergeNode(occurrence.symbol, {
         symbol: occurrence.symbol,
         language,
-      } satisfies GraphNode);
+      });
       graph.addDirectedEdge(parentSymbol, occurrence.symbol, {
         type: "uses",
         at: formatRange(occurrence.range),

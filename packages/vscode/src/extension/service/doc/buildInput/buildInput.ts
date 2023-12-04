@@ -25,20 +25,19 @@ import { getClosestUpcomingCodeLine, getContentInFile, getIndentationAtLine, rem
  * - The function relies on `getClosestUpcomingCodeLine`, assumed to be defined elsewhere,
  *   to find the closest upcoming non-empty line for indentation calculation.
  */
-export function getComponentBodyAndIndentation(componentType:string, code: string): [string, string] {
+export function getComponentBodyAndIndentation(code: string): [string, string] {
     const lines = code.split('\n');
-    
+
+    function matchesAnyType(str:string, patterns:RegExp[]) {
+        return patterns.some(regex => regex.test(str));
+    }
+    const types = [/^class\s/, /^def\s/]
+
     for (let index = 0; index < lines.length; index++) {  // JavaScript arrays are 0-indexed
         const line = lines[index].trim();
         // Using a regular expression to match class definition
-        let match = false;
-        if(componentType == "Class" ){
-            match = /^class\s/.test(line);
-        }else if(componentType == "Function"){
-            match = /^function\s/.test(line);
-        }else if(componentType == "Module"){
-            return [code, ""]
-        }
+
+        let match = matchesAnyType(line, types);
 
         if (match) {
             // Assuming getClosestUpcomingCodeLine is defined elsewhere and returns a tuple [number, string]
@@ -53,7 +52,7 @@ export function getComponentBodyAndIndentation(componentType:string, code: strin
         }
     }
 
-    return ["", ""];  // Return [null, null] if no matching class definition is found
+    return [code, ""];  // Return [null, null] if no matching class definition is found
 }
 
 /**
@@ -81,21 +80,21 @@ export function getComponentBodyAndIndentation(componentType:string, code: strin
  *  let newCode = replaceCodeByDocumentation(filePath, originalCode, locationsAndDocs);
  *  // newCode now contains the originalCode with the specified section replaced by the documentation.
  */
-export function replaceCodeByDocumentation(filePath:string, code: string, locationsAndDocumentations: [[number,number,string]]): string { // note that indexes in locationsAndDocumentations start at 1, first line is 1 not, zero
+export function replaceCodeByDocumentation(filePath:string, code: string, locationsAndDocumentations: [number,number,string | undefined][]): string { // note that indexes in locationsAndDocumentations start at 1, first line is 1 not, zero
 
     let newContent = code
 
     for (let i = 0; i < locationsAndDocumentations.length ; i++){
 
         let contentToRemove:string = getContentInFile(filePath, [locationsAndDocumentations[i][0],locationsAndDocumentations[i][1]])
-        console.log(contentToRemove)
-        console.log("contentToRemove")
         let indentation:string = getIndentationAtLine(getClosestUpcomingCodeLine(0,contentToRemove.split("\n"))[1])
          
         let documentation = locationsAndDocumentations[i][2]
 
         if(documentation && documentation !== ""){
-          
+            console.log(JSON.stringify(contentToRemove))
+            console.log(JSON.stringify(newContent))
+            console.log(newContent.includes(contentToRemove))
             newContent = newContent.replace(contentToRemove, indentation+'"""'+documentation+'"""\n'+indentation+'pass\n')
 
         }
@@ -119,7 +118,7 @@ export function replaceCodeByDocumentation(filePath:string, code: string, locati
  * @returns {Map<number, Array<[string, string]>>} A map where each key is a line index and the value is an array
  *          of documentation entries (component name and documentation string) to be inserted at that line.
  */
-function groupDocumentationsByLineIndex(set:Set<[number,string, string]>):Map<number,Array<[string, string]>> {
+function groupDocumentationsByLineIndex(set:Set<[number,string, string  | undefined]>):Map<number,Array<[string, string]>> {
     const groupedMap = new Map();
 
     set.forEach(([index, componentName, documentation]) => {
@@ -141,13 +140,13 @@ function groupDocumentationsByLineIndex(set:Set<[number,string, string]>):Map<nu
  * 
  * @param {string} code - The original code string where documentation comments are to be inserted.
  * @param {string} filePath - The file path for the code, used to reference specific lines and content.
- * @param {Set<[number, string, string]>} locationsAndDocumentations - A set of tuples. Each tuple contains
+ * @param {Set<[number, string, string | undefined]>} locationsAndDocumentations - A set of tuples. Each tuple contains
  *        a line number, a component name, and a documentation string, specifying where and what documentation
  *        should be inserted.
  * 
  * @returns {string} The new code string with inserted documentation comments.
  */
-export function insertDocumentationInCode(code: string, filePath:string, locationsAndDocumentations: Set<[number,string, string]>): string{
+export function insertDocumentationInCode(code: string, filePath:string, locationsAndDocumentations: Set<[number,string, string | undefined]>): string{
 
     let alreadyInserted = new Set<[string,string]>([])
     let newCode = code

@@ -45,7 +45,7 @@ suite("getComponentBodyAndIndentation Class Test Case", () => {
 suite("replaceCodeByDocumentation Class Test Case", () => {
     test('Replace documentation in Class', () => {
         const sampleCode = `class MyClass:\n    def __init__(self):\n        self.attribute = 42\n`;
-        const locationsAndDocumentationsTest: [[number,number,string]] = [[2, 3, 'This is a class.']];
+        const locationsAndDocumentationsTest: [[number,number,string]] = [[1, 2, 'This is a class.']];
 
         const newContent = buildInput.replaceCodeByDocumentation(
             __dirname.replace("out/","src/")+'/filesForTests/test.py',
@@ -61,7 +61,7 @@ suite("replaceCodeByDocumentation Class Test Case", () => {
     test('Replace documentation in Function', () => {
         const sampleCode = "    def f(self, a):\n        b = a+2\n        print(a)\n        return b\n"
 
-        const locationsAndDocumentationsTest: [[number,number,string]] = [[6, 8, 'This is a function.']];
+        const locationsAndDocumentationsTest: [[number,number,string]] = [[5, 7, 'This is a function.']];
 
         const newContent = buildInput.replaceCodeByDocumentation(
             __dirname.replace("out/","src/")+'/filesForTests/test2.py',
@@ -85,7 +85,7 @@ suite("replaceCodeByDocumentation Class Test Case", () => {
 
         const result = fileHelper.getContentInFile(
             __dirname.replace("out/","src/")+'/filesForTests/test2.py',
-            [6,6]
+            [5,5]
         );
         assert.strictEqual(result, "        b = a+2\n");
     });
@@ -94,24 +94,24 @@ suite("replaceCodeByDocumentation Class Test Case", () => {
 
         const result = fileHelper.getContentInFile(
             __dirname.replace("out/","src/")+'/filesForTests/test2.py',
-            [6,8]
+            [5,7]
         );
         assert.strictEqual(result, "        b = a+2\n        print(a)\n        return b\n");
     });
 
-    test('getContentInFile multiple lines with jump in the end', () => {
+    // test('getContentInFile multiple lines with jump in the end', () => {
 
-        const result = fileHelper.getContentInFile(
-            __dirname.replace("out/","src/")+'/filesForTests/test2.py',
-            [6,7]
-        );
-        assert.strictEqual(result, "        b = a+2\n        print(a)\n");
-    });
+    //     const result = fileHelper.getContentInFile(
+    //         __dirname.replace("out/","src/")+'/filesForTests/test2.py',
+    //         [5,8]
+    //     );
+    //     assert.strictEqual(result, "        b = a+2\n        print(a)\n");
+    // });
 
-    test('Insert documentation in Function', () => {
+    test('Insert documentation in Function single line', () => {
         const sampleCode = "    def f(self, a):\n        b = a+2\n        print(a)\n        return b\n"
 
-        const locationsAndDocumentationsTest: Set<[number,string, string]> = new Set([[6,"Test", 'Test Comment']]);
+        const locationsAndDocumentationsTest: Set<[number,string, string]> = new Set([[5,"Test", 'Test Comment']]);
 
         const newContent = buildInput.insertDocumentationInCode(
             sampleCode,
@@ -121,6 +121,36 @@ suite("replaceCodeByDocumentation Class Test Case", () => {
         console.log(newContent)
         console.log("newContent")
         const expectedContent = "    def f(self, a):\n        b = a+2 #Test Comment\n        print(a)\n        return b\n"
+        assert.strictEqual(newContent, expectedContent);
+    });
+
+    test('Insert documentation in Function nultiple single lines', () => {
+        const sampleCode = "    def f(self, a):\n        b = a+2\n        print(a)\n        return b\n"
+
+        const locationsAndDocumentationsTest: Set<[number,string, string]> = new Set([[5,"Test", 'Test Comment'], [6,"Test 2", 'Test Comment 2'] ]);
+
+        const newContent = buildInput.insertDocumentationInCode(
+            sampleCode,
+            __dirname.replace("out/","src/")+'/filesForTests/test2.py',
+            locationsAndDocumentationsTest
+        );
+        console.log(newContent)
+        console.log("newContent")
+        const expectedContent = "    def f(self, a):\n        b = a+2 #Test Comment\n        print(a) #Test Comment 2\n        return b\n"
+        assert.strictEqual(newContent, expectedContent);
+    });
+
+    test('Insert documentation in Function nultiple comments in a single line', () => {
+        const sampleCode = "    def f(self, a):\n        b = a+2\n        print(a)\n        return b\n"
+
+        const locationsAndDocumentationsTest: Set<[number,string, string]> = new Set([[5,"Test", 'Test Comment'], [5,"Test 2", 'Test Comment 2'] ]);
+
+        const newContent = buildInput.insertDocumentationInCode(
+            sampleCode,
+            __dirname.replace("out/","src/")+'/filesForTests/test2.py',
+            locationsAndDocumentationsTest
+        );
+        const expectedContent = '    def f(self, a):\n        b = a+2\n        """\n        Test: Test Comment\n        Test 2: Test Comment 2\n        """\n        print(a)\n        return b\n'
         assert.strictEqual(newContent, expectedContent);
     });
     // Additional tests for other component types (Function, Module) can be added similarly

@@ -14,14 +14,16 @@ export interface LocalGraphNode extends BasicGraphNode {
   range: Range;
   content: string;
   hash: string; // Hash of the content + outbouds links
-  fileHash: string;
+  fileHash?: string;
+  processedContent?:string;
+  documentation?:string;
 }
 
 export interface ResultGraphNode extends Omit<LocalGraphNode, "hash"> {
   score: number;
 }
 
-export type GraphNode = ExternalGraphNode | LocalGraphNode;
+export type GraphNode = LocalGraphNode | LocalGraphNode;
 
 export interface GraphEdge {
   type: "uses" | "defines";
