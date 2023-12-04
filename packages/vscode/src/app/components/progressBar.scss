@@ -1,10 +1,11 @@
 .progress-bar {
   background-color: var(--vscode-progressBar-background);
-  display: none;
+  display: block;
   position: absolute;
   left: 0;
   width: 2%;
   height: 2px;
+  opacity: 0;
 }
 
 .progress-bar {
@@ -16,7 +17,7 @@
 }
 
 .progress-bar.loading {
-  display: block;
+  opacity: 1;
 }
 
 @keyframes progress {
