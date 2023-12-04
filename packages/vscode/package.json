@@ -3,7 +3,7 @@
   "displayName": "CodeMuse",
   "description": "AI onboarding and peer programming.",
   "icon": "media/icon.png",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "publisher": "codemuse-app",
   "engines": {
     "vscode": "^1.84.0"
