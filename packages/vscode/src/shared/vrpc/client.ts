@@ -8,10 +8,10 @@ type ClientRouter<T extends Router> = {
   [K in keyof T]: T[K] extends (...args: infer P) => infer R
     ? (...args: P) => Promise<R>
     : T[K] extends Router
-    ? ClientRouter<T[K]>
-    : T[K] extends { subscribe: (f: infer P) => void }
-    ? T[K]
-    : never;
+      ? ClientRouter<T[K]>
+      : T[K] extends { subscribe: (f: infer P) => void }
+        ? T[K]
+        : never;
 } & {
   ready: () => Promise<void>;
 };
@@ -40,8 +40,6 @@ export const createClient = <T extends Router>(
     if (!registry[registryId]) {
       return;
     }
-
-    console.log("Resolving");
 
     // Resolve the promise
     registry[registryId].resolve(message.data.value);

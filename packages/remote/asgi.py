@@ -17,8 +17,8 @@ sentry_sdk.init(
 )
 
 class ExtensionRequest(BaseModel):
-    # VSCode extension installation ID
-    installationId: str
+    # VSCode extension machine ID
+    machineId: str
 
 class EmbeddingRequest(ExtensionRequest):
     code: str
@@ -37,7 +37,7 @@ async def embedding(request: Request):
     embedding_request = EmbeddingRequest(**body)
 
     # Set the sentry user to the installation ID
-    sentry_sdk.set_user({"id": embedding_request.installationId})
+    sentry_sdk.set_user({"id": embedding_request.machineId})
 
     # Call the function
     embedding = generate_embedding.remote(embedding_request.code)
@@ -62,7 +62,7 @@ async def documentation(request: Request):
     documentation_request = DocumentationRequest(**body)
 
     # Set the sentry user to the installation ID
-    sentry_sdk.set_user({"id": documentation_request.installationId})
+    sentry_sdk.set_user({"id": documentation_request.machineId})
 
     # Call the function
     documentation = ''

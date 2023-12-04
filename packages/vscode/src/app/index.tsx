@@ -21,14 +21,14 @@ Sentry.init({
   replaysOnErrorSampleRate: 1.0,
 });
 
-// use window.installationId as user id for sentry
+// use window.machineId as user id for sentry
 declare global {
   interface Window {
-    installationId: string;
+    machineId: string;
   }
 }
 
-Sentry.setUser({ id: window.installationId });
+Sentry.setUser({ id: window.machineId });
 
 try {
   const root = document.getElementById("root-search");
