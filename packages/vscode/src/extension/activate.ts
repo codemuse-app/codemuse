@@ -4,8 +4,11 @@ import { Status } from "./status";
 import { Index } from "./service/index";
 import { SearchViewProvider } from "./views/search";
 import { CodeMuseCodeLens } from "./codelense";
+import { telemetryLogger } from "./service/logging";
 
 export const activate = async (context: vscode.ExtensionContext) => {
+  context.subscriptions.push(telemetryLogger);
+
   Index.initialize(context);
 
   Status.getInstance();

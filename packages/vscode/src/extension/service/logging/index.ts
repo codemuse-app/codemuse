@@ -35,4 +35,5 @@ const telemetrySender: vscode.TelemetrySender = {
   },
 };
 
-vscode.env.createTelemetryLogger(telemetrySender);
+export const telemetryLogger =
+  vscode.env.createTelemetryLogger(telemetrySender);
