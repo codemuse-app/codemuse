@@ -279,8 +279,8 @@ export class Index {
       }
     );
 
-    runSpan.finish();
+    runSpan?.finish();
 
-    transaction.finish();
+    transaction?.finish();
   }
 }
