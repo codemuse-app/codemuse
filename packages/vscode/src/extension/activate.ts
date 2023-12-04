@@ -21,18 +21,16 @@ Sentry.init({
   tracePropagationTargets: ["codemuse-app--api-asgi.modal.run"],
 });
 
-Sentry.setUser({
-  id: vscode.env.machineId,
-});
-
 export const activate = async (context: vscode.ExtensionContext) => {
+  Sentry.setUser({
+    id: vscode.env.machineId,
+  });
+
   //context.subscriptions.push(telemetryLogger);
   const transaction = Sentry.startTransaction({
     name: "activate",
     op: "function",
   });
-
-  capture("activate");
 
   Index.initialize(context);
 
@@ -98,6 +96,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   // Run the index command on startup
   vscode.commands.executeCommand("codemuse.index");
 
+  capture("activate");
   transaction.finish();
 };
 
