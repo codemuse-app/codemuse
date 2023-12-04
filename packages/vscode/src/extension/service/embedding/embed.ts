@@ -1,5 +1,7 @@
 import { LocalIndex } from "vectra/src/LocalIndex";
 import * as vscode from "vscode";
+import * as Sentry from "@sentry/node";
+import { apiFetch } from "../../utils/fetch";
 
 const TOPK = 10; // Top K results to return
 
@@ -32,7 +34,7 @@ export class VectraManager {
 
     while (retries < maxRetries) {
       try {
-        const response = await fetch(
+        const response = await apiFetch(
           "https://codemuse-app--api-asgi.modal.run/embedding",
           {
             method: "POST",
