@@ -2,7 +2,6 @@ import path = require("path");
 import fetch from "node-fetch";
 import { LocalIndex } from "vectra/src/LocalIndex";
 import * as vscode from "vscode";
-import { getInstallationId } from "../../track";
 
 const TOPK = 10; // Top K results to return
 
@@ -43,7 +42,7 @@ export class VectraManager {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              installationId: getInstallationId(this.context),
+              machineId: vscode.env.machineId,
               code: text,
             }), // Ensure this matches the expected format
           }

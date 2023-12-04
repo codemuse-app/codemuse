@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { serve } from "../../shared/vrpc/server";
 import { router } from "../router";
-import { getInstallationId } from "../track";
 
 export class GenericViewProvider implements vscode.WebviewViewProvider {
   private context: vscode.ExtensionContext;
@@ -47,7 +46,7 @@ export class GenericViewProvider implements vscode.WebviewViewProvider {
         </head>
         <body>
           <script>
-            window.installationId = "${getInstallationId(this.context)}";
+            window.machineId = "${vscode.env.machineId}";
           </script>
           <div id="root-${this.viewId}"></div>
           <script src="${scriptHref}"></script>
