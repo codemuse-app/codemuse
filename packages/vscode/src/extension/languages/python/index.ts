@@ -4,6 +4,7 @@ import { resolve } from "path";
 import { promisify } from "util";
 import { execSync } from "child_process";
 import * as path from "path";
+import * as Sentry from "@sentry/browser";
 
 import { LanguageProvider } from "../provider";
 import { writeFile } from "fs";
@@ -71,6 +72,11 @@ export class Python extends LanguageProvider {
   languageId = "python" as const;
 
   private async getPythonPath(cwd: string) {
+    const getPythonSpan = Sentry.getActiveSpan()?.startChild({
+      op: "function",
+      name: "getPythonPath",
+    });
+
     // Detect the presence of the python extension, if it is installed use its global python path (for the workspace)
 
     let pythonExtension;
@@ -90,6 +96,7 @@ export class Python extends LanguageProvider {
           );
 
         if (pythonPath?.execCommand?.length > 0) {
+          getPythonSpan?.finish();
           return pythonPath.execCommand[0];
         }
       } catch (e) {
@@ -113,7 +120,7 @@ export class Python extends LanguageProvider {
           .trim()
           .replace("\n", "");
 
-        console.log(pythonPath);
+        getPythonSpan?.finish();
 
         return pythonPath;
       }
@@ -133,6 +140,8 @@ export class Python extends LanguageProvider {
           cwd,
         }).trim();
 
+        getPythonSpan?.finish();
+
         return pythonPath;
       }
     } catch (e) {}
@@ -142,6 +151,8 @@ export class Python extends LanguageProvider {
         encoding: "utf-8",
         cwd,
       }).trim();
+
+      getPythonSpan?.finish();
 
       return pythonPath;
     } catch (e) {}
@@ -153,14 +164,23 @@ export class Python extends LanguageProvider {
         cwd,
       }).trim();
 
+      getPythonSpan?.finish();
+
       return pythonPath;
     } catch (e) {}
+
+    getPythonSpan?.finish();
 
     // If python is not installed, throw an error
     throw new Error("Python is not installed");
   }
 
   private async createEnvironment(cwd: string) {
+    const createEnvironmentSpan = Sentry.getActiveSpan()?.startChild({
+      op: "function",
+      name: "createEnvironment",
+    });
+
     const pythonPath = await this.getPythonPath(cwd);
 
     const packageList = await execFileAsync(
@@ -211,6 +231,8 @@ export class Python extends LanguageProvider {
     const storagePath = this.getStoragePath(cwd) + "/environment.json";
 
     await writeFileAsync(storagePath, JSON.stringify(files));
+
+    createEnvironmentSpan?.finish();
 
     return storagePath;
   }

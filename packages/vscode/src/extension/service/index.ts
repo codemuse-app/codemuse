@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as Sentry from "@sentry/node";
 
 import * as Languages from "../languages";
 import { Status } from "../status";
@@ -13,8 +14,6 @@ import {
 } from "./graph/utils_graph";
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
-import path = require("path");
-import * as fs from "fs";
 import { MultiDirectedGraph } from "graphology";
 import { batch } from "../../shared/utils";
 
@@ -87,7 +86,14 @@ export class Index {
   }
 
   async run() {
+    const transaction = Sentry.getActiveTransaction();
+
     const instance = Index.getInstance();
+
+    const runSpan = transaction?.startChild({
+      op: "function",
+      name: "run",
+    });
 
     // Show a notification with progress bar
     await vscode.window.withProgress(
@@ -99,27 +105,72 @@ export class Index {
       async (progress) => {
         for (const workspace of vscode.workspace.workspaceFolders!) {
           //TODO: how to handle multiple languages??
+          const workspaceSpan = runSpan?.startChild({
+            op: "function",
+            name: "workspace",
+          });
+
           for (const language of instance.languages) {
+            const languageSpan = workspaceSpan?.startChild({
+              op: "function",
+              name: "language",
+              data: {
+                language: language.languageId,
+              },
+            });
+
             const done = Status.getInstance().loading(
               `indexing ${language.languageId}`
             );
 
-            if (await language.detect()) {
+            const languageDetectionSpan = languageSpan?.startChild({
+              op: "function",
+              name: "language detection",
+            });
+
+            const isLanguagePresent = await language.detect();
+
+            languageDetectionSpan?.finish();
+
+            if (isLanguagePresent) {
               progress.report({
                 message: `indexing ${language.languageId}`,
               });
 
+              const languageRunSpan = languageSpan?.startChild({
+                op: "function",
+                name: "scip indexing",
+                data: {
+                  language: language.languageId,
+                },
+              });
+
               const scipPath = await language.run(workspace.uri.fsPath);
 
+              languageRunSpan?.finish();
+
               // const originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
+
+              const buildGraphSpan = languageSpan?.startChild({
+                op: "function",
+                name: "buildGraph",
+              });
+
               instance.originalGraph = await buildGraph(
                 workspace.uri.fsPath,
                 scipPath,
                 language.languageId
               );
 
+              buildGraphSpan?.finish();
+
               progress.report({
                 message: `parsing ${language.languageId} graph`,
+              });
+
+              const flattenGraphSpan = languageSpan?.startChild({
+                op: "function",
+                name: "flattenGraph",
               });
 
               // check the number of cycles in the original graph
@@ -137,12 +188,18 @@ export class Index {
               );
               instance.flattenedGraph = newFlattenedGraph; // Update the flattened graph
 
+              flattenGraphSpan?.finish();
+
               // Update the Vectra index
               await this.vectraManager.refreshIndex();
               const allNodesToUpdate = addedNodes.concat(updatedNodes);
 
               progress.report({
                 message: "getting embeddings",
+              });
+
+              const embeddingsSpan = languageSpan?.startChild({
+                name: "get embeddings",
               });
 
               await batch(
@@ -171,6 +228,8 @@ export class Index {
                   await this.vectraManager.endUpdate();
                 }
               );
+
+              embeddingsSpan?.finish();
 
               await this.vectraManager.beginUpdate();
 
@@ -209,10 +268,19 @@ export class Index {
                 this.context
               );
             }
+
+            languageSpan?.finish();
+
             done();
           }
+
+          workspaceSpan?.finish();
         }
       }
     );
+
+    runSpan.finish();
+
+    transaction.finish();
   }
 }
