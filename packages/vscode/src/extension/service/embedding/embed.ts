@@ -1,6 +1,5 @@
 import { LocalIndex } from "vectra/src/LocalIndex";
 import * as vscode from "vscode";
-import * as Sentry from "@sentry/node";
 import { apiFetch } from "../../utils/fetch";
 
 const TOPK = 10; // Top K results to return
