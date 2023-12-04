@@ -83,7 +83,7 @@ async def trigger_error():
     division_by_zero = 1 / 0
 
 
-@stub.function(image=image, allow_concurrent_inputs=100, concurrency_limit=100)
+@stub.function(image=image, allow_concurrent_inputs=100, concurrency_limit=100, keep_warm=1)
 @asgi_app()
 def asgi():
     return web_app
