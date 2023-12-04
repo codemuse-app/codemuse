@@ -8,7 +8,6 @@ suite("getComponentBodyAndIndentation Class Test Case", () => {
     const sampleCode = `a = 1\n\nclass MyClass:\n    self.att = "test\n    def f():\n        pass`;
 
     const [body, indentation] = buildInput.getComponentBodyAndIndentation(
-      "Class",
       sampleCode
     );
 
@@ -25,7 +24,6 @@ suite("getComponentBodyAndIndentation Class Test Case", () => {
     const sampleCode = `let a = 1;\n\nfunction myFunction() {\n    let b = 2;\n    return a + b;\n}`;
 
     const [body, indentation] = buildInput.getComponentBodyAndIndentation(
-      "Function",
       sampleCode
     );
 
