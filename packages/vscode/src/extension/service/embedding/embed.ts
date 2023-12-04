@@ -1,5 +1,3 @@
-import path = require("path");
-import fetch from "node-fetch";
 import { LocalIndex } from "vectra/src/LocalIndex";
 import * as vscode from "vscode";
 
