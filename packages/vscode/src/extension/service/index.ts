@@ -137,17 +137,17 @@ export class Index {
                 message: `indexing ${language.languageId}`,
               });
 
-              const languageRunSpan = languageSpan?.startChild({
-                op: "function",
-                name: "scip indexing",
-                data: {
-                  language: language.languageId,
+              const scipPath = await Sentry.startSpan(
+                {
+                  parentSpanId: languageSpan?.spanId,
+                  name: "scip indexing",
+                  op: "function",
                 },
-              });
-
-              const scipPath = await language.run(workspace.uri.fsPath);
-
-              languageRunSpan?.finish();
+                () => {
+                  Sentry.getActiveSpan()!.parentSpanId = languageSpan?.spanId;
+                  return language.run(workspace.uri.fsPath);
+                }
+              );
 
               // const originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
 
