@@ -18,6 +18,13 @@ def download_model_to_folder():
         token=os.environ["HUGGINGFACE_TOKEN"],
     )
 
+def model_init():
+    from vllm.engine.arg_utils import AsyncEngineArgs
+    from vllm.engine.async_llm_engine import AsyncLLMEngine
+
+    engine_args = AsyncEngineArgs(model=MODEL_DIR, gpu_memory_utilization=0.95)
+    return AsyncLLMEngine.from_engine_args(engine_args)
+
 image = (
     Image.from_registry(
         "nvcr.io/nvidia/pytorch:23.10-py3"
@@ -37,6 +44,7 @@ image = (
         secret=Secret.from_name("huggingface"),
         timeout=60 * 20,
     )
+    .run_function(model_init)
 )
 
 stub = Stub("documentation", image=image)
@@ -44,11 +52,7 @@ stub = Stub("documentation", image=image)
 @stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), allow_concurrent_inputs=30, container_idle_timeout=30)
 class Model:
     def __enter__(self):
-        from vllm.engine.arg_utils import AsyncEngineArgs
-        from vllm.engine.async_llm_engine import AsyncLLMEngine
-
-        engine_args = AsyncEngineArgs(model=MODEL_DIR, gpu_memory_utilization=0.95)
-        self.llm = AsyncLLMEngine.from_engine_args(engine_args)
+        self.llm = model_init()
         self.template = """<s>[INST] <<SYS>>
 {system}
 <</SYS>>
