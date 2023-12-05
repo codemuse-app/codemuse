@@ -6,6 +6,8 @@ from pydantic import BaseModel
 
 from modal import Image, Stub, asgi_app, Function
 
+from utils import get_sentry_trace_headers
+
 image = Image.debian_slim().pip_install(["sentry-sdk[fastapi]==1.38.0", "pydantic==2.5.2"])
 
 sentry_sdk.init(
@@ -59,7 +61,7 @@ class Api:
             sentry_sdk.set_user({"id": embedding_request.machineId})
 
             # Call the function
-            embedding = await api_functions["generate_embedding"].remote.aio(embedding_request.code)
+            embedding = await api_functions["generate_embedding"].remote.aio(embedding_request.code, get_sentry_trace_headers())
 
             # Return the response
             return EmbeddingResponse(embedding=embedding)

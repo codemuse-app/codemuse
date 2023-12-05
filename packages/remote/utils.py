@@ -18,8 +18,11 @@ sentry_sdk.init(
 
 def with_sentry(fn):
     @functools.wraps(fn)
-    async def fn_wrapped(*args, **kwargs):
+    async def fn_wrapped(*args, sentry_trace_headers: dict = None, **kwargs):
         try:
+            if sentry_trace_headers:
+                sentry_sdk.continue_trace(sentry_trace_headers)
+
             with sentry_sdk.start_transaction(op="function", name=fn.__name__):
                 await fn(*args, **kwargs)
         except Exception as exc:
@@ -27,3 +30,10 @@ def with_sentry(fn):
             raise exc
 
     return fn_wrapped
+
+def get_sentry_trace_headers():
+    headers = {}
+    headers["sentry-trace"] = sentry_sdk.get_traceparent()
+    headers["baggage"] = sentry_sdk.get_baggage()
+
+    return headers
