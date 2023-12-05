@@ -12,42 +12,45 @@ sentry_sdk.init(
     profiles_sample_rate=1.0,
     enable_tracing=True
 )
+
 def with_sentry(fn):
     @functools.wraps(fn)
-    async def fn_wrapped(*args, sentry_trace_headers: dict = None, **kwargs):
+    async def fn_wrapped(*args, **kwargs):
+        # Extract the sentry_trace_headers from kwargs, if it exists
+        sentry_trace_headers = kwargs.pop('sentry_trace_headers', None)
+
         try:
             if sentry_trace_headers:
                 sentry_sdk.continue_trace(sentry_trace_headers)
 
             with sentry_sdk.start_transaction(op="function", name=fn.__name__):
-                await fn(*args, **kwargs)
+                # Call the function without the sentry_trace_headers argument
+                return await fn(*args, **kwargs)
         except Exception as exc:
             sentry_sdk.capture_exception(exc)
             raise exc
 
-    def wrapper(*args, **kwargs):
-        return fn_wrapped(*args, **kwargs)
-
-    return wrapper
+    return fn_wrapped
 
 def with_sentry_generator(fn):
     @functools.wraps(fn)
-    async def fn_wrapped(*args, sentry_trace_headers: dict = None, **kwargs):
+    async def fn_wrapped(*args, **kwargs):
+        # Extract the sentry_trace_headers from kwargs, if it exists
+        sentry_trace_headers = kwargs.pop('sentry_trace_headers', None)
+
         try:
             if sentry_trace_headers:
                 sentry_sdk.continue_trace(sentry_trace_headers)
 
-            with sentry_sdk.start_transaction(op="generator", name=fn.__name__):
+            with sentry_sdk.start_transaction(op="function", name=fn.__name__):
+                # Call the function without the sentry_trace_headers argument
                 async for item in fn(*args, **kwargs):
                     yield item
         except Exception as exc:
             sentry_sdk.capture_exception(exc)
             raise exc
 
-    def wrapper(*args, **kwargs):
-        return fn_wrapped(*args, **kwargs)
-
-    return wrapper
+    return fn_wrapped
 
 def get_sentry_trace_headers():
     headers = {}
