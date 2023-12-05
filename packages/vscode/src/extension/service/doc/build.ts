@@ -157,14 +157,14 @@ function inputDefinesChildren(code:string, nodeObject:LocalGraphNode, childrenNo
 
 function inputUsesChildren(code:string, nodeObject:LocalGraphNode, locationsAndDocumentations:Set<[number,string, string|undefined]>):string{
 
-    if (locationsAndDocumentations.size == 0) {
+    if (locationsAndDocumentations.size === 0) {
 
-        return code
+        return code;
     }
     return buildInput.insertDocumentationInCode(code, nodeObject.file, locationsAndDocumentations )
 }
 
-export function documentNode(graph:Graph, node:string):void{
+export async function documentNode(graph:Graph, node:string){
 
     const outBoundEdges:string[] = graph.outboundEdges(node)
     //const numberOfUnvisitedChildren = 0
@@ -215,13 +215,8 @@ export function documentNode(graph:Graph, node:string):void{
     }
 
     if (processedContent){
-        const documentation = buildDocumentation(processedContent)
-
-        documentation.then(result => {
-
-            graph.setNodeAttribute(node, "documentation", result);//build documentation
-
-        })
+        const documentation = await buildDocumentation(processedContent)
+            graph.setNodeAttribute(node, "documentation", documentation);//build documentation  
     }
 
 }
