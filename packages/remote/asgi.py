@@ -40,7 +40,7 @@ async def embedding(request: Request):
     sentry_sdk.set_user({"id": embedding_request.machineId})
 
     # Call the function
-    embedding = generate_embedding.remote(embedding_request.code)
+    embedding = await generate_embedding.remote.aio(embedding_request.code)
 
     # Return the response
     return EmbeddingResponse(embedding=embedding)
@@ -67,7 +67,7 @@ async def documentation(request: Request):
     # Call the function
     documentation = ''
 
-    for chunk in generate_documentation.remote_gen(documentation_request.code):
+    for chunk in generate_documentation.remote_gen.aio(documentation_request.code):
         documentation += chunk
 
     # Return the response
