@@ -283,7 +283,7 @@ export class Index {
                       });
                     };
                   }),
-                  10
+                  50
                 );
               }
 
