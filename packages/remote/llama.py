@@ -6,6 +6,8 @@ import utils
 
 MODEL_DIR = "/model"
 BASE_MODEL = "codellama/CodeLlama-7b-Instruct-hf"
+TOKENIZER_DIR = "/tokenizer"
+TOKENIZER = "hf-internal-testing/llama-tokenizer"
 
 def download_model_to_folder():
     from huggingface_hub import snapshot_download
@@ -17,6 +19,18 @@ def download_model_to_folder():
         local_dir=MODEL_DIR,
         token=os.environ["HUGGINGFACE_TOKEN"],
     )
+
+    snapshot_download(
+        TOKENIZER,
+        local_dir=TOKENIZER_DIR,
+        token=os.environ["HUGGINGFACE_TOKEN"],
+    )
+
+    from transformers import CodeLlamaTokenizer
+    tokenizer = CodeLlamaTokenizer.from_pretrained(TOKENIZER_DIR)
+
+    return
+
 
 image = (
     Image.from_registry(
@@ -30,7 +44,7 @@ image = (
         "vllm @ git+https://github.com/vllm-project/vllm.git@665cbcec4b963f6ab7b696f3d7e3393a7909003d"
     )
     # Use the barebones hf-transfer package for maximum download speeds. No progress bar, but expect 700MB/s.
-    .pip_install(["hf-transfer", "sentry-sdk", "posthog"])
+    .pip_install(["hf-transfer", "sentry-sdk", "posthog", 'transformers[torch]'])
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
     .run_function(
         download_model_to_folder,
@@ -46,9 +60,11 @@ class Model:
     def __enter__(self):
         from vllm.engine.arg_utils import AsyncEngineArgs
         from vllm.engine.async_llm_engine import AsyncLLMEngine
+        from transformers import CodeLlamaTokenizer
 
         engine_args = AsyncEngineArgs(model=MODEL_DIR, gpu_memory_utilization=0.95)
         self.llm = AsyncLLMEngine.from_engine_args(engine_args)
+        self.tokenizer = CodeLlamaTokenizer.from_pretrained(TOKENIZER_DIR)
         self.template = """<s>[INST] <<SYS>>
 {system}
 <</SYS>>
@@ -67,8 +83,8 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
         print('Generating...')
 
         # Check if the input goes over the token limit of 14.5k. If it does, truncate it. Use vllm tokenizer to get the exact token count.
-        while len(self.llm.tokenizer.encode(code)) > 14500:
-            code = code[:-20]
+        while len(self.tokenizer.encode(code)) > 14500:
+            code = code[:-50]
 
         prompt = self.template.format(
             system="You are a skilled senior developer who is asked to explain the code to a new hire. You are synthetic, and you are trying to explain the code to a human. You focus on business aspects rather than framework details. You use simple english language, with declarative sentences. You do not talk about 'this code' or 'that snippet', but just explain straight to the point.",
