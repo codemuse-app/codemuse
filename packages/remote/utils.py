@@ -12,7 +12,6 @@ sentry_sdk.init(
     profiles_sample_rate=1.0,
     enable_tracing=True
 )
-
 def with_sentry(fn):
     @functools.wraps(fn)
     async def fn_wrapped(*args, sentry_trace_headers: dict = None, **kwargs):
@@ -26,7 +25,10 @@ def with_sentry(fn):
             sentry_sdk.capture_exception(exc)
             raise exc
 
-    return functools.partial(fn_wrapped, sentry_trace_headers=None)
+    def wrapper(*args, **kwargs):
+        return fn_wrapped(*args, **kwargs)
+
+    return wrapper
 
 def with_sentry_generator(fn):
     @functools.wraps(fn)
@@ -42,7 +44,10 @@ def with_sentry_generator(fn):
             sentry_sdk.capture_exception(exc)
             raise exc
 
-    return functools.partial(fn_wrapped, sentry_trace_headers=None)
+    def wrapper(*args, **kwargs):
+        return fn_wrapped(*args, **kwargs)
+
+    return wrapper
 
 def get_sentry_trace_headers():
     headers = {}
