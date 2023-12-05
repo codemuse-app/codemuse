@@ -65,7 +65,7 @@ async def documentation(request: Request):
     # Call the function
     documentation = ''
 
-    for chunk in api_functions["generate_documentation"].remote_gen.aio(documentation_request.code):
+    async for chunk in api_functions["generate_documentation"].remote_gen.aio(documentation_request.code):
         documentation += chunk
 
     # Return the response
