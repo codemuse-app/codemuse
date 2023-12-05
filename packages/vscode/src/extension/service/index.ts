@@ -272,27 +272,19 @@ export class Index {
 
               for (const nodeList of nodesBatch) {
                 // Map each nodeId to a documentNode promise
-                const documentNodePromises = nodeList.map(async (nodeId) => {
-                  await documentNode(instance.originalGraph!, nodeId);
+                await batch(
+                  nodeList.map((nodeId) => {
+                    return async () => {
+                      await documentNode(instance.originalGraph!, nodeId);
 
-                  progress.report({
-                    message: "generating documentation",
-                    increment: 100 / allNodesToUpdate.length / 2,
-                  });
-                });
-
-                // Execute all documentNode operations in parallel and wait for them to complete
-                try {
-                  await Promise.all(documentNodePromises);
-                  console.log(
-                    "All nodes in the current list have been processed."
-                  );
-                } catch (error) {
-                  console.error(
-                    "An error occurred while processing the nodes:",
-                    error
-                  );
-                }
+                      progress.report({
+                        message: "generating documentation",
+                        increment: 100 / allNodesToUpdate.length / 2,
+                      });
+                    };
+                  }),
+                  10
+                );
               }
 
               documentationSpan?.finish();
