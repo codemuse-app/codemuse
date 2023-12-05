@@ -7,7 +7,7 @@ import utils
 MODEL_DIR = "/model"
 BASE_MODEL = "codellama/CodeLlama-7b-Instruct-hf"
 TOKENIZER_DIR = "/tokenizer"
-TOKENIZER = "hf-internal-testing/llama-tokenizer"
+TOKENIZER = "codellama/CodeLlama-7b-Instruct-hf"
 
 def download_model_to_folder():
     from huggingface_hub import snapshot_download
