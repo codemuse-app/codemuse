@@ -1,8 +1,5 @@
 import functools
 import sentry_sdk
-from posthog import Posthog
-
-posthog = Posthog('phc_DgRmIFV3DxfEZ2PT968d9hwS9vNme86Cvm2Ic4KUqT0', host='https://app.posthog.com')
 
 sentry_sdk.init(
     dsn="https://5778b258c3b19d7b1a11f8ca575bc494@o4506308721115136.ingest.sentry.io/4506308722688000",
