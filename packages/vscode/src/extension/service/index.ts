@@ -16,7 +16,7 @@ import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
 import { MultiDirectedGraph } from "graphology";
 import { batch } from "../../shared/utils";
-
+import { buildDocumentationsForGraph} from "./doc/build"
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
@@ -244,7 +244,10 @@ export class Index {
               console.log("Flattened cycles (should be NONE):");
               printCycles(flattened_cycles);
 
-              progress.report({
+              // Builds documentation
+              buildDocumentationsForGraph(instance.flattenedGraph)
+
+                progress.report({
                 message: `${language.languageId} indexed`,
               });
             } else {

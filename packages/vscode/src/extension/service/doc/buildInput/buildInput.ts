@@ -1,4 +1,23 @@
 import { getClosestUpcomingCodeLine, getContentInFile, getIndentationAtLine, removeLastOccurrenceCharacter } from "../helpers/fileHelper";
+
+export function getLineOfSignature(lines:string[]):number{
+
+    function matchesAnyType(str:string, patterns:RegExp[]) {
+        return patterns.some(regex => regex.test(str));
+    }
+
+    const types = [/class/, /def/, /function/]
+
+    for (let index = 0; index < lines.length; index++) {  // JavaScript arrays are 0-indexed
+
+        let match = matchesAnyType(lines[index], types);
+
+        if (match) {
+            return index;
+        }
+    }
+    return 0
+}
 /**
  * Extracts the body of a specified component and its indentation from a string of code.
  *
@@ -26,33 +45,18 @@ import { getClosestUpcomingCodeLine, getContentInFile, getIndentationAtLine, rem
  *   to find the closest upcoming non-empty line for indentation calculation.
  */
 export function getComponentBodyAndIndentation(code: string): [string, string] {
-    const lines = code.split('\n');
+    let lines = code.split('\n');
 
-    function matchesAnyType(str:string, patterns:RegExp[]) {
-        return patterns.some(regex => regex.test(str));
-    }
-    const types = [/^class\s/, /^def\s/]
+    const index = getLineOfSignature(lines)
 
-    for (let index = 0; index < lines.length; index++) {  // JavaScript arrays are 0-indexed
-        const line = lines[index].trim();
-        // Using a regular expression to match class definition
+    const [_, nonEmptyClosestLine] = getClosestUpcomingCodeLine(index+1, lines);
 
-        let match = matchesAnyType(line, types);
+    lines = lines.slice(index+1)
 
-        if (match) {
-            // Assuming getClosestUpcomingCodeLine is defined elsewhere and returns a tuple [number, string]
-            const [_, nonEmptyClosestLine] = getClosestUpcomingCodeLine(index+1, lines);
-
-            const result = lines.slice(index+1).join('\n');
-
-            
-            const indentation =nonEmptyClosestLine.replace(nonEmptyClosestLine.trimStart(),"");
+    const indentation = nonEmptyClosestLine.replace(nonEmptyClosestLine.trimStart(),"");
          
-            return [result, indentation];
-        }
-    }
-
-    return [code, ""];  // Return [null, null] if no matching class definition is found
+    return [lines.join('\n'), indentation];
+        
 }
 
 /**
@@ -87,14 +91,14 @@ export function replaceCodeByDocumentation(filePath:string, code: string, locati
     for (let i = 0; i < locationsAndDocumentations.length ; i++){
 
         let contentToRemove:string = getContentInFile(filePath, [locationsAndDocumentations[i][0],locationsAndDocumentations[i][1]])
+        //let contentBeforeToRemove:string = newContent.replace
+
         let indentation:string = getIndentationAtLine(getClosestUpcomingCodeLine(0,contentToRemove.split("\n"))[1])
          
         let documentation = locationsAndDocumentations[i][2]
 
         if(documentation && documentation !== ""){
-            console.log(JSON.stringify(contentToRemove))
-            console.log(JSON.stringify(newContent))
-            console.log(newContent.includes(contentToRemove))
+           
             newContent = newContent.replace(contentToRemove, indentation+'"""'+documentation+'"""\n'+indentation+'pass\n')
 
         }
@@ -188,3 +192,7 @@ export function insertDocumentationInCode(code: string, filePath:string, locatio
     return newCode
 
 }
+
+
+
+
