@@ -18,13 +18,7 @@ api_functions = {}
 
 stub = Stub("api")
 
-@asynccontextmanager
-def lifespan(app: FastAPI):
-    api_functions["generate_embedding"] = Function.lookup("embeddings", "Model.generate")
-    api_functions["generate_documentation"] = Function.lookup("documentation", "Model.generate")
-    yield
-
-web_app = FastAPI(lifespan=lifespan)
+web_app = FastAPI()
 
 class ExtensionRequest(BaseModel):
     # VSCode extension machine ID
@@ -86,7 +80,12 @@ async def status():
 async def trigger_error():
     division_by_zero = 1 / 0
 
-@stub.function(image=image, concurrency_limit=100, keep_warm=1)
-@asgi_app()
-def asgi():
-    return web_app
+@stub.cls(image=image, concurrency_limit=100, keep_warm=1)
+class Api:
+    def __enter__(self):
+        api_functions["generate_embedding"] = Function.lookup("embeddings", "Model.generate")
+        api_functions["generate_documentation"] = Function.lookup("documentation", "Model.generate")
+
+    @asgi_app()
+    def asgi():
+        return web_app
