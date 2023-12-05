@@ -19,11 +19,9 @@ def download_model_to_folder():
     )
 
 def model_init():
-    from vllm.engine.arg_utils import AsyncEngineArgs
-    from vllm.engine.async_llm_engine import AsyncLLMEngine
+    from sentence_transformers import SentenceTransformer
 
-    engine_args = AsyncEngineArgs(model=MODEL_DIR, gpu_memory_utilization=0.95)
-    return AsyncLLMEngine.from_engine_args(engine_args)
+    pass
 
 image = (
     Image.from_registry(
@@ -52,7 +50,11 @@ stub = Stub("documentation", image=image)
 @stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), allow_concurrent_inputs=30, container_idle_timeout=30)
 class Model:
     def __enter__(self):
-        self.llm = model_init()
+        from vllm.engine.arg_utils import AsyncEngineArgs
+        from vllm.engine.async_llm_engine import AsyncLLMEngine
+
+        engine_args = AsyncEngineArgs(model=MODEL_DIR, gpu_memory_utilization=0.95)
+        self.llm = AsyncLLMEngine.from_engine_args(engine_args)
         self.template = """<s>[INST] <<SYS>>
 {system}
 <</SYS>>
