@@ -1,5 +1,7 @@
 const { MultiDirectedGraph } = require('graphology');
 import * as buildInput from "./buildInput/buildInput";
+import * as vscode from "vscode";
+import { apiFetch } from "../../utils/fetch";
 
 import { start } from "repl";
 import {
@@ -13,6 +15,7 @@ import {
 import { resolveObjectURL } from "buffer";
 import { constants } from "crypto";
 import { removeLastOccurrenceCharacter } from "./helpers/fileHelper";
+import { procedure } from "../../../shared/vrpc";
 
   
   const createDummyGraph = () => {
@@ -86,16 +89,62 @@ import { removeLastOccurrenceCharacter } from "./helpers/fileHelper";
         return graph;
     };
 
+async function buildDocumentation(code:string):Promise<string>{
 
+      const maxRetries = 2;
+      let retries = 0;
+      let error: Error | undefined;
+  
+      while (retries < maxRetries) {
+        try {
+            const response = await apiFetch(
+                "https://codemuse-app--api-asgi.modal.run/documentation",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    machineId: vscode.env.machineId,
+                    code: code,
+                  }),
+                }
+              );
+  
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+  
+          const data = (await response.json()) as { documentation: string };
+          
+          return data.documentation;
+
+        } catch (error) {
+          retries++;
+          error = error;
+          if (retries === maxRetries) {
+            throw error;
+          }
+        }
+      }
+
+    throw error
+
+    }
+  
   
 function inputDefinesChildren(code:string, nodeObject:LocalGraphNode, childrenNodeObjects:Set<LocalGraphNode>):string{
     
-    const locationsAndDocumentations: [number,number,string | undefined][] = [...childrenNodeObjects].map((e:LocalGraphNode)=>{
+    const locationsAndDocumentations: [number,number,string | undefined, number][] = [...childrenNodeObjects].map((e:LocalGraphNode)=>{
         if (nodeObject.symbol == "scip-python python rtcmd-api-server indexer `server.service.modules.aluminium.api.quote_viewset`/QuoteViewSet#"){
             console.log(e)
             console.log(buildInput.getLineOfSignature(e.content.split("\n")))
         }
-        return [e.range[0] + buildInput.getLineOfSignature(e.content.split("\n")) + 1 ,e.range[2],e.documentation]
+        const lineOfSignature:number = buildInput.getLineOfSignature(e.content.split("\n"))
+        
+        
+        const lineOfSignatureInCode = e.range[0] + lineOfSignature - nodeObject.range[0]
+        return [e.range[0] + lineOfSignature + 1 ,e.range[2],e.documentation, lineOfSignatureInCode]
     })
 
 
@@ -115,11 +164,12 @@ function inputUsesChildren(code:string, nodeObject:LocalGraphNode, locationsAndD
     return buildInput.insertDocumentationInCode(code, nodeObject.file, locationsAndDocumentations )
 }
 
+<<<<<<< Updated upstream
 export function documentNode(graph:Graph, node:string):string{
+=======
+function documentNode(graph:Graph, node:string):boolean{
+>>>>>>> Stashed changes
 
-    if (graph.getNodeAttributes(node).processedContent){
-        return "doc"
-    }
     const outBoundEdges:string[] = graph.outboundEdges(node)
     //const numberOfUnvisitedChildren = 0
 
@@ -127,12 +177,12 @@ export function documentNode(graph:Graph, node:string):string{
     //const filePath = graph.getNodeAttribute(node, "file")
 
     const currentNodeObject = graph.getNodeAttributes(node)
+    let processedContent:string =currentNodeObject.content
 
     if(outBoundEdges.length == 0){
         // do the trivial case, documenting without inputing any comments of modifying the code
 
-        graph.setNodeAttribute(node, "processedContent", currentNodeObject.content);
-        graph.setNodeAttribute(node, "documentation", node);//build documentation
+        graph.setNodeAttribute(node, "processedContent", processedContent);
         
     }else {
 
@@ -156,7 +206,6 @@ export function documentNode(graph:Graph, node:string):string{
 
         })
 
-        let processedContent:string =currentNodeObject.content
 
         if (outBoundDefinesChildren.size > 0) {
             processedContent = inputDefinesChildren(processedContent, currentNodeObject, outBoundDefinesChildren )
@@ -166,12 +215,20 @@ export function documentNode(graph:Graph, node:string):string{
         }
 
         graph.setNodeAttribute(node, "processedContent", processedContent);
-        graph.setNodeAttribute(node, "documentation", node);//build documentation
 
     }
 
-    return "doc"
+    if (processedContent){
+        const documentation = buildDocumentation(processedContent)
 
+        documentation.then(result => {
+
+            graph.setNodeAttribute(node, "documentation", result);//build documentation
+
+        })
+    }
+
+    return true
 }
 
 function depthFirstDocument(graph:Graph, node:string, resolved = new Set<string>(), unresolved = new Set<string>()):void {

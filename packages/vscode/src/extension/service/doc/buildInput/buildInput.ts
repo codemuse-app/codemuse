@@ -1,5 +1,6 @@
 import { getClosestUpcomingCodeLine, getContentInFile, getIndentationAtLine, removeLastOccurrenceCharacter } from "../helpers/fileHelper";
 
+
 export function getLineOfSignature(lines:string[]):number{
 
     function matchesAnyType(str:string, patterns:RegExp[]) {
@@ -84,23 +85,39 @@ export function getComponentBodyAndIndentation(code: string): [string, string] {
  *  let newCode = replaceCodeByDocumentation(filePath, originalCode, locationsAndDocs);
  *  // newCode now contains the originalCode with the specified section replaced by the documentation.
  */
-export function replaceCodeByDocumentation(filePath:string, code: string, locationsAndDocumentations: [number,number,string | undefined][]): string { // note that indexes in locationsAndDocumentations start at 1, first line is 1 not, zero
+export function replaceCodeByDocumentation(filePath:string, code: string, locationsAndDocumentations: [number,number,string | undefined, number][]): string { // note that indexes in locationsAndDocumentations start at 1, first line is 1 not, zero
+
+    function replaceFromIndex(originalString:string, substringToReplace:string, replacement:string, startIndex:number) {
+        const beforeIndex = originalString.slice(0, startIndex);
+        const afterIndex = originalString.slice(startIndex);
+    
+        return beforeIndex + afterIndex.replace(substringToReplace, replacement);
+    }
 
     let newContent = code
 
+    
     for (let i = 0; i < locationsAndDocumentations.length ; i++){
 
         let contentToRemove:string = getContentInFile(filePath, [locationsAndDocumentations[i][0],locationsAndDocumentations[i][1]])
+        const lineOfSignature:number = locationsAndDocumentations[i][3]
+        const signature:string = code.split("\n")[lineOfSignature]
+        const indexAtWhichSignatureStarts:number = newContent.indexOf(signature)
+
         //let contentBeforeToRemove:string = newContent.replace
 
         let indentation:string = getIndentationAtLine(getClosestUpcomingCodeLine(0,contentToRemove.split("\n"))[1])
          
         let documentation = locationsAndDocumentations[i][2]
+        
+        if(code == "class QuoteViewSet(viewsets.ViewSet):\n\n    def list(self, request):\n\n        error = check_permission(request.user,\"rtcmdmodels.view_request\")\n        if  error:\n                return error\n\n        raw_filters = dict()\n        raw_filters[\"start_date\"] = request.GET.get(\"start_date\")\n        raw_filters[\"end_date\"] = request.GET.get(\"end_date\")\n\n        filters = dict()\n\n        if raw_filters.get(\"start_date\") and raw_filters.get(\"start_date\") != \"null\":\n            filters[\"start_date\"] = datetime.datetime.strptime(\n                raw_filters.get(\"start_date\"), '%d/%m/%Y')\n\n        if raw_filters.get(\"end_date\") and raw_filters.get(\"end_date\") != \"null\":\n            filters[\"end_date\"] = datetime.datetime.strptime(\n                raw_filters.get(\"end_date\"), '%d/%m/%Y')\n            filters[\"end_date\"] += datetime.timedelta(days=1)\n\n        requests = Request.objects.filter(request_type__in=[RequestTypeChoices.QUOTE,RequestTypeChoices.AUTO_QUOTE])\n\n        for key, value in filters.items():\n\n            if key == \"start_date\" and value:\n                requests = requests.filter(created_at__gte=value)\n\n            elif key == \"end_date\" and value:\n                requests = requests.filter(created_at__lte=value)\n\n        request_serializer = RequestSerializer(requests, many=isinstance(requests, QuerySet))\n\n        return Response(request_serializer.data, status=200)\n\n    @atomic\n    def create(self, request):\n\n        error = check_permission(request.user,\"rtcmdmodels.add_request\")\n        if error:\n            return error\n\n        try:\n            data = request.data\n            quote = QuoteView(obj=data, requestor=request.user)\n            quote.save_to_db()\n\n            for t in data.get(\"trades\"):\n\n                maturity_model = Maturity.objects.get(id=t.get(\"maturity\"))\n                request_maturity_model, created_request_instrument = RequestMaturity.objects.get_or_create(\n                    request=quote.db_object, maturity=maturity_model)\n\n                for i in data.get(\"instruments\"):\n                    instrument_model = Instrument.objects.get(name=i)\n                    trade = AluTradeView(obj=t, instrument=instrument_model, request_maturity=request_maturity_model,\n                                         trade_action=TradeActions.REQUEST_ADDED.value)\n                    trade.save_to_db()\n\n            add_plant_details(quote.db_object, data.get('plant_details', []))\n            serialized_data = LightRequestSerializer(quote.db_object)\n            send_request_create(serialized_data.data)\n\n\n            \n            title = \"New \" + str(quote.db_object.request_type) + \" #\" + str(quote.db_object.id) +\" for \" + str(quote.db_object.customer.name) +\" for \" + str(quote.db_object.total_quantity) +\" MT\"\n\n            notify_alu(\"\", title, 'View Request', '/request/'+str(quote.db_object.id)+\"/details\", receiver_type=\"TRADER\", request=quote.db_object )\n            \n\n            return Response({'id': serialized_data.data['id'], 'type': serialized_data.data['request_type']}, status=200)\n\n        except ValidationError as e:\n            return Response({\"error\": e}, status=400)\n        except Maturity.DoesNotExist:\n            return Response({\"error\":\"Maturity not found in database\"},status = 400)\n        except Instrument.DoesNotExist:\n            return Response({\"error\":\"Instrument not found in database\"},status = 400)\n\n    def update(self, request, pk=None):\n\n        pass\n\n    def retrieve(self, request, pk=None):\n        try:\n            \n            error = check_permission(request.user,\"rtcmdmodels.view_request\")\n            if  error:\n                return error\n            quote = Request.objects.get(pk=pk)\n        except Request.DoesNotExist:\n            return Response({}, status=400)\n\n        quote_serializer = QuoteSerializer(quote)\n        return Response(quote_serializer.data, status=200)\n\n    def destroy(self, request, pk=None):\n        pass" ){
+            console.log("Here")
+        }
 
         if(documentation && documentation !== ""){
            
-            newContent = newContent.replace(contentToRemove, indentation+'"""'+documentation+'"""\n'+indentation+'pass\n')
-
+            //newContent = newContent.replace(contentToRemove, indentation+'"""'+documentation+'"""\n'+indentation+'pass\n')
+            newContent = replaceFromIndex(newContent, contentToRemove,indentation+'"""'+documentation+'"""\n'+indentation+'pass\n', indexAtWhichSignatureStarts )
         }
 
     }
