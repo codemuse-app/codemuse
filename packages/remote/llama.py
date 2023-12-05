@@ -79,7 +79,7 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
 
 
     @method(keep_warm=1)
-    @utils.with_sentry
+    @utils.with_sentry_generator
     async def generate(self, code: str):
         from vllm import SamplingParams
         from vllm.utils import random_uuid
