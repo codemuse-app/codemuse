@@ -81,6 +81,18 @@ export const Search = () => {
           paddingTop: "10px",
         }}
       >
+        {
+          // If there are no results, show a message
+          results.length === 0 && search === "" && (
+            <div
+              style={{
+                opacity: 0.5,
+              }}
+            >
+              CodeMuse helps you find code in your CodeBase.
+            </div>
+          )
+        }
         {results.map((result) => {
           const { name, moduleName, type } = getSymbolName(result.symbol);
           const { backgroundColor, color } = getResultColors(result.score);

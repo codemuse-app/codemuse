@@ -34,7 +34,7 @@ export class VectraManager {
     while (retries < maxRetries) {
       try {
         const response = await apiFetch(
-          "https://codemuse-app--api-asgi.modal.run/embedding",
+          "https://codemuse-app--api-api-asgi.modal.run/embedding",
           {
             method: "POST",
             headers: {
