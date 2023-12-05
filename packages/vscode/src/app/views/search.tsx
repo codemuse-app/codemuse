@@ -39,13 +39,12 @@ export const Search = () => {
 
   React.useEffect(() => {
     (async (search, setResults) => {
-      setLoading(true);
-      console.log("Called search", search);
-
       if (search === "") {
         setResults([]);
         return;
       }
+
+      setLoading(true);
 
       const results = await client.query(search);
 
