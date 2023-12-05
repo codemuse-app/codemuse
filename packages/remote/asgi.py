@@ -87,7 +87,7 @@ class Api:
                 documentation += chunk
 
             # Return the response
-            return DocumentationResponse(documentation=documentation)
+            return DocumentationResponse(documentation=documentation.strip())
 
 
         @web_app.get('/status')
