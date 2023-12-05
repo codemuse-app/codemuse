@@ -6,6 +6,8 @@ import { Index } from "./service/index";
 import { SearchViewProvider } from "./views/search";
 import { CodeMuseCodeLens } from "./codelense";
 import { capture } from "./service/logging/posthog";
+import * as fs from "fs";
+
 // import { telemetryLogger } from "./service/logging";
 
 Sentry.addTracingExtensions();
@@ -35,6 +37,15 @@ export const activate = async (context: vscode.ExtensionContext) => {
   Index.initialize(context);
 
   Status.getInstance();
+
+  // Create a command called "CodeMuse: Delete Index" that will delete the files in the folder located at: context!.storageUri!.fsPath (codemuse folder for each workspace)
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codemuse.deleteIndex", async () => {
+      capture("deleteIndex");
+      const dir = context.storageUri!.fsPath;
+      fs.rmSync(dir, { recursive: true, force: true });
+    })
+  );
 
   // Create a command called "CodeMuse: Index Workspace" that will run the index
   context.subscriptions.push(

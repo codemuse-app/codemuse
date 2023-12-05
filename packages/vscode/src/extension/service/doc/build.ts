@@ -144,7 +144,7 @@ function inputDefinesChildren(code:string, nodeObject:LocalGraphNode, childrenNo
         
         
         const lineOfSignatureInCode = e.range[0] + lineOfSignature - nodeObject.range[0]
-        return [e.range[0] + lineOfSignature + 1 ,e.range[2],e.documentation, lineOfSignatureInCode]
+        return [e.range[0] + lineOfSignature + 1 ,e.range[2],e.documentation, lineOfSignatureInCode];
     })
 
 

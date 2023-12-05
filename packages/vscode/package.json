@@ -44,6 +44,10 @@
         "title": "CodeMuse: open sidebar"
       },
       {
+        "command": "codemuse.deleteIndex",
+        "title": "CodeMuse: Delete Index"
+      },
+      {
         "command": "codemuse.error",
         "title": "CodeMuse: trigger error"
       }
