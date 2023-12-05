@@ -65,7 +65,7 @@ stub = Stub("embeddings", image=image)
 BATCH_SIZE = 50
 TIMEOUT = 0.5
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs= 10 * BATCH_SIZE, concurrency_limit=3, keep_warm=1)
+@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs= 10 * BATCH_SIZE, concurrency_limit=3)
 class Model:
     def __enter__(self):
         # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
@@ -124,7 +124,7 @@ class Model:
             for item, result in zip(batch, results):
                 item[1].set_result(result)
 
-    @method()
+    @method(keep_warm=1)
     async def generate(self, element: str) -> List[float]:
         # Create a Future for the result
         result = asyncio.Future()
