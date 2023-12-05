@@ -11,12 +11,13 @@ import {
   compareGraphs,
   loadGraphFromFile,
   saveGraphToFile,
+  findMultiUpdateOrder,
 } from "./graph/utils_graph";
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
 import { MultiDirectedGraph } from "graphology";
 import { batch } from "../../shared/utils";
-import { buildDocumentationsForGraph} from "./doc/build"
+import { documentNode} from "./doc/build"
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
@@ -245,7 +246,12 @@ export class Index {
               printCycles(flattened_cycles);
 
               // Builds documentation
-              buildDocumentationsForGraph(instance.flattenedGraph)
+              // get the order of the nodes in which they should be documented:
+              const nodesOrder = findMultiUpdateOrder(instance.flattenedGraph, allNodesToUpdate);
+              //document the nodes in the order
+              for (const nodeId of nodesOrder) {
+                documentNode(instance.originalGraph, nodeId); // warning: should we change the original graph to the flattened graph?
+              }
 
                 progress.report({
                 message: `${language.languageId} indexed`,

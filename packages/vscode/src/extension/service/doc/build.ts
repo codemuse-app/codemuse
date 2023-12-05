@@ -115,7 +115,7 @@ function inputUsesChildren(code:string, nodeObject:LocalGraphNode, locationsAndD
     return buildInput.insertDocumentationInCode(code, nodeObject.file, locationsAndDocumentations )
 }
 
-function documentNode(graph:Graph, node:string):string{
+export function documentNode(graph:Graph, node:string):string{
 
     if (graph.getNodeAttributes(node).processedContent){
         return "doc"
