@@ -80,7 +80,7 @@ async def status():
 async def trigger_error():
     division_by_zero = 1 / 0
 
-@stub.cls(image=image, concurrency_limit=100, keep_warm=1, allow_concurrent_inputs=50)
+@stub.cls(image=image, concurrency_limit=10, keep_warm=1, allow_concurrent_inputs=20)
 class Api:
     def __enter__(self):
         api_functions["generate_embedding"] = Function.lookup("embeddings", "Model.generate")
