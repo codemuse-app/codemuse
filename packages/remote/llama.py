@@ -55,7 +55,7 @@ image = (
 
 stub = Stub("documentation", image=image)
 
-@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), concurrency_limit=50, allow_concurrent_inputs=50, container_idle_timeout=60)
+@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), concurrency_limit=5, allow_concurrent_inputs=20, container_idle_timeout=60, timeout=60 * 20, keep_warm=1)
 class Model:
     def __enter__(self):
         from vllm.engine.arg_utils import AsyncEngineArgs
@@ -79,7 +79,6 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
     async def generate(self, code: str):
         from vllm import SamplingParams
         from vllm.utils import random_uuid
-
 
         # Check if the input goes over the token limit of 14.5k. If it does, truncate it. Use vllm tokenizer to get the exact token count.
         while len(self.tokenizer.encode(code)) > 14500:
