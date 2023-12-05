@@ -55,7 +55,7 @@ image = (
 
 stub = Stub("documentation", image=image)
 
-@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), concurrency_limit=20, allow_concurrent_inputs=50, container_idle_timeout=60)
+@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), concurrency_limit=50, allow_concurrent_inputs=50, container_idle_timeout=60)
 class Model:
     def __enter__(self):
         from vllm.engine.arg_utils import AsyncEngineArgs
