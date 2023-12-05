@@ -85,9 +85,6 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
         while len(self.tokenizer.encode(code)) > 14500:
             code = code[:-50]
 
-        t0 = time.time()
-        print('Generating...')
-
         prompt = self.template.format(
             system="You are a skilled senior developer who is asked to explain the code to a new hire. You are synthetic, and you are trying to explain the code to a human. You focus on business aspects rather than framework details. You use simple english language, with declarative sentences. You do not talk about 'this code' or 'that snippet', but just explain straight to the point.",
             code=code
@@ -102,20 +99,13 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
         request_id = random_uuid()
         results_generator = self.llm.generate(prompt, sampling_params, request_id)
 
-        index, tokens = 0, 0
+        index = 0
 
         async for request_output in results_generator:
             if "\ufffd" == request_output.outputs[0].text[-1]:
                 continue
             yield request_output.outputs[0].text[index:]
             index = len(request_output.outputs[0].text)
-
-            # Token accounting
-            new_tokens = len(request_output.outputs[0].token_ids)
-            tokens = new_tokens
-
-        throughput = tokens / (time.time() - t0)
-        print(f"Request completed: {throughput:.4f} tokens/s")
 
 # @stub.local_entrypoint()
 # def main():
