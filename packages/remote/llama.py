@@ -55,14 +55,14 @@ image = (
 
 stub = Stub("documentation", image=image)
 
-@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), allow_concurrent_inputs=100, container_idle_timeout=30)
+@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), concurrency_limit=5, allow_concurrent_inputs=50, container_idle_timeout=60)
 class Model:
     def __enter__(self):
         from vllm.engine.arg_utils import AsyncEngineArgs
         from vllm.engine.async_llm_engine import AsyncLLMEngine
         from transformers import CodeLlamaTokenizer
 
-        engine_args = AsyncEngineArgs(model=MODEL_DIR, gpu_memory_utilization=0.95)
+        engine_args = AsyncEngineArgs(model=MODEL_DIR, gpu_memory_utilization=0.9)
         self.llm = AsyncLLMEngine.from_engine_args(engine_args)
         self.tokenizer = CodeLlamaTokenizer.from_pretrained(TOKENIZER_DIR)
         self.template = """<s>[INST] <<SYS>>
@@ -80,11 +80,13 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
         from vllm import SamplingParams
         from vllm.utils import random_uuid
 
-        print('Generating...')
 
         # Check if the input goes over the token limit of 14.5k. If it does, truncate it. Use vllm tokenizer to get the exact token count.
         while len(self.tokenizer.encode(code)) > 14500:
             code = code[:-50]
+
+        t0 = time.time()
+        print('Generating...')
 
         prompt = self.template.format(
             system="You are a skilled senior developer who is asked to explain the code to a new hire. You are synthetic, and you are trying to explain the code to a human. You focus on business aspects rather than framework details. You use simple english language, with declarative sentences. You do not talk about 'this code' or 'that snippet', but just explain straight to the point.",
@@ -100,7 +102,6 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
         request_id = random_uuid()
         results_generator = self.llm.generate(prompt, sampling_params, request_id)
 
-        t0 = time.time()
         index, tokens = 0, 0
 
         async for request_output in results_generator:
