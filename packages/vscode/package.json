@@ -45,7 +45,7 @@
       },
       {
         "command": "codemuse.deleteIndex",
-        "title": "CodeMuse: Delete Index"
+        "title": "CodeMuse: delete index"
       },
       {
         "command": "codemuse.error",
