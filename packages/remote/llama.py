@@ -18,11 +18,6 @@ def download_model_to_folder():
         token=os.environ["HUGGINGFACE_TOKEN"],
     )
 
-def model_init():
-    from sentence_transformers import SentenceTransformer
-
-    pass
-
 image = (
     Image.from_registry(
         "nvcr.io/nvidia/pytorch:23.10-py3"
@@ -42,7 +37,6 @@ image = (
         secret=Secret.from_name("huggingface"),
         timeout=60 * 20,
     )
-    .run_function(model_init)
 )
 
 stub = Stub("documentation", image=image)
