@@ -66,6 +66,10 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
 
         print('Generating...')
 
+        # Check if the input goes over the token limit of 14.5k. If it does, truncate it. Use vllm tokenizer to get the exact token count.
+        while len(self.llm.tokenizer.encode(code)) > 14500:
+            code = code[:-20]
+
         prompt = self.template.format(
             system="You are a skilled senior developer who is asked to explain the code to a new hire. You are synthetic, and you are trying to explain the code to a human. You focus on business aspects rather than framework details. You use simple english language, with declarative sentences. You do not talk about 'this code' or 'that snippet', but just explain straight to the point.",
             code=code
@@ -82,6 +86,7 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
 
         t0 = time.time()
         index, tokens = 0, 0
+
         async for request_output in results_generator:
             if "\ufffd" == request_output.outputs[0].text[-1]:
                 continue
