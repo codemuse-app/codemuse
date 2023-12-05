@@ -26,7 +26,7 @@ def with_sentry(fn):
             sentry_sdk.capture_exception(exc)
             raise exc
 
-    return fn_wrapped
+    return functools.partial(fn_wrapped, sentry_trace_headers=None)
 
 def with_sentry_generator(fn):
     @functools.wraps(fn)
@@ -42,7 +42,7 @@ def with_sentry_generator(fn):
             sentry_sdk.capture_exception(exc)
             raise exc
 
-    return fn_wrapped
+    return functools.partial(fn_wrapped, sentry_trace_headers=None)
 
 def get_sentry_trace_headers():
     headers = {}

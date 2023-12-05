@@ -83,7 +83,7 @@ class Api:
             # Call the function
             documentation = ''
 
-            async for chunk in api_functions["generate_documentation"].remote_gen.aio(documentation_request.code):
+            async for chunk in api_functions["generate_documentation"].remote_gen.aio(documentation_request.code, get_sentry_trace_headers()):
                 documentation += chunk
 
             # Return the response
