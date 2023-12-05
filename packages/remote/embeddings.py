@@ -125,6 +125,7 @@ class Model:
                 item[1].set_result(result)
 
     @method(keep_warm=1)
+    @utils.with_sentry
     async def generate(self, element: str) -> List[float]:
         # Create a Future for the result
         result = asyncio.Future()
