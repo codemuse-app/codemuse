@@ -61,7 +61,7 @@ class Api:
             sentry_sdk.set_user({"id": embedding_request.machineId})
 
             # Call the function
-            embedding = await api_functions["generate_embedding"].remote.aio(embedding_request.code, get_sentry_trace_headers())
+            embedding = await api_functions["generate_embedding"].remote.aio(embedding_request.code, sentry_trace_headers=get_sentry_trace_headers())
 
             # Return the response
             return EmbeddingResponse(embedding=embedding)
@@ -83,7 +83,7 @@ class Api:
             # Call the function
             documentation = ''
 
-            async for chunk in api_functions["generate_documentation"].remote_gen.aio(documentation_request.code, get_sentry_trace_headers()):
+            async for chunk in api_functions["generate_documentation"].remote_gen.aio(documentation_request.code, sentry_trace_headers=get_sentry_trace_headers()):
                 documentation += chunk
 
             # Return the response
