@@ -164,11 +164,7 @@ function inputUsesChildren(code:string, nodeObject:LocalGraphNode, locationsAndD
     return buildInput.insertDocumentationInCode(code, nodeObject.file, locationsAndDocumentations )
 }
 
-<<<<<<< Updated upstream
-export function documentNode(graph:Graph, node:string):string{
-=======
-function documentNode(graph:Graph, node:string):boolean{
->>>>>>> Stashed changes
+export function documentNode(graph:Graph, node:string):void{
 
     const outBoundEdges:string[] = graph.outboundEdges(node)
     //const numberOfUnvisitedChildren = 0
@@ -228,7 +224,6 @@ function documentNode(graph:Graph, node:string):boolean{
         })
     }
 
-    return true
 }
 
 function depthFirstDocument(graph:Graph, node:string, resolved = new Set<string>(), unresolved = new Set<string>()):void {
