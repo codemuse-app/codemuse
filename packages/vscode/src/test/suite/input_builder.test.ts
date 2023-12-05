@@ -21,7 +21,7 @@ suite("getComponentBodyAndIndentation Class Test Case", () => {
   });
   test("getComponentBodyAndIndentation for Function", () => {
     // Sample code string containing a function definition
-    const sampleCode = `let a = 1;\n\nfunction myFunction() {\n    let b = 2;\n    return a + b;\n}`;
+    const sampleCode = `let a = 1;\n\ndef myFunction() {\n    let b = 2;\n    return a + b;\n}`;
 
     const [body, indentation] = buildInput.getComponentBodyAndIndentation(
       sampleCode
@@ -43,7 +43,7 @@ suite("getComponentBodyAndIndentation Class Test Case", () => {
 suite("replaceCodeByDocumentation Class Test Case", () => {
     test('Replace documentation in Class', () => {
         const sampleCode = `class MyClass:\n    def __init__(self):\n        self.attribute = 42\n`;
-        const locationsAndDocumentationsTest: [[number,number,string]] = [[1, 2, 'This is a class.']];
+        const locationsAndDocumentationsTest: [[number,number,string, number]] = [[1, 2, 'This is a class.',0]];
 
         const newContent = buildInput.replaceCodeByDocumentation(
             __dirname.replace("out/","src/")+'/filesForTests/test.py',
@@ -59,7 +59,7 @@ suite("replaceCodeByDocumentation Class Test Case", () => {
     test('Replace documentation in Function', () => {
         const sampleCode = "    def f(self, a):\n        b = a+2\n        print(a)\n        return b\n"
 
-        const locationsAndDocumentationsTest: [[number,number,string]] = [[5, 7, 'This is a function.']];
+        const locationsAndDocumentationsTest: [[number,number,string,number]] = [[5, 7, 'This is a function.',4]];
 
         const newContent = buildInput.replaceCodeByDocumentation(
             __dirname.replace("out/","src/")+'/filesForTests/test2.py',
@@ -151,6 +151,8 @@ suite("replaceCodeByDocumentation Class Test Case", () => {
         const expectedContent = '    def f(self, a):\n        b = a+2\n        """\n        Test: Test Comment\n        Test 2: Test Comment 2\n        """\n        print(a)\n        return b\n'
         assert.strictEqual(newContent, expectedContent);
     });
+
+   
     // Additional tests for other component types (Function, Module) can be added similarly
   });
   

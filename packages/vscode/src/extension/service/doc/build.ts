@@ -1,5 +1,7 @@
 const { MultiDirectedGraph } = require('graphology');
 import * as buildInput from "./buildInput/buildInput";
+import * as vscode from "vscode";
+import { apiFetch } from "../../utils/fetch";
 
 import { start } from "repl";
 import {
@@ -13,6 +15,7 @@ import {
 import { resolveObjectURL } from "buffer";
 import { constants } from "crypto";
 import { removeLastOccurrenceCharacter } from "./helpers/fileHelper";
+import { procedure } from "../../../shared/vrpc";
 
   
   const createDummyGraph = () => {
@@ -86,17 +89,66 @@ import { removeLastOccurrenceCharacter } from "./helpers/fileHelper";
         return graph;
     };
 
+async function buildDocumentation(code:string):Promise<string>{
 
+      const maxRetries = 2;
+      let retries = 0;
+      let error: Error | undefined;
   
-function inputDefinesChildren(code:string, nodeObject:LocalGraphNode, childrenNodeObjects:LocalGraphNode[]):string{
+      while (retries < maxRetries) {
+        try {
+            const response = await apiFetch(
+                "https://codemuse-app--api-asgi.modal.run/documentation",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    machineId: vscode.env.machineId,
+                    code: code,
+                  }),
+                }
+              );
+  
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+  
+          const data = (await response.json()) as { documentation: string };
+          
+          return data.documentation;
 
+        } catch (error) {
+          retries++;
+          error = error;
+          if (retries === maxRetries) {
+            throw error;
+          }
+        }
+      }
+
+    throw error
+
+    }
+  
+  
+function inputDefinesChildren(code:string, nodeObject:LocalGraphNode, childrenNodeObjects:Set<LocalGraphNode>):string{
     
-    const locationsAndDocumentations: [number,number,string | undefined][] = childrenNodeObjects.map((e:LocalGraphNode)=>{return [e.range[0]+1,e.range[2],e.documentation]})
-    console.log(locationsAndDocumentations.length)
-    console.log("locationsAndDocumentations.length")
+    const locationsAndDocumentations: [number,number,string | undefined, number][] = [...childrenNodeObjects].map((e:LocalGraphNode)=>{
+        if (nodeObject.symbol == "scip-python python rtcmd-api-server indexer `server.service.modules.aluminium.api.quote_viewset`/QuoteViewSet#"){
+            console.log(e)
+            console.log(buildInput.getLineOfSignature(e.content.split("\n")))
+        }
+        const lineOfSignature:number = buildInput.getLineOfSignature(e.content.split("\n"))
+        
+        
+        const lineOfSignatureInCode = e.range[0] + lineOfSignature - nodeObject.range[0]
+        return [e.range[0] + lineOfSignature + 1 ,e.range[2],e.documentation, lineOfSignatureInCode]
+    })
+
+
     //console.log(buildInput.replaceCodeByDocumentation(nodeObject.file, code, locationsAndDocumentations))
-    console.log(locationsAndDocumentations[0][0])
-    console.log(locationsAndDocumentations[0][1])
 
     return buildInput.replaceCodeByDocumentation(nodeObject.file, code, locationsAndDocumentations)
 
@@ -112,8 +164,7 @@ function inputUsesChildren(code:string, nodeObject:LocalGraphNode, locationsAndD
     return buildInput.insertDocumentationInCode(code, nodeObject.file, locationsAndDocumentations )
 }
 
-function documentNode(graph:Graph, node:string, resolved: Set<string>, unresolved: Set<string>):boolean{
-
+export function documentNode(graph:Graph, node:string):void{
 
     const outBoundEdges:string[] = graph.outboundEdges(node)
     //const numberOfUnvisitedChildren = 0
@@ -122,18 +173,16 @@ function documentNode(graph:Graph, node:string, resolved: Set<string>, unresolve
     //const filePath = graph.getNodeAttribute(node, "file")
 
     const currentNodeObject = graph.getNodeAttributes(node)
-    console.log("Documenting "+ node)
+    let processedContent:string =currentNodeObject.content
+
     if(outBoundEdges.length == 0){
-        console.log("case 0")
         // do the trivial case, documenting without inputing any comments of modifying the code
 
-        graph.setNodeAttribute(node, "processedContent", currentNodeObject.content);
-        graph.setNodeAttribute(node, "documentation", "doc");//build documentation
+        graph.setNodeAttribute(node, "processedContent", processedContent);
         
     }else {
-        console.log("case >=1")
 
-        let outBoundDefinesChildren:GraphNode[] = []
+        let outBoundDefinesChildren = new Set<LocalGraphNode>()
         let locationsAndDocumentationsUses:Set<[number,string, string|undefined]> = new Set()
 
         graph.forEachOutboundEdge(node, (_, attr, from, to) => {
@@ -144,19 +193,17 @@ function documentNode(graph:Graph, node:string, resolved: Set<string>, unresolve
 
             const nodeObject:LocalGraphNode = graph.getNodeAttributes(node)
             const toObject:LocalGraphNode = graph.getNodeAttributes(to)
+
             if (type == "defines"){
-                outBoundDefinesChildren.push(toObject)
+                outBoundDefinesChildren.add(toObject)
             }else{
                 locationsAndDocumentationsUses.add([edgeAttribute.at[0],toObject.symbol,toObject.documentation])
             }
 
         })
-        console.log(outBoundDefinesChildren.length)
-        outBoundDefinesChildren.forEach((e)=>(console.log(e)))
-        console.log(locationsAndDocumentationsUses.size)
-        let processedContent:string =currentNodeObject.content
 
-        if (outBoundDefinesChildren.length > 0) {
+
+        if (outBoundDefinesChildren.size > 0) {
             processedContent = inputDefinesChildren(processedContent, currentNodeObject, outBoundDefinesChildren )
         }
         if (locationsAndDocumentationsUses.size > 0) {
@@ -164,17 +211,23 @@ function documentNode(graph:Graph, node:string, resolved: Set<string>, unresolve
         }
 
         graph.setNodeAttribute(node, "processedContent", processedContent);
-        graph.setNodeAttribute(node, "documentation", "doc");//build documentation
 
     }
 
-    return true
+    if (processedContent){
+        const documentation = buildDocumentation(processedContent)
+
+        documentation.then(result => {
+
+            graph.setNodeAttribute(node, "documentation", result);//build documentation
+
+        })
+    }
 
 }
 
 function depthFirstDocument(graph:Graph, node:string, resolved = new Set<string>(), unresolved = new Set<string>()):void {
     // Print the node or perform the desired action
-    console.log("visiting: "+node);
 
     if ( !unresolved.has(node) && !resolved.has(node)){
         unresolved.add(node)
@@ -192,24 +245,28 @@ function depthFirstDocument(graph:Graph, node:string, resolved = new Set<string>
             }
         })
 
-        documentNode(graph, node, resolved, unresolved)
+        documentNode(graph, node)
 
     }
 
    
 }
 
-function buildDocumentationsForGraph(graph:Graph){
+export function buildDocumentationsForGraph(graph:Graph){
     const rootNodes = graph.nodes().filter(node=> graph.inDegree(node) === 0);
 
-    depthFirstDocument(graph, rootNodes[0])
+    let resolved = new Set<string>()
+    let unresolved = new Set<string>()
+
+    rootNodes.forEach((rootNode)=>{
+        depthFirstDocument(graph, rootNode, resolved, unresolved)
+    })
 
 }
   
-let dummyGraph = createDummyGraph();
 
-buildDocumentationsForGraph(dummyGraph)
-console.log(dummyGraph)
-console.log("done")
+function updateNode(nodeToUpdate:string, graph:Graph):string{
 
-
+    let newDocumentation:string = ""
+    return newDocumentation
+}

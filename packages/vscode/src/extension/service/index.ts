@@ -11,12 +11,15 @@ import {
   compareGraphs,
   loadGraphFromFile,
   saveGraphToFile,
+  findMultiUpdateOrder,
+  findMultiUpdateOrderWithDepth,
+  groupNodesByDepth,
 } from "./graph/utils_graph";
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
 import { MultiDirectedGraph } from "graphology";
 import { batch } from "../../shared/utils";
-
+import { documentNode} from "./doc/build"
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
@@ -244,7 +247,28 @@ export class Index {
               console.log("Flattened cycles (should be NONE):");
               printCycles(flattened_cycles);
 
-              progress.report({
+              // Builds documentation
+              // get the order of the nodes in which they should be documented:
+              const nodesOrder = findMultiUpdateOrderWithDepth(instance.flattenedGraph, allNodesToUpdate);
+
+              // get the different batch:
+              const nodesBatch = groupNodesByDepth(nodesOrder).reverse();
+
+              for (const nodeList of nodesBatch) {
+                // Map each nodeId to a documentNode promise
+                const documentNodePromises = nodeList.map(nodeId => documentNode(instance.originalGraph!, nodeId));
+            
+                // Execute all documentNode operations in parallel and wait for them to complete
+                try {
+                  await Promise.all(documentNodePromises);
+                  console.log('All nodes in the current list have been processed.');
+                } catch (error) {
+                  console.error('An error occurred while processing the nodes:', error);
+                }
+              }
+
+
+                progress.report({
                 message: `${language.languageId} indexed`,
               });
             } else {

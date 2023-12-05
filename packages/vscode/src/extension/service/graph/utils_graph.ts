@@ -103,9 +103,55 @@ export function findMultiUpdateOrder(
     .filter((node, index, self) => self.indexOf(node) === index);
 }
 
+/* The findMultiUpdateOrderWithDepth function takes a list of updated nodes and returns a list of nodes with their depth
+*/
+export function findMultiUpdateOrderWithDepth(
+  graph: Graph,
+  updatedNodes: string[]
+): [string, number][] {  // Updated return type to include depth
+  let depths: Map<string, number> = new Map();
+  let allNodes: Set<string> = new Set();
+
+  const visit = (node: string, depth: number) => {
+    if (!allNodes.has(node) || depths.get(node)! < depth) {
+      allNodes.add(node);
+      depths.set(node, depth);
+      graph.inNeighbors(node).forEach((parent) => visit(parent, depth + 1));
+    }
+  };
+
+  updatedNodes.forEach((node) => visit(node, 0));
+
+  // Modified to return an array of tuples [node, depth]
+  return Array.from(allNodes)
+    .sort((a, b) => depths.get(b)! - depths.get(a)!)
+    .filter((node, index, self) => self.indexOf(node) === index)
+    .map(node => [node, depths.get(node)!]);  // Map each node to a tuple [node, depth]
+}
+
 /* Function that detect if GraphNode is LocalGraphNode or ExternalGraphNode --> TODO: remove this function and use type check in TS instead */
 function isLocalGraphNode(node: GraphNode): node is LocalGraphNode {
   return (node as LocalGraphNode).hash !== undefined;
+}
+
+/* Funtion that group nodes by depth in order to have different executin batch that can be run in parallel */
+export function groupNodesByDepth(nodesWithDepth: [string, number][]): string[][] {
+  // Create a Map to group nodes by their depth
+  const depthGroups: Map<number, string[]> = new Map();
+
+  // Iterate over each node and group them by depth
+  nodesWithDepth.forEach(([nodeId, depth]) => {
+    if (!depthGroups.has(depth)) {
+      depthGroups.set(depth, []);
+    }
+    depthGroups.get(depth)!.push(nodeId);
+  });
+
+  // Convert the Map to a sorted array of arrays
+  // Sort the depths in decreasing order and map each depth to its group of nodes
+  return Array.from(depthGroups.entries())
+    .sort((a, b) => b[0] - a[0]) // Sort by depth in decreasing order
+    .map(entry => entry[1]); // Extract only the list of nodes
 }
 
 /* Function that compare two graphs and return the added, updated and deleted nodes between the two graphs. */
