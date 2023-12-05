@@ -32,7 +32,7 @@ class DocumentationRequest(ExtensionRequest):
 class DocumentationResponse(BaseModel):
     documentation: str
 
-@stub.cls(image=image, concurrency_limit=10, keep_warm=1, allow_concurrent_inputs=20)
+@stub.cls(image=image, concurrency_limit=10, keep_warm=1, allow_concurrent_inputs=20, timeout=60 * 20)
 class Api:
     def __enter__(self):
         api_functions["generate_embedding"] = Function.lookup("embeddings", "Model.generate")

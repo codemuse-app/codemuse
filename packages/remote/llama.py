@@ -66,6 +66,7 @@ class Model:
         self.llm = AsyncLLMEngine.from_engine_args(engine_args)
         self.tokenizer = CodeLlamaTokenizer.from_pretrained(TOKENIZER_DIR)
         self.template = """<s>[INST] <<SYS>>
+
 {system}
 <</SYS>>
 
@@ -74,6 +75,7 @@ class Model:
 ````
 
 Briefly explain the above code. Focus on business aspects, and be as concise as possible. If possible, only use one short sentence.[/INST] """
+
 
     @method(keep_warm=1)
     async def generate(self, code: str):
