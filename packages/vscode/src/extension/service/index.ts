@@ -19,7 +19,7 @@ import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
 import { MultiDirectedGraph } from "graphology";
 import { batch } from "../../shared/utils";
-import { documentNode} from "./doc/build"
+import { documentNode } from "./doc/build";
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
@@ -206,24 +206,28 @@ export class Index {
               });
 
               await batch(
-                allNodesToUpdate.map(async (nodeId) => {
-                  const nodeData = newFlattenedGraph.getNodeAttributes(
-                    nodeId
-                  ) as LocalGraphNode;
-                  if (nodeData.content) {
-                    await this.vectraManager.upsertItem(
-                      nodeData.content,
-                      nodeId,
-                      nodeData.hash,
-                      nodeData.file
-                    );
+                allNodesToUpdate.map((nodeId) => {
+                  return async () => {
+                    const nodeData = newFlattenedGraph.getNodeAttributes(
+                      nodeId
+                    ) as LocalGraphNode;
+
+                    if (nodeData.content) {
+                      await this.vectraManager.upsertItem(
+                        nodeData.content,
+                        nodeId,
+                        nodeData.hash,
+                        nodeData.file
+                      );
+                    }
+
                     progress.report({
                       message: "getting embeddings",
-                      increment: 100 / allNodesToUpdate.length,
+                      increment: 100 / allNodesToUpdate.length / 2,
                     });
-                  }
+                  };
                 }),
-                200,
+                100,
                 async () => {
                   await this.vectraManager.beginUpdate();
                 },
@@ -247,28 +251,53 @@ export class Index {
               console.log("Flattened cycles (should be NONE):");
               printCycles(flattened_cycles);
 
+              const documentationSpan = languageSpan?.startChild({
+                op: "function",
+                name: "documentation",
+              });
+
               // Builds documentation
               // get the order of the nodes in which they should be documented:
-              const nodesOrder = findMultiUpdateOrderWithDepth(instance.flattenedGraph, allNodesToUpdate);
+              const nodesOrder = findMultiUpdateOrderWithDepth(
+                instance.flattenedGraph,
+                allNodesToUpdate
+              );
+
+              progress.report({
+                message: "generating documentation",
+              });
 
               // get the different batch:
               const nodesBatch = groupNodesByDepth(nodesOrder).reverse();
 
               for (const nodeList of nodesBatch) {
                 // Map each nodeId to a documentNode promise
-                const documentNodePromises = nodeList.map(nodeId => documentNode(instance.originalGraph!, nodeId));
-            
+                const documentNodePromises = nodeList.map(async (nodeId) => {
+                  await documentNode(instance.originalGraph!, nodeId);
+
+                  progress.report({
+                    message: "generating documentation",
+                    increment: 100 / allNodesToUpdate.length / 2,
+                  });
+                });
+
                 // Execute all documentNode operations in parallel and wait for them to complete
                 try {
                   await Promise.all(documentNodePromises);
-                  console.log('All nodes in the current list have been processed.');
+                  console.log(
+                    "All nodes in the current list have been processed."
+                  );
                 } catch (error) {
-                  console.error('An error occurred while processing the nodes:', error);
+                  console.error(
+                    "An error occurred while processing the nodes:",
+                    error
+                  );
                 }
               }
 
+              documentationSpan?.finish();
 
-                progress.report({
+              progress.report({
                 message: `${language.languageId} indexed`,
               });
             } else {

@@ -9,19 +9,21 @@
  * @param afterBatch A function to call after each batch
  */
 export const batch = async (
-  promises: Promise<any>[],
+  promiseBuilders: (() => Promise<any>)[],
   batchSize: number = 100,
   beforeBatch?: () => any,
   afterBatch?: () => any
 ) => {
   const results: any[] = [];
 
-  for (let i = 0; i < promises.length; i += batchSize) {
+  for (let i = 0; i < promiseBuilders.length; i += batchSize) {
     if (beforeBatch) {
       await beforeBatch();
     }
 
-    const batch = promises.slice(i, i + batchSize);
+    const batch = promiseBuilders
+      .slice(i, i + batchSize)
+      .map((builder) => builder());
 
     try {
       const batchResults = await Promise.all(batch);
@@ -56,7 +58,7 @@ export const getSymbolName = (symbol: string) => {
   } else if (describer.indexOf("(") >= 0) {
     type = "function";
   }
-  
+
   return {
     moduleName,
     language,
