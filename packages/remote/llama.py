@@ -1,6 +1,7 @@
 import os
 import time
 from modal import Image, Secret, Stub, method, web_endpoint
+import sentry_sdk
 
 import utils
 
@@ -78,6 +79,7 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
 
 
     @method(keep_warm=1)
+    @utils.with_sentry
     async def generate(self, code: str):
         from vllm import SamplingParams
         from vllm.utils import random_uuid
@@ -91,8 +93,9 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
 
         # Check if the input goes over the token limit of MAX_CODE_TOKENS. If it does, truncate it. Use vllm tokenizer to get the exact token count.
         # TODO: would it be smarter to take some part from the beginning and some part from the end?
-        if len(self.tokenizer.encode(code)) > MAX_CODE_TOKENS:
-            code = self.tokenizer.decode(self.tokenizer.encode(code)[0:MAX_CODE_TOKENS])
+        with sentry_sdk.start_span(op="tokenize"):
+            if len(self.tokenizer.encode(code)) > MAX_CODE_TOKENS:
+                code = self.tokenizer.decode(self.tokenizer.encode(code)[0:MAX_CODE_TOKENS])
 
         prompt = self.template.format(
             system="You are a skilled senior developer who is asked to explain the code to a new hire. You are synthetic, and you are trying to explain the code to a human. You focus on business aspects rather than framework details. You use simple english language, with declarative sentences. You do not talk about 'this code' or 'that snippet', but just explain straight to the point.",
@@ -110,11 +113,13 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
 
         index = 0
 
-        async for request_output in results_generator:
-            if "\ufffd" == request_output.outputs[0].text[-1]:
-                continue
-            yield request_output.outputs[0].text[index:]
-            index = len(request_output.outputs[0].text)
+        with sentry_sdk.start_span(op="generate"):
+            async for request_output in results_generator:
+                if "\ufffd" == request_output.outputs[0].text[-1]:
+                    continue
+                yield request_output.outputs[0].text[index:]
+                index = len(request_output.outputs[0].text)
+
 
 # @stub.local_entrypoint()
 # def main():

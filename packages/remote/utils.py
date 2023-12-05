@@ -13,13 +13,15 @@ sentry_sdk.init(
     # of sampled transactions.
     # We recommend adjusting this value in production.
     profiles_sample_rate=1.0,
+    enable_tracing=True
 )
 
 def with_sentry(fn):
     @functools.wraps(fn)
     async def fn_wrapped(*args, **kwargs):
         try:
-            await fn(*args, **kwargs)
+            with sentry_sdk.start_transaction(op="function", name=fn.__name__):
+                await fn(*args, **kwargs)
         except Exception as exc:
             sentry_sdk.capture_exception(exc)
             raise exc
