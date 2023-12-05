@@ -19,7 +19,7 @@ import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
 import { MultiDirectedGraph } from "graphology";
 import { batch } from "../../shared/utils";
-import { documentNode} from "./doc/build"
+import { documentNode} from "./doc/build";
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];

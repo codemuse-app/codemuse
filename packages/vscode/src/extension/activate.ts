@@ -6,9 +6,27 @@ import { Index } from "./service/index";
 import { SearchViewProvider } from "./views/search";
 import { CodeMuseCodeLens } from "./codelense";
 import { capture } from "./service/logging/posthog";
+import { getSymbolName } from "../shared/utils";
+
 import * as fs from "fs";
 
 // import { telemetryLogger } from "./service/logging";
+
+export const highlight = vscode.window.createTextEditorDecorationType({
+  isWholeLine: true,
+  light: {
+    // Use the current color theme's token color for the foreground
+    backgroundColor: new vscode.ThemeColor(
+      "editor.findMatchHighlightBackground"
+    ),
+  },
+  dark: {
+    // Use the current color theme's token color for the foreground
+    backgroundColor: new vscode.ThemeColor(
+      "editor.findMatchHighlightBackground"
+    ),
+  },
+});
 
 Sentry.addTracingExtensions();
 
@@ -27,6 +45,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
   Sentry.setUser({
     id: vscode.env.machineId,
   });
+
+  // create a new comment controller
+  let commentController = vscode.comments.createCommentController(
+    "commentController",
+    "CodeMuse"
+  );
 
   //context.subscriptions.push(telemetryLogger);
   const transaction = Sentry.startTransaction({
@@ -95,6 +119,62 @@ export const activate = async (context: vscode.ExtensionContext) => {
     })
   );
 
+  // command to display documentation of CodeLens
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "extension.askCodeMuseDoc",
+      (record, range: vscode.Range) => {
+        const record_info = getSymbolName(record.symbol);
+        const activeEditor = vscode.window.activeTextEditor;
+        if (!activeEditor) {
+          return; // No editor is focused
+        }
+
+        if (!record.documentation) {
+          return;
+        }
+
+        const contents = new vscode.MarkdownString();
+        contents.supportHtml = true;
+        contents.value = record.documentation;
+
+        const commentThread = commentController.createCommentThread(
+          activeEditor.document.uri,
+          range,
+          [
+            {
+              body: contents,
+              author: { name: "CodeMuse" },
+              label: "",
+              mode: vscode.CommentMode.Preview,
+              timestamp: new Date(),
+            },
+          ]
+        );
+
+        commentThread.canReply = false;
+        commentThread.label = "Explanation of " + record_info.name;
+        commentThread.collapsibleState =
+          vscode.CommentThreadCollapsibleState.Expanded;
+
+        context.subscriptions.push(commentThread);
+
+        commentThread.collapsibleState =
+          vscode.CommentThreadCollapsibleState.Expanded;
+
+        // Dispose of the comment thread when the selection is changed
+        const selectionChangeDisposable =
+          vscode.window.onDidChangeTextEditorSelection(() => {
+            commentThread.dispose();
+            selectionChangeDisposable.dispose();
+          });
+
+        context.subscriptions.push(selectionChangeDisposable);
+      }
+    )
+  );
+
+
   // Attach the CodeLens provider
   let selector: vscode.DocumentSelector = {
     scheme: "file",
@@ -114,3 +194,4 @@ export const activate = async (context: vscode.ExtensionContext) => {
 export const deactivate = () => {
   Status.getInstance().dispose();
 };
+
