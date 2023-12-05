@@ -90,7 +90,7 @@ const createDummyGraph = () => {
 };
 
 async function buildDocumentation(code: string): Promise<string> {
-  const maxRetries = 2;
+  const maxRetries = 4;
   let retries = 0;
   let error: Error | undefined;
 
