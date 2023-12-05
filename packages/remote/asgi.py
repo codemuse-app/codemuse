@@ -87,5 +87,5 @@ class Api:
         api_functions["generate_documentation"] = Function.lookup("documentation", "Model.generate")
 
     @asgi_app()
-    def asgi():
+    def asgi(self):
         return web_app
