@@ -59,6 +59,9 @@ async def documentation(request: Request):
     # Validate the body
     documentation_request = DocumentationRequest(**body)
 
+    if len(documentation_request.code) == 0:
+        return DocumentationResponse(documentation='')
+
     # Set the sentry user to the installation ID
     sentry_sdk.set_user({"id": documentation_request.machineId})
 
