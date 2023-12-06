@@ -179,7 +179,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
         const newRange = new vscode.Range(range.end, new vscode.Position(newBottomLine, 0));
 
         // Scroll the editor to this new range
-        editor.revealRange(newRange, vscode.TextEditorRevealType.Default);
+        editor.revealRange(newRange, vscode.TextEditorRevealType.InCenter); // change this if you want to modify the position of the scroll
 
         commentThread.collapsibleState =
           vscode.CommentThreadCollapsibleState.Expanded;
