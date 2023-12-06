@@ -56,7 +56,7 @@ image = (
 
 stub = Stub("documentation", image=image)
 
-@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), concurrency_limit=5, allow_concurrent_inputs=20, container_idle_timeout=60, timeout=60 * 20, keep_warm=1)
+@stub.cls(gpu="A10G", secret=Secret.from_name("huggingface"), concurrency_limit=5, allow_concurrent_inputs=20, container_idle_timeout=60, timeout=60 * 20)
 class Model:
     def __enter__(self):
         from vllm.engine.arg_utils import AsyncEngineArgs
@@ -78,7 +78,7 @@ class Model:
 Briefly explain the above code. Focus on business aspects, and be as concise as possible. If possible, only use one short sentence.[/INST] """
 
 
-    @method(keep_warm=1)
+    @method()
     @utils.with_sentry_generator
     async def generate(self, code: str):
         from vllm import SamplingParams
