@@ -1,5 +1,8 @@
 import * as React from "react";
-import { VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
+import {
+  VSCodeTextField,
+  VSCodeButton,
+} from "@vscode/webview-ui-toolkit/react";
 
 import { RouterType } from "../../extension/router";
 import { createClient } from "../../shared/vrpc/client";
@@ -57,6 +60,18 @@ export const Search = () => {
 
   return (
     <div className="search">
+      <div style={{ paddingBottom: "15px" }}>
+        Actions
+        <div style={{ paddingTop: "3px" }}>
+          <VSCodeButton
+            onClick={() => {
+              client.index();
+            }}
+          >
+            Reindex
+          </VSCodeButton>
+        </div>
+      </div>
       <div style={{ position: "relative" }}>
         <VSCodeTextField
           style={{
@@ -89,7 +104,15 @@ export const Search = () => {
                 opacity: 0.5,
               }}
             >
-              CodeMuse helps you find code in your CodeBase.
+              Find elements in your codebase by typing in the search bar above.
+              <br />
+              <br />
+              Examples
+              <ul>
+                <li>Check the user permission level</li>
+                <li>Database model for a user</li>
+                <li>Application configuration</li>
+              </ul>
             </div>
           )
         }

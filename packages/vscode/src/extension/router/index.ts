@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/browser";
+import * as vscode from "vscode";
 
 import { router as vrpcRouter, procedure } from "../../shared/vrpc";
 import { goTo } from "../commands";
@@ -21,6 +22,9 @@ export const router = vrpcRouter({
     );
   }),
   goTo: procedure(goTo),
+  index: procedure(() => {
+    vscode.commands.executeCommand("codemuse.index");
+  }),
 });
 
 export type RouterType = typeof router;

@@ -50,6 +50,10 @@
       {
         "command": "codemuse.error",
         "title": "CodeMuse: trigger error"
+      },
+      {
+        "command": "codemuse.index",
+        "title": "CodeMuse: index workspace"
       }
     ]
   },
