@@ -213,8 +213,10 @@ export class Index {
 
               await batch(
                 allNodesToUpdate.map((nodeId) => {
+                  const graph = newFlattenedGraph as Graph;
+
                   return async () => {
-                    const nodeData = newFlattenedGraph!.getNodeAttributes(
+                    const nodeData = graph.getNodeAttributes(
                       nodeId
                     ) as LocalGraphNode;
 
@@ -280,8 +282,10 @@ export class Index {
                 // Map each nodeId to a documentNode promise
                 await batch(
                   nodeList.map((nodeId) => {
+                    const graph = newOriginalGraph as Graph;
+
                     return async () => {
-                      await documentNode(newOriginalGraph!, nodeId);
+                      await documentNode(graph, nodeId);
 
                       progress.report({
                         message: "generating documentation",
