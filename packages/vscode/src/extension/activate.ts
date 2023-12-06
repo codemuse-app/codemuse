@@ -168,6 +168,19 @@ export const activate = async (context: vscode.ExtensionContext) => {
         // Push the thread to the openThreads map (using the record.symbol as the key)
         openThreads.set(record.symbol, commentThread);
 
+        // Get the active editor
+        const uri = vscode.Uri.file(record.file);
+        const document = await vscode.workspace.openTextDocument(uri);
+        const editor = await vscode.window.showTextDocument(document);
+
+        // Calculate a new range that is a few lines below the original range
+        const lineCount = editor.document.lineCount;
+        const newBottomLine = Math.min(range.end.line + 5, lineCount - 1);
+        const newRange = new vscode.Range(range.end, new vscode.Position(newBottomLine, 0));
+
+        // Scroll the editor to this new range
+        editor.revealRange(newRange, vscode.TextEditorRevealType.Default);
+
         commentThread.collapsibleState =
           vscode.CommentThreadCollapsibleState.Expanded;
 
