@@ -125,6 +125,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
     vscode.commands.registerCommand(
       "extension.askCodeMuseDoc",
       async (record, range: vscode.Range) => {
+        capture("docview");
+
         if (!record.documentation) {
           return;
         }
