@@ -216,3 +216,29 @@ export const hashContent = (content: string): string => {
 export const hashNode = (node: Omit<LocalGraphNode, "hash">): string => {
   return hashContent(node.content);
 };
+
+// copy documentatin and processedContent of a all nodes
+export function updateGraphNodes(newOriginalGraph: Graph, originalGraph: Graph): void {
+  // Iterate over all nodes in newOriginalGraph
+  newOriginalGraph.forEachNode((nodeKey, attributes) => {
+    // Assuming 'hash' is the unique identifier
+    const nodeHash = attributes.hash;
+
+    // Check if this.originalGraph has a node with the same hash
+    let originalNodeKey = originalGraph.findNode(node => {
+      return originalGraph.getNodeAttribute(node, 'hash') === nodeHash;
+    });
+
+    if (originalNodeKey !== undefined) {
+      // Copy attributes from this.originalGraph to newOriginalGraph
+      const processedContent = originalGraph.getNodeAttribute(originalNodeKey, 'processedContent');
+      const documentation = originalGraph.getNodeAttribute(originalNodeKey, 'documentation');
+
+      // Update newOriginalGraph node attributes
+      newOriginalGraph.mergeNodeAttributes(nodeKey, {
+        processedContent,
+        documentation
+      });
+    }
+  });
+}

@@ -14,6 +14,7 @@ import {
   findMultiUpdateOrder,
   findMultiUpdateOrderWithDepth,
   groupNodesByDepth,
+  updateGraphNodes,
 } from "./graph/utils_graph";
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
@@ -169,6 +170,11 @@ export class Index {
               );
 
               buildGraphSpan?.finish();
+              
+              // load documentation from the previous graph
+              if (instance.originalGraph) {
+                updateGraphNodes(newOriginalGraph, instance.originalGraph);
+              }
 
               progress.report({
                 message: `parsing ${language.languageId} graph`,
