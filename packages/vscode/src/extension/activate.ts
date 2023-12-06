@@ -118,61 +118,69 @@ export const activate = async (context: vscode.ExtensionContext) => {
       throw new Error("This is an error");
     })
   );
-  
-  // Array to keep track of all open comment threads
-  let openCommentThreads: vscode.CommentThread[] = [];
+
+  const openThreads = new Map();
 
   context.subscriptions.push(
-  vscode.commands.registerCommand(
-    "extension.askCodeMuseDoc",
-    async (record, range: vscode.Range) => {
-      const activeEditor = vscode.window.activeTextEditor;
-      if (!activeEditor || !record.documentation) {
-        return; // No editor is focused or no documentation available
+    vscode.commands.registerCommand(
+      "extension.askCodeMuseDoc",
+      async (record, range: vscode.Range) => {
+        if (!record.documentation) {
+          return;
+        }
+
+        // If there is already a thread open for this symbol, dispose of it
+        const existingThread = openThreads.get(record.symbol);
+
+        if (existingThread) {
+          existingThread.dispose();
+          openThreads.delete(record.symbol);
+          return;
+        }
+
+        // Now create the new comment thread
+        const contents = new vscode.MarkdownString(record.documentation);
+        contents.supportHtml = true;
+
+        const commentThread = commentController.createCommentThread(
+          vscode.Uri.file(record.file),
+          range,
+          [
+            {
+              body: contents,
+              author: { name: "CodeMuse" },
+              label: "",
+              mode: vscode.CommentMode.Preview,
+              timestamp: new Date(),
+            },
+          ]
+        );
+
+        commentThread.canReply = false;
+        commentThread.label =
+          "Explanation of " + getSymbolName(record.symbol).name;
+        commentThread.collapsibleState =
+          vscode.CommentThreadCollapsibleState.Expanded;
+
+        // Add the new thread to the tracking array
+        context.subscriptions.push(commentThread);
+
+        // Push the thread to the openThreads map (using the record.symbol as the key)
+        openThreads.set(record.symbol, commentThread);
+
+        commentThread.collapsibleState =
+          vscode.CommentThreadCollapsibleState.Expanded;
+
+        // Modify the selection change disposable
+        const selectionChangeDisposable =
+          vscode.window.onDidChangeTextEditorSelection(() => {
+            commentThread.dispose();
+            selectionChangeDisposable.dispose();
+          });
+
+        context.subscriptions.push(selectionChangeDisposable);
       }
-
-      // Dispose all open comment threads
-      //openCommentThreads.forEach(thread => thread.dispose());
-      //openCommentThreads = []; // Clear the array
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Now create the new comment thread
-      const contents = new vscode.MarkdownString(record.documentation);
-      contents.supportHtml = true;
-
-      const commentThread = commentController.createCommentThread(
-        activeEditor.document.uri,
-        range,
-        [{
-          body: contents,
-          author: { name: "CodeMuse" },
-          label: "",
-          mode: vscode.CommentMode.Preview,
-          timestamp: new Date(),
-        }]
-      );
-
-      commentThread.canReply = false;
-      commentThread.label = "Explanation of " + getSymbolName(record.symbol).name;
-      commentThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-
-      // Add the new thread to the tracking array
-      openCommentThreads.push(commentThread);
-      context.subscriptions.push(commentThread);
-
-      commentThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
-
-      // Modify the selection change disposable
-      const selectionChangeDisposable = vscode.window.onDidChangeTextEditorSelection(() => {
-        openCommentThreads.forEach(thread => thread.dispose());
-        openCommentThreads = [];
-        selectionChangeDisposable.dispose();
-      });
-
-      context.subscriptions.push(selectionChangeDisposable);
-    }
-  )
+    )
   );
 
   // // command to display documentation of CodeLens
@@ -230,8 +238,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   //     }
   //   )
   // );
-  
-  
+
   // Attach the CodeLens provider
   let selector: vscode.DocumentSelector = {
     scheme: "file",
@@ -252,4 +259,3 @@ export const activate = async (context: vscode.ExtensionContext) => {
 export const deactivate = () => {
   Status.getInstance().dispose();
 };
-
