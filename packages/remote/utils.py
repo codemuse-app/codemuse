@@ -20,10 +20,10 @@ def with_sentry(fn):
         sentry_trace_headers = kwargs.pop('sentry_trace_headers', None)
 
         try:
-            if sentry_trace_headers:
-                sentry_sdk.continue_trace(sentry_trace_headers)
-
             with sentry_sdk.start_transaction(op="function", name=fn.__name__):
+                if sentry_trace_headers:
+                    sentry_sdk.continue_trace(sentry_trace_headers)
+
                 # Call the function without the sentry_trace_headers argument
                 return await fn(*args, **kwargs)
         except Exception as exc:
@@ -39,10 +39,10 @@ def with_sentry_generator(fn):
         sentry_trace_headers = kwargs.pop('sentry_trace_headers', None)
 
         try:
-            if sentry_trace_headers:
-                sentry_sdk.continue_trace(sentry_trace_headers)
-
             with sentry_sdk.start_transaction(op="function", name=fn.__name__):
+                if sentry_trace_headers:
+                    sentry_sdk.continue_trace(sentry_trace_headers)
+
                 # Call the function without the sentry_trace_headers argument
                 async for item in fn(*args, **kwargs):
                     yield item
