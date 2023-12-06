@@ -118,68 +118,126 @@ export const activate = async (context: vscode.ExtensionContext) => {
       throw new Error("This is an error");
     })
   );
+  
+  // Array to keep track of all open comment threads
+  let openCommentThreads: vscode.CommentThread[] = [];
 
-  // command to display documentation of CodeLens
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "extension.askCodeMuseDoc",
-      (record, range: vscode.Range) => {
-        const record_info = getSymbolName(record.symbol);
-        const activeEditor = vscode.window.activeTextEditor;
-        if (!activeEditor) {
-          return; // No editor is focused
-        }
-
-        if (!record.documentation) {
-          return;
-        }
-
-        const contents = new vscode.MarkdownString();
-        contents.supportHtml = true;
-        contents.value = record.documentation;
-
-        const commentThread = commentController.createCommentThread(
-          activeEditor.document.uri,
-          range,
-          [
-            {
-              body: contents,
-              author: { name: "CodeMuse" },
-              label: "",
-              mode: vscode.CommentMode.Preview,
-              timestamp: new Date(),
-            },
-          ]
-        );
-
-        commentThread.canReply = false;
-        commentThread.label = "Explanation of " + record_info.name;
-        commentThread.collapsibleState =
-          vscode.CommentThreadCollapsibleState.Expanded;
-
-        context.subscriptions.push(commentThread);
-
-        commentThread.collapsibleState =
-          vscode.CommentThreadCollapsibleState.Expanded;
-
-        // Dispose of the comment thread when the selection is changed
-        const selectionChangeDisposable =
-          vscode.window.onDidChangeTextEditorSelection(() => {
-            commentThread.dispose();
-            selectionChangeDisposable.dispose();
-          });
-
-        context.subscriptions.push(selectionChangeDisposable);
+  vscode.commands.registerCommand(
+    "extension.askCodeMuseDoc",
+    async (record, range: vscode.Range) => {
+      const activeEditor = vscode.window.activeTextEditor;
+      if (!activeEditor || !record.documentation) {
+        return; // No editor is focused or no documentation available
       }
-    )
+
+      // Dispose all open comment threads
+      //openCommentThreads.forEach(thread => thread.dispose());
+      //openCommentThreads = []; // Clear the array
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Now create the new comment thread
+      const contents = new vscode.MarkdownString(record.documentation);
+      contents.supportHtml = true;
+
+      const commentThread = commentController.createCommentThread(
+        activeEditor.document.uri,
+        range,
+        [{
+          body: contents,
+          author: { name: "CodeMuse" },
+          label: "",
+          mode: vscode.CommentMode.Preview,
+          timestamp: new Date(),
+        }]
+      );
+
+      commentThread.canReply = false;
+      commentThread.label = "Explanation of " + getSymbolName(record.symbol).name;
+      commentThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
+
+      // Add the new thread to the tracking array
+      openCommentThreads.push(commentThread);
+      context.subscriptions.push(commentThread);
+
+      commentThread.collapsibleState = vscode.CommentThreadCollapsibleState.Expanded;
+
+      // Modify the selection change disposable
+      const selectionChangeDisposable = vscode.window.onDidChangeTextEditorSelection(() => {
+        openCommentThreads.forEach(thread => thread.dispose());
+        openCommentThreads = [];
+        selectionChangeDisposable.dispose();
+      });
+
+      context.subscriptions.push(selectionChangeDisposable);
+    }
+  )
   );
 
+  // // command to display documentation of CodeLens
+  // context.subscriptions.push(
+  //   vscode.commands.registerCommand(
+  //     "extension.askCodeMuseDoc",
+  //     (record, range: vscode.Range) => {
+  //       const record_info = getSymbolName(record.symbol);
+  //       const activeEditor = vscode.window.activeTextEditor;
+  //       if (!activeEditor) {
+  //         return; // No editor is focused
+  //       }
 
+  //       if (!record.documentation) {
+  //         return;
+  //       }
+
+  //       const contents = new vscode.MarkdownString();
+  //       contents.supportHtml = true;
+  //       contents.value = record.documentation;
+
+  //       // Inside your registerCommand callback
+  //       const commentThread = commentController.createCommentThread(
+  //         activeEditor.document.uri,
+  //         range,
+  //         [
+  //           {
+  //             body: contents,
+  //             author: { name: "CodeMuse" },
+  //             label: "",
+  //             mode: vscode.CommentMode.Preview,
+  //             timestamp: new Date(),
+  //           },
+  //         ]
+  //       );
+
+  //       commentThread.canReply = false;
+  //       commentThread.label = "Explanation of " + record_info.name;
+  //       commentThread.collapsibleState =
+  //         vscode.CommentThreadCollapsibleState.Expanded;
+
+  //       context.subscriptions.push(commentThread);
+
+  //       commentThread.collapsibleState =
+  //         vscode.CommentThreadCollapsibleState.Expanded;
+
+  //       // Dispose of the comment thread when the selection is changed
+  //       const selectionChangeDisposable =
+  //         vscode.window.onDidChangeTextEditorSelection(() => {
+  //           commentThread.dispose();
+  //           selectionChangeDisposable.dispose();
+  //         });
+
+  //       context.subscriptions.push(selectionChangeDisposable);
+  //     }
+  //   )
+  // );
+  
+  
   // Attach the CodeLens provider
   let selector: vscode.DocumentSelector = {
     scheme: "file",
     language: "python",
   };
+
   context.subscriptions.push(
     vscode.languages.registerCodeLensProvider(selector, new CodeMuseCodeLens())
   );
