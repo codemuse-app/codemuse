@@ -114,6 +114,9 @@ export class Index {
           });
 
           for (const language of instance.languages) {
+            let newOriginalGraph: Graph | undefined = undefined,
+              newFlattenedGraph: Graph | undefined = undefined;
+
             const languageSpan = workspaceSpan?.startChild({
               op: "function",
               name: "language",
@@ -159,7 +162,7 @@ export class Index {
                 name: "buildGraph",
               });
 
-              instance.originalGraph = await buildGraph(
+              newOriginalGraph = await buildGraph(
                 workspace.uri.fsPath,
                 scipPath,
                 language.languageId
@@ -177,19 +180,16 @@ export class Index {
               });
 
               // check the number of cycles in the original graph
-              const original_cycles = findCycles(instance.originalGraph);
+              const original_cycles = findCycles(newOriginalGraph);
               console.log("Original cycles:");
               printCycles(original_cycles);
 
               // Rebuild the flattened graph and update the Vectra index
-              const newFlattenedGraph = buildFlattenedGraph(
-                instance.originalGraph
-              );
+              newFlattenedGraph = buildFlattenedGraph(newOriginalGraph);
               const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(
                 instance.flattenedGraph || new MultiDirectedGraph(),
                 newFlattenedGraph
               );
-              instance.flattenedGraph = newFlattenedGraph; // Update the flattened graph
 
               flattenGraphSpan?.finish();
 
@@ -208,7 +208,7 @@ export class Index {
               await batch(
                 allNodesToUpdate.map((nodeId) => {
                   return async () => {
-                    const nodeData = newFlattenedGraph.getNodeAttributes(
+                    const nodeData = newFlattenedGraph!.getNodeAttributes(
                       nodeId
                     ) as LocalGraphNode;
 
@@ -247,7 +247,7 @@ export class Index {
 
               await this.vectraManager.endUpdate();
 
-              const flattened_cycles = findCycles(instance.flattenedGraph);
+              const flattened_cycles = findCycles(newFlattenedGraph);
               console.log("Flattened cycles (should be NONE):");
               printCycles(flattened_cycles);
 
@@ -259,7 +259,7 @@ export class Index {
               // Builds documentation
               // get the order of the nodes in which they should be documented:
               const nodesOrder = findMultiUpdateOrderWithDepth(
-                instance.flattenedGraph,
+                newFlattenedGraph,
                 allNodesToUpdate
               );
 
@@ -275,7 +275,7 @@ export class Index {
                 await batch(
                   nodeList.map((nodeId) => {
                     return async () => {
-                      await documentNode(instance.originalGraph!, nodeId);
+                      await documentNode(newOriginalGraph!, nodeId);
 
                       progress.report({
                         message: "generating documentation",
@@ -299,19 +299,21 @@ export class Index {
             }
 
             // At the end of the run method, save the graphs
-            if (this.originalGraph) {
+            if (newOriginalGraph) {
               saveGraphToFile(
-                this.originalGraph,
+                newOriginalGraph,
                 "originalGraph.json",
                 this.context
               );
+              this.originalGraph = newOriginalGraph;
             }
-            if (this.flattenedGraph) {
+            if (newFlattenedGraph) {
               saveGraphToFile(
-                this.flattenedGraph,
+                newFlattenedGraph,
                 "flattenedGraph.json",
                 this.context
               );
+              this.flattenedGraph = newFlattenedGraph;
             }
 
             languageSpan?.finish();
