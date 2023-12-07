@@ -63,7 +63,7 @@ export default async function Login({
   return (
     <div>
       <div className="flex flex-col items-center py-8 xl:py-24">
-        <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-white dark:bg-black p-8 rounded-xl border border-gray-200 max-w-md">
+        <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-white dark:bg-black p-8 rounded-xl border border-gray-200 dark:border-gray-600 max-w-md">
           {searchParams?.message && (
             <p className="mb-4 p-4 rounded-md bg-foreground/10 text-foreground text-center">
               {searchParams.message}
