@@ -61,11 +61,7 @@ export default async function Login({
   return (
     <div>
       <div className="flex flex-col items-center py-8 xl:py-24">
-        <form
-          className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-white dark:bg-black p-8 rounded-xl border border-gray-200 max-w-md"
-          // @ts-ignore
-          action={signIn}
-        >
+        <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-white dark:bg-black p-8 rounded-xl border border-gray-200 max-w-md">
           {searchParams?.message && (
             <p className="mb-4 p-4 rounded-md bg-foreground/10 text-foreground text-center">
               {searchParams.message}
@@ -100,6 +96,7 @@ export default async function Login({
             <input
               type="email"
               id="email"
+              name="email"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="name@flowbite.com"
               required
@@ -115,11 +112,15 @@ export default async function Login({
             <input
               type="password"
               id="password"
+              name="password"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               required
             />
           </div>
-          <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+          <button
+            formAction={signIn}
+            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          >
             Sign In
           </button>
           <hr />
