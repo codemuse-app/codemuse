@@ -2,8 +2,12 @@
   "name": "codemuse",
   "displayName": "CodeMuse",
   "description": "AI onboarding and peer programming.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codemuse-app/codemuse"
+  },
   "icon": "media/icon.png",
-  "version": "0.8.31",
+  "version": "0.8.33",
   "publisher": "codemuse-app",
   "engines": {
     "vscode": "^1.84.0"
