@@ -19,8 +19,7 @@ export async function POST(request: Request) {
     console.error(error);
   }
 
-  // Respond with an empty HTML page containing "Redirecting..." and a meta http-equiv="refresh" tag that redirects back to https://www.codemuse.app
-  return `<!DOCTYPE html>
+  return new Response(`<!DOCTYPE html>
     <html>
       <head>
         <meta http-equiv="refresh" content="15; url=https://www.codemuse.app/" />
@@ -28,5 +27,5 @@ export async function POST(request: Request) {
       <body>
         You have been successfully subscribed. Redirecting...
       </body>
-    </html>`;
+    </html>`);
 }
