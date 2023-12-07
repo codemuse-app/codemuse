@@ -31,6 +31,20 @@ export default async function Login({
       return redirect("/login?message=Could not authenticate user");
     }
 
+    if (
+      searchParams.redirect &&
+      (searchParams.redirect.startsWith("vscode://codemuse-app.codemuse") ||
+        searchParams.redirect.startsWith(
+          "vscode-insiders://codemuse-app.codemuse"
+        ))
+    ) {
+      return redirect(
+        searchParams.redirect +
+          "?token=" +
+          (await supabase.auth.getSession()).data.session?.access_token
+      );
+    }
+
     return redirect(searchParams.redirect || "/");
   };
 
