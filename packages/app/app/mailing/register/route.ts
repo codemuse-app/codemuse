@@ -19,9 +19,14 @@ export async function POST(request: Request) {
     console.error(error);
   }
 
-  // Redirect to https://codemuse.app
-  // with a GET request
-  return NextResponse.redirect("https://www.codemuse.app", {
-    status: 303,
-  });
+  // Respond with an empty HTML page containing "Redirecting..." and a meta http-equiv="refresh" tag that redirects back to https://www.codemuse.app
+  return `<!DOCTYPE html>
+    <html>
+      <head>
+        <meta http-equiv="refresh" content="15; url=https://www.codemuse.app/" />
+      </head>
+      <body>
+        You have been successfully subscribed. Redirecting...
+      </body>
+    </html>`;
 }
