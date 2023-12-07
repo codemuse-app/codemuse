@@ -19,13 +19,20 @@ export async function POST(request: Request) {
     console.error(error);
   }
 
-  return new Response(`<!DOCTYPE html>
-    <html>
-      <head>
-        <meta http-equiv="refresh" content="15; url=https://www.codemuse.app/" />
-      </head>
-      <body>
-        You have been successfully subscribed. Redirecting...
-      </body>
-    </html>`);
+  return new Response(
+    `<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="refresh" content="15; url=https://www.codemuse.app/" />
+  </head>
+  <body>
+    You have been successfully subscribed. Redirecting...
+  </body>
+</html>`,
+    {
+      headers: {
+        "content-type": "text/html;charset=UTF-8",
+      },
+    }
+  );
 }
