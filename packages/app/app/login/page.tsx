@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { headers, cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
@@ -64,6 +63,7 @@ export default async function Login({
       <div className="flex flex-col items-center py-8 xl:py-24">
         <form
           className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-white dark:bg-black p-8 rounded-xl border border-gray-200 max-w-md"
+          // @ts-ignore
           action={signIn}
         >
           {searchParams?.message && (
