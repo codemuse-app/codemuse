@@ -20,5 +20,8 @@ export async function POST(request: Request) {
   }
 
   // Redirect to https://codemuse.app
-  return NextResponse.redirect("https://codemuse.app");
+  // with a GET request
+  return NextResponse.redirect("https://www.codemuse.app", {
+    status: 303,
+  });
 }
