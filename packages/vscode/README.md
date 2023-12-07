@@ -66,9 +66,10 @@ Upon installation, you will need to restart Visual Studio Code for the changes t
 ## Contributing
 Your feedback is crucial! Explore our free access plan, join our Discord channel for discussions, or submit ticket errors for quick resolutions. Direct contact for improvement suggestions or active contributions is always welcome.
 
-Join our [Discord](discordlink)!
+[Join our Discord](https://discord.gg/KSzM9kFq)!
+<br>
 Submit an [issue](issueformlink) !
 
 ## How Can I Help?
-Love our extension? Rate us 5 stars on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=codemuse-app.codemuse&ssr=false#review-details) and join our [Discord](linktodiscord) to be a part of our user community, providing invaluable feedback and shaping our product's future!
+Love our extension? Rate us ⭐⭐⭐⭐⭐ on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=codemuse-app.codemuse&ssr=false#review-details) and [join our Discord](https://discord.gg/KSzM9kFq) to be a part of our user community, providing invaluable feedback and shaping our product's future!
 
