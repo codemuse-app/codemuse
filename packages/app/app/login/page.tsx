@@ -5,73 +5,156 @@ import { redirect } from "next/navigation";
 export default async function Login({
   searchParams,
 }: {
-  searchParams: { message: string; redirect?: string };
+  searchParams: { message: string; redirect?: string; machine_id?: string };
 }) {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const origin = headers().get("origin");
 
-  if ((await supabase.auth.getUser()).data.user) {
-    return redirect(searchParams.redirect || "/");
-  }
+  const handleRedirect = async () => {
+    "use server";
+
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+
+    const user = await supabase.auth.getUser();
+
+    if (!user.data.user) {
+      // User is not logged in
+      return;
+    }
+
+    if (searchParams.redirect) {
+      // Detect if the target redirect is vscode
+      const decodedRedirect = decodeURIComponent(searchParams.redirect);
+
+      if (
+        !decodedRedirect.startsWith("vscode://") &&
+        !decodedRedirect.startsWith("vscode-insiders://")
+      ) {
+        // Target redirect is not vscode
+        return;
+      }
+
+      console.log("Redirect to vscode");
+
+      if (!searchParams.machine_id) {
+        // No machine id is provided
+        //redirect("/login?message=Missing machine id");
+      }
+
+      const existingToken = await supabase
+        .from("api_tokens")
+        .select("id")
+        .eq("machine_id", searchParams.machine_id)
+        .eq("user_id", user.data.user.id)
+        .single();
+
+      console.log(existingToken.error);
+
+      let token = null;
+
+      if (existingToken.data) {
+        token = existingToken.data.id;
+      } else {
+        const newToken = await supabase
+          .from("api_tokens")
+          .insert({
+            user_id: user.data.user.id,
+            machine_id: searchParams.machine_id,
+          })
+          .select()
+          .single();
+
+        if (newToken.error || !newToken.data) {
+          console.error(newToken.error);
+          return;
+        }
+
+        token = newToken.data.id;
+      }
+
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const redirectUrl = new URL(decodedRedirect);
+      redirectUrl.searchParams.set("token", token);
+
+      return redirect(redirectUrl.toString());
+    }
+  };
+
+  await handleRedirect();
 
   const signIn = async (formData: FormData) => {
     "use server";
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
 
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    if (!email || !password) {
+      const redirectSearchParams = new URLSearchParams(searchParams);
+      redirectSearchParams.set("message", "Missing email or password");
+
+      return redirect(`/login?${redirectSearchParams.toString()}`);
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: email as string,
+      password: password as string,
     });
 
     if (error) {
-      return redirect("/login?message=Could not authenticate user");
+      const redirectSearchParams = new URLSearchParams(searchParams);
+      redirectSearchParams.set("message", error.message);
     }
 
-    if (
-      searchParams.redirect &&
-      (searchParams.redirect.startsWith("vscode://codemuse-app.codemuse") ||
-        searchParams.redirect.startsWith(
-          "vscode-insiders://codemuse-app.codemuse"
-        ))
-    ) {
-      return redirect(
-        searchParams.redirect +
-          "?token=" +
-          (await supabase.auth.getSession()).data.session?.access_token
-      );
-    }
-
-    return redirect(searchParams.redirect || "/");
+    handleRedirect();
   };
 
   const signUp = async (formData: FormData) => {
     "use server";
 
-    const origin = headers().get("origin");
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
 
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    if (!email || !password) {
+      const redirectSearchParams = new URLSearchParams(searchParams);
+      redirectSearchParams.set("message", "Missing email or password");
+
+      return redirect(`/login?${redirectSearchParams.toString()}`);
+    }
+
+    const emailRedirectSearchParams = new URLSearchParams(searchParams);
+
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
+      email: email as string,
+      password: password as string,
       options: {
-        emailRedirectTo: `${origin}/auth/callback?redirect=${
-          searchParams.redirect || "/"
-        }`,
+        emailRedirectTo: `${origin}/auth/callback?${emailRedirectSearchParams.toString()}`,
       },
     });
 
     if (error) {
-      return redirect("/login?message=Could not authenticate user");
+      const redirectSearchParams = new URLSearchParams(searchParams);
+      redirectSearchParams.set("message", error.message);
+
+      return redirect(`/login?${redirectSearchParams.toString()}`);
     }
 
-    return redirect("/login?message=Check email to continue sign in process");
+    const redirectSearchParams = new URLSearchParams(searchParams);
+    redirectSearchParams.set(
+      "message",
+      "Check your email for the confirmation link"
+    );
+
+    return redirect(`/login?${redirectSearchParams.toString()}`);
   };
 
   return (

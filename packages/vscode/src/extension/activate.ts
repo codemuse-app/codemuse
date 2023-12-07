@@ -9,6 +9,7 @@ import { capture } from "./service/logging/posthog";
 import { getSymbolName } from "../shared/utils";
 
 import * as fs from "fs";
+import { CodeMuseAuthenticationProvider, getUser } from "./service/auth";
 
 // import { telemetryLogger } from "./service/logging";
 
@@ -46,9 +47,37 @@ export const activate = async (context: vscode.ExtensionContext) => {
     id: vscode.env.machineId,
   });
 
+  // create authentication provider
+  const authenticationProvider = new CodeMuseAuthenticationProvider(context);
+
+  context.subscriptions.push(authenticationProvider);
+
+  // register authentication provider
+  context.subscriptions.push(
+    vscode.authentication.registerAuthenticationProvider(
+      "codemuseAuthenticationProvider",
+      "CodeMuse",
+      authenticationProvider
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codemuse.login", async () => {
+      await authenticationProvider.createSession([]);
+      capture("login");
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codemuse.logout", async () => {
+      await authenticationProvider.logOut();
+      capture("logout");
+    })
+  );
+
   // create a new comment controller
   let commentController = vscode.comments.createCommentController(
-    "commentController",
+    "codemuseCommentController",
     "CodeMuse"
   );
 
@@ -178,7 +207,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
         // Calculate a new range that is a few lines below the original range
         const lineCount = editor.document.lineCount;
         const newBottomLine = Math.min(range.end.line + 5, lineCount - 1);
-        const newRange = new vscode.Range(range.end, new vscode.Position(newBottomLine, 0));
+        const newRange = new vscode.Range(
+          range.end,
+          new vscode.Position(newBottomLine, 0)
+        );
 
         // Scroll the editor to this new range
         editor.revealRange(newRange, vscode.TextEditorRevealType.InCenter); // change this if you want to modify the position of the scroll

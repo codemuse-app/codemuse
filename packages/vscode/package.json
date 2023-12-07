@@ -59,6 +59,14 @@
       {
         "command": "codemuse.index",
         "title": "CodeMuse: index workspace"
+      },
+      {
+        "command": "codemuse.login",
+        "title": "CodeMuse: login"
+      },
+      {
+        "command": "codemuse.logout",
+        "title": "CodeMuse: logout"
       }
     ]
   },
