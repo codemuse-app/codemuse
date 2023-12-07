@@ -11,10 +11,15 @@ export async function POST(request: Request) {
   const data = await request.formData();
 
   try {
-    mailchimp.lists.addListMember(process.env.MAILCHIMP_LIST_ID as string, {
-      email_address: data.get("email") as string,
-      status: "subscribed",
-    });
+    mailchimp.lists.setListMember(
+      process.env.MAILCHIMP_LIST_ID as string,
+      data.get("email") as string,
+      {
+        email_address: data.get("email") as string,
+        status: "subscribed",
+        status_if_new: "subscribed",
+      }
+    );
   } catch (error) {
     console.error(error);
   }
