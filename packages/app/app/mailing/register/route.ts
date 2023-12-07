@@ -19,9 +19,6 @@ export async function POST(request: Request) {
     console.error(error);
   }
 
-  if (data.get("redirect")) {
-    return NextResponse.redirect(data.get("redirect") as string);
-  }
-
-  return NextResponse.redirect("/");
+  // Redirect to https://codemuse.app
+  return NextResponse.redirect("https://codemuse.app");
 }
