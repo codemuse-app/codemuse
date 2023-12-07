@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     `<!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="refresh" content="15; url=https://www.codemuse.app/" />
+    <meta http-equiv="refresh" content="3; url=https://www.codemuse.app/" />
   </head>
   <body>
     You have been successfully subscribed. Redirecting...
