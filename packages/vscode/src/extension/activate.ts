@@ -62,6 +62,13 @@ export const activate = async (context: vscode.ExtensionContext) => {
     )
   );
 
+  const session = await vscode.authentication.getSession("codemuse", [], {
+    createIfNone: false,
+  });
+  Sentry.setUser({
+    id: session?.id,
+  });
+
   authenticationProvider.onDidChangeSessions((e) => {
     if (e.added) {
       Sentry.setUser({
@@ -75,15 +82,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
       });
     }
   });
-
-  const setId = (async () => {
-    const session = await vscode.authentication.getSession("codemuse", [], {
-      createIfNone: true,
-    });
-    Sentry.setUser({
-      id: session?.id,
-    });
-  })();
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.login", async () => {
