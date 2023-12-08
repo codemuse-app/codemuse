@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     .digest("hex");
 
   try {
-    mailchimp.lists.setListMember(
+    await mailchimp.lists.setListMember(
       process.env.MAILCHIMP_LIST_ID as string,
       mailHash,
       {
@@ -27,10 +27,13 @@ export async function POST(request: Request) {
   } catch (e) {
     console.error(e);
 
-    mailchimp.lists.addListMember(process.env.MAILCHIMP_LIST_ID as string, {
-      email_address: (data.get("email") as string).toLocaleLowerCase(),
-      status: "subscribed",
-    });
+    await mailchimp.lists.addListMember(
+      process.env.MAILCHIMP_LIST_ID as string,
+      {
+        email_address: (data.get("email") as string).toLocaleLowerCase(),
+        status: "subscribed",
+      }
+    );
   }
 
   return new Response(
