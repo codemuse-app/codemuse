@@ -9,7 +9,7 @@ import { capture } from "./service/logging/posthog";
 import { getSymbolName } from "../shared/utils";
 
 import * as fs from "fs";
-import { CodeMuseAuthenticationProvider, getUser } from "./service/auth";
+import { CodeMuseAuthenticationProvider } from "./service/auth";
 
 // import { telemetryLogger } from "./service/logging";
 
@@ -70,7 +70,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.logout", async () => {
-      await authenticationProvider.logOut();
+      await authenticationProvider.clearSessions();
       capture("logout");
     })
   );
