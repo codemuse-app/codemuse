@@ -159,7 +159,7 @@ export default async function Login({
   };
 
   const oAuthRedirectUri = `${
-    window.location.origin
+    headers().get("origin") || "http://localhost:3000"
   }/login?${new URLSearchParams(searchParams).toString()}`;
 
   return (
