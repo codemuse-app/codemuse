@@ -7,23 +7,18 @@ export const GitHubLoginButton = ({ redirect }: { redirect?: string }) => {
   const signInWithGithub = async () => {
     "use client";
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
         redirectTo: `https://app.codemuse.app/auth/callback?redirect=${encodeURIComponent(
           redirect || "/"
         )}`,
-        queryParams: {
-          // redirectTo: redirectTo || "/",
-        },
       },
     });
 
     if (error) {
       throw error;
     }
-
-    console.log(data);
   };
 
   return (
@@ -46,7 +41,6 @@ export const GitHubLoginButton = ({ redirect }: { redirect?: string }) => {
         />
       </svg>
       Sign in with Github
-      {redirect}
     </button>
   );
 };

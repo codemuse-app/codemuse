@@ -20,8 +20,11 @@ export default async function Login({
 
     if (!user.data.user) {
       // User is not logged in
+      console.log("not logged in");
       return;
     }
+
+    console.log("logged in");
 
     if (searchParams.redirect) {
       // Detect if the target redirect is vscode
@@ -31,11 +34,8 @@ export default async function Login({
         !decodedRedirect.startsWith("vscode://") &&
         !decodedRedirect.startsWith("vscode-insiders://")
       ) {
-        // Target redirect is not vscode
-        return;
+        redirect(decodedRedirect);
       }
-
-      console.log("Redirect to vscode");
 
       if (!searchParams.machine_id) {
         // No machine id is provided
@@ -83,6 +83,8 @@ export default async function Login({
 
       return redirect(redirectUrl.toString());
     }
+
+    return redirect("/");
   };
 
   await handleRedirect();
