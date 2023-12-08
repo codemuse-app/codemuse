@@ -49,6 +49,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   // create authentication provider
   const authenticationProvider = new CodeMuseAuthenticationProvider(context);
+  await authenticationProvider.clearSessions();
 
   context.subscriptions.push(authenticationProvider);
 
@@ -60,6 +61,29 @@ export const activate = async (context: vscode.ExtensionContext) => {
       authenticationProvider
     )
   );
+
+  authenticationProvider.onDidChangeSessions((e) => {
+    if (e.added) {
+      Sentry.setUser({
+        id: e.added[0].account.id,
+      });
+    }
+
+    if (e.changed) {
+      Sentry.setUser({
+        id: e.changed[0].account.id,
+      });
+    }
+  });
+
+  const setId = (async () => {
+    const session = await vscode.authentication.getSession("codemuse", [], {
+      createIfNone: true,
+    });
+    Sentry.setUser({
+      id: session?.id,
+    });
+  })();
 
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.login", async () => {

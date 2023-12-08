@@ -154,6 +154,16 @@ export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
           token: string;
         };
 
+        const { userId } = await fetch(`${CODEMUSE_APP_URL}/auth/user`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token,
+          }),
+        }).then((res) => res.json());
+
         capture("login");
 
         const session = {
@@ -161,7 +171,7 @@ export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
           accessToken: token,
           account: {
             label: "CodeMuse",
-            id: "codemuse",
+            id: userId,
           },
           scopes: [],
         } satisfies AuthenticationSession;
