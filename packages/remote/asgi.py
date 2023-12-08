@@ -57,7 +57,7 @@ class Api:
                 raise HTTPException(400, "No authorization header")
 
             # The token should be in authorization bearer format. Extract it
-            token = request.headers.get("Authorization").split("Bearer")[1]
+            token = request.headers.get("Authorization").split("Bearer")[1].strip()
 
             # Check if the token is valid in supabase
             db_token = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute()
