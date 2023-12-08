@@ -158,9 +158,9 @@ export default async function Login({
     return redirect(`/login?${redirectSearchParams.toString()}`);
   };
 
-  const oAuthRedirectUri = `login?${new URLSearchParams(
-    searchParams
-  ).toString()}`;
+  const oAuthRedirectUri = `${
+    window.location.origin
+  }/login?${new URLSearchParams(searchParams).toString()}`;
 
   return (
     <div>
