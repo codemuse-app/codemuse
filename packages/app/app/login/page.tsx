@@ -171,7 +171,7 @@ export default async function Login({
               {searchParams.message}
             </p>
           )}
-          <GitHubLoginButton redirectTo={oAuthRedirectUri} />
+          <GitHubLoginButton redirect={oAuthRedirectUri} />
           <div className="mb-5">
             <label
               htmlFor="email"

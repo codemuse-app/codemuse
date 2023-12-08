@@ -1,7 +1,7 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 
-export const GitHubLoginButton = ({ redirectTo }: { redirectTo?: string }) => {
+export const GitHubLoginButton = ({ redirect }: { redirect?: string }) => {
   const supabase = createClient();
 
   const signInWithGithub = async () => {
@@ -10,9 +10,9 @@ export const GitHubLoginButton = ({ redirectTo }: { redirectTo?: string }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
-        redirectTo: encodeURIComponent(
-          `/auth/callback?redirectTo=${encodeURIComponent(redirectTo || "/")}`
-        ),
+        redirectTo: `https://app.codemuse.app/auth/callback?redirect=${encodeURIComponent(
+          redirect || "/"
+        )}`,
         queryParams: {
           // redirectTo: redirectTo || "/",
         },
@@ -46,7 +46,7 @@ export const GitHubLoginButton = ({ redirectTo }: { redirectTo?: string }) => {
         />
       </svg>
       Sign in with Github
-      {redirectTo}
+      {redirect}
     </button>
   );
 };
