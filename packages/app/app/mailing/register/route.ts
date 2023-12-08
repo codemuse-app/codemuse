@@ -14,15 +14,24 @@ export async function POST(request: Request) {
     .update((data.get("email") as string).toLowerCase())
     .digest("hex");
 
-  mailchimp.lists.setListMember(
-    process.env.MAILCHIMP_LIST_ID as string,
-    mailHash,
-    {
+  try {
+    mailchimp.lists.setListMember(
+      process.env.MAILCHIMP_LIST_ID as string,
+      mailHash,
+      {
+        email_address: (data.get("email") as string).toLocaleLowerCase(),
+        status: "pending",
+        status_if_new: "subscribed",
+      }
+    );
+  } catch (e) {
+    console.error(e);
+
+    mailchimp.lists.addListMember(process.env.MAILCHIMP_LIST_ID as string, {
       email_address: (data.get("email") as string).toLocaleLowerCase(),
-      status: "pending",
-      status_if_new: "subscribed",
-    }
-  );
+      status: "subscribed",
+    });
+  }
 
   return new Response(
     `<!DOCTYPE html>
