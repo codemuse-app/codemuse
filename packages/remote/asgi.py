@@ -59,8 +59,11 @@ class Api:
             # The token should be in authorization bearer format. Extract it
             token = request.headers.get("Authorization").split("Bearer")[1].strip()
 
-            # Check if the token is valid in supabase
-            db_token = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute()
+            try:
+                # Check if the token is valid in supabase
+                db_token = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute()
+            except Exception as e:
+                raise HTTPException(500, e.__str__)
 
             if not db_token:
                 raise HTTPException(401, "Token not found")
