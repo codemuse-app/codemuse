@@ -10,11 +10,11 @@ export const GitHubLoginButton = ({ redirectTo }: { redirectTo?: string }) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
-        redirectTo: `/auth/callback?redirectTo=${encodeURIComponent(
-          redirectTo || "/"
-        )}`,
+        redirectTo: encodeURIComponent(
+          `/auth/callback?redirectTo=${encodeURIComponent(redirectTo || "/")}`
+        ),
         queryParams: {
-          redirectTo: redirectTo || "/",
+          // redirectTo: redirectTo || "/",
         },
       },
     });
