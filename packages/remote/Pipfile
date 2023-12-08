@@ -10,6 +10,7 @@ fastapi = "*"
 posthog = "*"
 sentry-sdk = {extras = ["fastapi"], version = "*"}
 pydantic = "*"
+supabase = "*"
 
 [dev-packages]
 
