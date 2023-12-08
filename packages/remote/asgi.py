@@ -76,6 +76,9 @@ class Api:
             # Set the sentry user to the installation ID
             sentry_sdk.set_user({"id": db_token["user_id"]})
 
+            # Push a new entry to the usage table, with event name, token_id and user_id
+            self.supabase.table("api_usage").insert({"event": event_name, "token_id": db_token["id"], "user_id": db_token["user_id"]}).execute()
+
         @web_app.middleware("http")
         async def print_request(request: Request, call_next):
             print(request.url)

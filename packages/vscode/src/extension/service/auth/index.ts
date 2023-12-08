@@ -3,7 +3,6 @@ import {
   AuthenticationProviderAuthenticationSessionsChangeEvent,
   AuthenticationSession,
   Disposable,
-  Event,
   EventEmitter,
   ExtensionContext,
   ProgressLocation,
