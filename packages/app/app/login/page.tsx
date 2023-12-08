@@ -34,7 +34,7 @@ export default async function Login({
         !decodedRedirect.startsWith("vscode://") &&
         !decodedRedirect.startsWith("vscode-insiders://")
       ) {
-        redirect(decodedRedirect);
+        return redirect(decodedRedirect);
       }
 
       if (!searchParams.machine_id) {
