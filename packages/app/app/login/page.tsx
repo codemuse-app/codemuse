@@ -1,5 +1,6 @@
 import { headers, cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { createClient as createClientClient } from "@/utils/supabase/client";
 import { redirect } from "next/navigation";
 
 export default async function Login({
@@ -157,6 +158,16 @@ export default async function Login({
     return redirect(`/login?${redirectSearchParams.toString()}`);
   };
 
+  const supabase = createClientClient();
+
+  const signInWithGithub = async () => {
+    "use client";
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+    });
+  };
+
   return (
     <div>
       <div className="flex flex-col items-center py-8 xl:py-24">
@@ -167,6 +178,7 @@ export default async function Login({
             </p>
           )}
           <button
+            onClick={signInWithGithub}
             type="button"
             className="text-white bg-[#24292F] hover:bg-[#24292F]/90 focus:ring-4 focus:outline-none focus:ring-[#24292F]/50 font-medium rounded-lg text-sm px-5 py-2.5 flex justify-center items-center dark:focus:ring-gray-500 dark:hover:bg-[#050708]/30 mb-2"
           >
