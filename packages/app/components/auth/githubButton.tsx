@@ -13,6 +13,9 @@ export const GitHubLoginButton = ({ redirectTo }: { redirectTo?: string }) => {
         redirectTo: `/auth/callback?redirectTo=${encodeURIComponent(
           redirectTo || "/"
         )}`,
+        queryParams: {
+          redirectTo: redirectTo || "/",
+        },
       },
     });
 
