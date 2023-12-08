@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     mailHash,
     {
       email_address: (data.get("email") as string).toLocaleLowerCase(),
-      status: "subscribed",
+      status: "pending",
       status_if_new: "subscribed",
     }
   );
