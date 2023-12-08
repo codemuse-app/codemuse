@@ -1,7 +1,7 @@
 "use client";
 import { createClient } from "@/utils/supabase/client";
 
-export const GitHubLoginButton = () => {
+export const GitHubLoginButton = ({ redirectTo }: { redirectTo?: string }) => {
   const supabase = createClient();
 
   const signInWithGithub = async () => {
@@ -9,6 +9,11 @@ export const GitHubLoginButton = () => {
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "github",
+      options: {
+        redirectTo: `${
+          window.location.origin
+        }/auth/callback?redirectTo=${encodeURIComponent(redirectTo || "/")}`,
+      },
     });
   };
 
