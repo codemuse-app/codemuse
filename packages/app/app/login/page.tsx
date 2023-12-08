@@ -8,6 +8,8 @@ export default async function Login({
 }: {
   searchParams: { message: string; redirect?: string; machine_id?: string };
 }) {
+  "use client";
+
   const origin = headers().get("origin");
 
   const handleRedirect = async () => {
