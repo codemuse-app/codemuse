@@ -61,7 +61,7 @@ class Api:
 
             try:
                 # Check if the token is valid in supabase
-                db_token = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute()
+                db_token = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute().data
             except Exception as e:
                 raise HTTPException(500, e.__str__)
 
