@@ -58,7 +58,7 @@ export class CodeMuseCodeLens implements vscode.CodeLensProvider {
             if (record.content && record.symbol) {
                 const record_info = getSymbolName(record.symbol);
                 const codeLens2 = new vscode.CodeLens(range, {
-                    title: "📄 " + record_info.name,
+                    title: "🧠 " + record_info.name,
                     command: "extension.askCodeMuseDoc",
                     arguments: [record, range],
                     tooltip: "Ask an explanation for " + record.symbol,
