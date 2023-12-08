@@ -158,7 +158,7 @@ export default async function Login({
     return redirect(`/login?${redirectSearchParams.toString()}`);
   };
 
-  const oAuthRedirectUri = `/login?${new URLSearchParams(
+  const oAuthRedirectUri = `https://app.codemuse.app/login?${new URLSearchParams(
     searchParams
   ).toString()}`;
 
