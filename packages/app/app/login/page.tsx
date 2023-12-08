@@ -115,7 +115,7 @@ export default async function Login({
       redirectSearchParams.set("message", error.message);
     }
 
-    handleRedirect();
+    await handleRedirect();
   };
 
   const signUp = async (formData: FormData) => {
