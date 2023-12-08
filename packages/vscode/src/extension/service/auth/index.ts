@@ -195,7 +195,7 @@ export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
   clearSessions = async (): Promise<void> => {
     const sessions = await this.getSessions();
 
-    await this.context.secrets.delete(SESSIONS_SECRET_KEY);
+    await this.context.secrets.store(SESSIONS_SECRET_KEY, "[]");
 
     this.sessionChangeEmitter.fire({
       added: [],
@@ -204,11 +204,3 @@ export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
     });
   };
 }
-
-export const getUser = async () => {
-  const test = await authentication.getSession("codemuse", [], {
-    createIfNone: true,
-  });
-
-  console.log(test);
-};

@@ -49,7 +49,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   // create authentication provider
   const authenticationProvider = new CodeMuseAuthenticationProvider(context);
-  await authenticationProvider.clearSessions();
 
   context.subscriptions.push(authenticationProvider);
 
