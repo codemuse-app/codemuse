@@ -55,7 +55,7 @@ export const apiFetch = (
     [BAGGAGE_HEADER_NAME]: sentryBaggageHeader,
   };
 
-  return async () => {
+  return (async () => {
     const session = await vscode.authentication.getSession("codemuse", [], {
       createIfNone: true,
     });
@@ -71,5 +71,5 @@ export const apiFetch = (
         Authorization: `Bearer ${session.accessToken}`,
       },
     });
-  };
+  })();
 };
