@@ -16,9 +16,11 @@ export async function GET(request: Request) {
   }
 
   if (requestUrl.searchParams.get("redirect")) {
-    return NextResponse.redirect(
-      "/login?redirect=" + requestUrl.searchParams.get("redirect")
+    const url = decodeURIComponent(
+      requestUrl.searchParams.get("redirect") as string
     );
+
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.redirect("/login");
