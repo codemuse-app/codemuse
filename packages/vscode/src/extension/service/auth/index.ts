@@ -16,7 +16,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { capture } from "../logging/posthog";
 
-const CODEMUSE_APP_URL = "http://localhost:3000";
+const CODEMUSE_APP_URL = "https://app.codemuse.app";
 
 const AUTH_TYPE = `codemuse`;
 const AUTH_NAME = `CodeMuse`;

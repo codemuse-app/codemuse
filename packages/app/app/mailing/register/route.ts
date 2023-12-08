@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import * as mailchimp from "@mailchimp/mailchimp_marketing";
 import { createHash } from "crypto";
 
