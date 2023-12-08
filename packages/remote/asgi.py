@@ -59,6 +59,9 @@ class Api:
             # The token should be in authorization bearer format. Extract it
             token = request.headers.get("Authorization").split("Bearer")[1].strip()
 
+            if token == "betterstack-uptime-check":
+                return
+
             try:
                 # Check if the token is valid in supabase
                 data = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute()
