@@ -4,11 +4,11 @@ from fastapi.responses import JSONResponse
 import sentry_sdk
 from pydantic import BaseModel
 
-from modal import Image, Stub, asgi_app, Function
+from modal import Image, Stub, asgi_app, Function, Secret
 
 from utils import get_sentry_trace_headers
 
-image = Image.debian_slim().pip_install(["sentry-sdk[fastapi]==1.38.0", "pydantic==2.5.2"])
+image = Image.debian_slim().pip_install(["sentry-sdk[fastapi]==1.38.0", "pydantic==2.5.2", "supabase"])
 
 sentry_sdk.init(
     dsn="https://5778b258c3b19d7b1a11f8ca575bc494@o4506308721115136.ingest.sentry.io/4506308722688000",
@@ -34,15 +34,42 @@ class DocumentationRequest(ExtensionRequest):
 class DocumentationResponse(BaseModel):
     documentation: str
 
-@stub.cls(image=image, concurrency_limit=10, keep_warm=1, allow_concurrent_inputs=50, timeout=60 * 20)
+@stub.cls(image=image, concurrency_limit=10, keep_warm=1, allow_concurrent_inputs=50, timeout=60 * 20, secret=Secret.from_name("supabase"))
 class Api:
     def __enter__(self):
         api_functions["generate_embedding"] = Function.lookup("embeddings", "Model.generate")
         api_functions["generate_documentation"] = Function.lookup("documentation", "Model.generate")
 
+        from supabase import create_client, Client
+        import os
+
+        self.supabase: Client = create_client(
+            os.environ.get("SUPABASE_URL"),
+            os.environ.get("SUPABASE_KEY"),
+        )
+
     @asgi_app()
     def asgi(self):
         web_app = FastAPI()
+
+        def authenticate(request, event_name):
+            if not request.headers.get("Authorization"):
+                return JSONResponse({"error": "Missing authorization header"}, status_code=401)
+
+            # The token should be in authorization bearer format. Extract it
+            token = request.headers.get("Authorization").split("Bearer")[1]
+
+            # Check if the token is valid in supabase
+            try:
+                db_token = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute()
+
+                if not db_token:
+                    raise Exception("Token not found")
+            except Exception as e:
+                return JSONResponse({"error": e.__str__}, status_code=401)
+
+            # Set the sentry user to the installation ID
+            sentry_sdk.set_user({"id": db_token["user_id"]})
 
         @web_app.middleware("http")
         async def print_request(request: Request, call_next):
@@ -52,6 +79,8 @@ class Api:
 
         @web_app.post("/embedding")
         async def embedding(request: Request):
+            authenticate(request, "embedding")
+
             body = await request.json()
 
             # Validate the body
@@ -69,6 +98,8 @@ class Api:
 
         @web_app.post("/documentation")
         async def documentation(request: Request):
+            authenticate(request, "documentation")
+
             body = await request.json()
 
             # Validate the body
