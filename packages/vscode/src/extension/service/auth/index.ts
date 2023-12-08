@@ -23,14 +23,15 @@ const AUTH_NAME = `CodeMuse`;
 const SESSIONS_SECRET_KEY = `${AUTH_TYPE}.sessions`;
 
 export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
-  private static instance: CodeMuseAuthenticationProvider | null = null;
   private context: ExtensionContext = null as any;
   private disposable: Disposable;
   private uriHandler: UriHandler;
-  private eventEmitter: EventEmitter<{
+  private eventEmitter = new EventEmitter<{
     requestId: string;
     token: string;
-  }>;
+  }>();
+  private sessionChangeEmitter =
+    new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
 
   constructor(context: ExtensionContext) {
     this.context = context;
@@ -38,11 +39,6 @@ export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
     this.uriHandler = {
       handleUri: this.handleUri,
     };
-
-    this.eventEmitter = new EventEmitter<{
-      requestId: string;
-      token: string;
-    }>();
 
     this.disposable = Disposable.from(
       authentication.registerAuthenticationProvider(
@@ -59,10 +55,8 @@ export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
     this.disposable.dispose();
   }
 
-  private _onDidChangeSessions =
-    new EventEmitter<AuthenticationProviderAuthenticationSessionsChangeEvent>();
-  get onDidChangeSessions(): Event<AuthenticationProviderAuthenticationSessionsChangeEvent> {
-    return this._onDidChangeSessions.event;
+  get onDidChangeSessions() {
+    return this.sessionChangeEmitter.event;
   }
 
   public async getSessions(
@@ -178,13 +172,27 @@ export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
           JSON.stringify([session])
         );
 
+        this.sessionChangeEmitter.fire({
+          added: [session],
+          removed: [],
+          changed: [],
+        });
+
         return session;
       }
     );
   }
 
-  logOut = async (): Promise<void> => {
+  clearSessions = async (): Promise<void> => {
+    const sessions = await this.getSessions();
+
     await this.context.secrets.delete(SESSIONS_SECRET_KEY);
+
+    this.sessionChangeEmitter.fire({
+      added: [],
+      removed: sessions,
+      changed: [],
+    });
   };
 }
 
