@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 import sentry_sdk
 from pydantic import BaseModel
@@ -54,19 +54,16 @@ class Api:
 
         def authenticate(request, event_name):
             if not request.headers.get("Authorization"):
-                return JSONResponse({"error": "Missing authorization header"}, status_code=401)
+                raise HTTPException(400, "No authorization header")
 
             # The token should be in authorization bearer format. Extract it
             token = request.headers.get("Authorization").split("Bearer")[1]
 
             # Check if the token is valid in supabase
-            try:
-                db_token = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute()
+            db_token = self.supabase.table("api_tokens").select("*").eq("id", token).single().execute()
 
-                if not db_token:
-                    raise Exception("Token not found")
-            except Exception as e:
-                return JSONResponse({"error": e.__str__}, status_code=401)
+            if not db_token:
+                raise HTTPException(401, "Token not found")
 
             # Set the sentry user to the installation ID
             sentry_sdk.set_user({"id": db_token["user_id"]})
