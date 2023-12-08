@@ -91,9 +91,6 @@ class Api:
             # Validate the body
             embedding_request = EmbeddingRequest(**body)
 
-            # Set the sentry user to the installation ID
-            sentry_sdk.set_user({"id": embedding_request.machineId})
-
             # Call the function
             embedding = await api_functions["generate_embedding"].remote.aio(embedding_request.code, sentry_trace_headers=get_sentry_trace_headers())
 
@@ -112,9 +109,6 @@ class Api:
 
             if len(documentation_request.code) == 0:
                 return DocumentationResponse(documentation='')
-
-            # Set the sentry user to the installation ID
-            sentry_sdk.set_user({"id": documentation_request.machineId})
 
             # Call the function
             documentation = ''
