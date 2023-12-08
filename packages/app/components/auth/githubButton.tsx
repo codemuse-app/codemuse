@@ -15,6 +15,12 @@ export const GitHubLoginButton = ({ redirectTo }: { redirectTo?: string }) => {
         }/auth/callback?redirectTo=${encodeURIComponent(redirectTo || "/")}`,
       },
     });
+
+    if (error) {
+      throw error;
+    }
+
+    console.log(data);
   };
 
   return (
