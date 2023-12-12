@@ -170,7 +170,7 @@ export class Index {
               );
 
               buildGraphSpan?.finish();
-              
+
               // load documentation from the previous graph
               if (instance.originalGraph) {
                 updateGraphNodes(newOriginalGraph, instance.originalGraph);

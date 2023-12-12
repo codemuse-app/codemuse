@@ -118,6 +118,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       capture("deleteIndex");
       const dir = context.storageUri!.fsPath;
       fs.rmSync(dir, { recursive: true, force: true });
+      Index.initialize(context);
     })
   );
 
