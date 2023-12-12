@@ -46,6 +46,10 @@ export class Index {
     ) as Graph;
   }
 
+  getNumberOfNodes() {
+    return this.originalGraph?.size || 0;
+  }
+
   static initialize(context: vscode.ExtensionContext) {
     Index.instance = new Index(context);
 

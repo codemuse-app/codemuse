@@ -25,6 +25,9 @@ export const router = vrpcRouter({
   index: procedure(() => {
     vscode.commands.executeCommand("codemuse.index");
   }),
+  getNumberOfNodes: procedure(() => {
+    return Index.getInstance().getNumberOfNodes();
+  }),
 });
 
 export type RouterType = typeof router;

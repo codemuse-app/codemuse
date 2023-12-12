@@ -40,6 +40,33 @@ export const Search = () => {
     Exclude<Awaited<ReturnType<typeof client.query>>, void>
   >([]);
 
+  const [isInitialized, setIsInitialized] = React.useState(false);
+
+  const updateNumberOfNodes = React.useCallback(() => {
+    (async () => {
+      const numberOfNodes = await client.getNumberOfNodes();
+
+      if (numberOfNodes) {
+        setIsInitialized(true);
+      } else {
+        setIsInitialized(false);
+      }
+    })();
+  }, [setIsInitialized, client]);
+
+  React.useEffect(() => {
+    updateNumberOfNodes();
+  }, []);
+
+  // Refresh initialization status every 1 second
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      updateNumberOfNodes();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   React.useEffect(() => {
     (async (search, setResults) => {
       if (search === "") {
@@ -60,18 +87,20 @@ export const Search = () => {
 
   return (
     <div className="search">
-      <div style={{ paddingBottom: "15px" }}>
-        Actions
-        <div style={{ paddingTop: "3px" }}>
-          <VSCodeButton
-            onClick={() => {
-              client.index();
-            }}
-          >
-            Reindex
-          </VSCodeButton>
+      {isInitialized && (
+        <div style={{ paddingBottom: "15px" }}>
+          Actions
+          <div style={{ paddingTop: "3px" }}>
+            <VSCodeButton
+              onClick={() => {
+                client.index();
+              }}
+            >
+              Reindex
+            </VSCodeButton>
+          </div>
         </div>
-      </div>
+      )}
       <div style={{ position: "relative" }}>
         <VSCodeTextField
           style={{
@@ -81,6 +110,7 @@ export const Search = () => {
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setSearch(e.target.value);
           }}
+          disabled={!isInitialized}
         >
           Search
         </VSCodeTextField>
@@ -98,7 +128,7 @@ export const Search = () => {
       >
         {
           // If there are no results, show a message
-          results.length === 0 && search === "" && (
+          results.length === 0 && isInitialized && search === "" && (
             <div
               style={{
                 opacity: 0.5,
@@ -116,6 +146,25 @@ export const Search = () => {
             </div>
           )
         }
+        {!isInitialized && results.length === 0 && (
+          <div>
+            <h3>CodeMuse is not initialized</h3>
+            <p>
+              CodeMuse needs to index your codebase before you can search it. It
+              will automatically index any new codespace you open.{" "}
+              <a href="https://codemuse.notion.site/Indexing-dec4f5aa0881452a91856b381bf458f3">
+                Learn more about indexing.
+              </a>
+            </p>
+            <VSCodeButton
+              onClick={() => {
+                client.index();
+              }}
+            >
+              Index now
+            </VSCodeButton>
+          </div>
+        )}
         {results.map((result) => {
           const { name, moduleName, type } = getSymbolName(result.symbol);
           const { backgroundColor, color } = getResultColors(result.score);
@@ -168,6 +217,26 @@ export const Search = () => {
             </div>
           );
         })}
+      </div>
+      <div>
+        <p
+          style={{
+            fontSize: "0.85em",
+            borderTop: "1px solid var(--vscode-activityBar-border)",
+            paddingTop: "10px",
+            paddingBottom: "10px",
+            marginTop: "20px",
+          }}
+        >
+          <a href="https://codemuse.notion.site/Troubleshooting-98d042ec94c3468bb012735de6fe0a88">
+            Troubleshooting
+          </a>
+          , <a href="https://discord.gg/dh5JEkk7">feedback</a>,{" "}
+          <a href="https://codemuse.notion.site/a09cd839084048b0bf49dcd98540d01b?v=3cbf6b9c75fe431aa54927ca0ee7b584">
+            documentation
+          </a>
+          , <a href="https://www.codemuse.app/">website</a>.
+        </p>
       </div>
     </div>
   );
