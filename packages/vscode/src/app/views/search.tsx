@@ -231,7 +231,7 @@ export const Search = () => {
           <a href="https://codemuse.notion.site/Troubleshooting-98d042ec94c3468bb012735de6fe0a88">
             Troubleshooting
           </a>
-          , <a href="https://discord.gg/dh5JEkk7">feedback</a>,{" "}
+          , <a href="https://discord.com/invite/uRJE6e2rgr">feedback</a>,{" "}
           <a href="https://codemuse.notion.site/a09cd839084048b0bf49dcd98540d01b?v=3cbf6b9c75fe431aa54927ca0ee7b584">
             documentation
           </a>
