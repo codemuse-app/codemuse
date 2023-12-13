@@ -8,7 +8,7 @@
     "url": "https://github.com/codemuse-app/codemuse"
   },
   "icon": "media/icon.png",
-  "version": "0.8.49",
+  "version": "0.8.50",
   "publisher": "codemuse-app",
   "engines": {
     "vscode": "^1.84.0"
