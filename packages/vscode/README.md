@@ -21,6 +21,10 @@ Upon installation, you will need to restart Visual Studio Code for the changes t
 - 🔍 [First Search](https://codemuse.notion.site/First-search-65d61dfc2a504222b624e9f088c15bab?pvs=4)
 - 📄 [Automated Documentation](https://codemuse.notion.site/Automated-docs-2b94c50852e54440983b589b78a9d5dc?pvs=4)
 
+
+
+First time using CodeMuse ? Checkout our ["How to use CodeMuse"](https://www.youtube.com/watch?v=8JmVMXH8kq4) video 🎥
+
 <!---
 Upon installation, you will need to restart Visual Studio Code for the changes to take effect. When you open a new workspace with supported language files and/or open the CodeMuse sidebar, CodeMuse will start indexing your project. Step by step guide:
 
