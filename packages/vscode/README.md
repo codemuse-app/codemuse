@@ -6,8 +6,6 @@
 
 ## Features
 
-![DemoSearchLow](https://github.com/codemuse-app/codemuse/assets/18631734/e8ff0b16-c9ee-48cb-ac8a-c6a8de9d8553)
-
 - 🔍 **Search**: Effortlessly navigate your codebase with natural language queries.
 - 📄 **Automated Documentation**: Get both developer and business-oriented documentation, automatically.
 - 🧑‍💻 **Key-up Assistant**: Real-time coding assistance as you type. [In Progress]
