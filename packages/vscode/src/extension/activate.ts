@@ -47,6 +47,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
     id: vscode.env.machineId,
   });
 
+  process.on("uncaughtException", (err) => {
+    Sentry.captureException(err);
+  });
+
+  process.on("unhandledRejection", (err) => {
+    Sentry.captureException(err);
+  });
+
   // create authentication provider
   const authenticationProvider = new CodeMuseAuthenticationProvider(context);
 
@@ -64,17 +72,12 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const session = await vscode.authentication.getSession("codemuse", [], {
     createIfNone: false,
   });
+
   Sentry.setUser({
     id: session?.id,
   });
 
   authenticationProvider.onDidChangeSessions((e) => {
-    if (e.added) {
-      Sentry.setUser({
-        id: e.added[0].account.id,
-      });
-    }
-
     if (e.changed) {
       Sentry.setUser({
         id: e.changed[0].account.id,
@@ -166,7 +169,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   context.subscriptions.push(
     // Command to trigger an error in Sentry
     vscode.commands.registerCommand("codemuse.error", () => {
-      throw new Error("This is an error");
+      throw new Error("This is an error from command palette");
     })
   );
 
