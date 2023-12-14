@@ -51,6 +51,15 @@ export class Index {
   }
 
   static initialize(context: vscode.ExtensionContext) {
+    if (!context.storageUri) {
+      // There is no open workspace
+      vscode.window.showErrorMessage(
+        "CodeMuse: A workspace must be open to use this extension"
+      );
+
+      return;
+    }
+
     Index.instance = new Index(context);
 
     Index.getInstance().languages = [
@@ -196,7 +205,7 @@ export class Index {
 
               // Rebuild the flattened graph and update the Vectra index
               newFlattenedGraph = buildFlattenedGraph(newOriginalGraph);
-              
+
               // Temporary fix for the cycles issue: while findCycles does not return an empty array, rebuild the flattened graph
               while (findCycles(newFlattenedGraph).length > 0) {
                 newFlattenedGraph = buildFlattenedGraph(newFlattenedGraph);
@@ -206,8 +215,6 @@ export class Index {
                 instance.flattenedGraph || new MultiDirectedGraph(),
                 newFlattenedGraph
               );
-
-              
 
               flattenGraphSpan?.finish();
 
