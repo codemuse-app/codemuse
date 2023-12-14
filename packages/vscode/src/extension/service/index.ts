@@ -203,6 +203,19 @@ export class Index {
 
               flattenGraphSpan?.finish();
 
+
+
+              const flattened_cycles = findCycles(newFlattenedGraph);
+              console.log("Flattened cycles (should be NONE):");
+              printCycles(flattened_cycles);
+
+              // throw an error if flattened_cyles is not empty
+              if (flattened_cycles.length > 0) {
+                throw new Error(
+                  "Flattened graph has cycles. This should not happen."
+                );
+              }
+
               // Update the Vectra index
               await this.vectraManager.refreshIndex();
               const allNodesToUpdate = addedNodes.concat(updatedNodes);
@@ -258,10 +271,6 @@ export class Index {
               }
 
               await this.vectraManager.endUpdate();
-
-              const flattened_cycles = findCycles(newFlattenedGraph);
-              console.log("Flattened cycles (should be NONE):");
-              printCycles(flattened_cycles);
 
               const documentationSpan = languageSpan?.startChild({
                 op: "function",
