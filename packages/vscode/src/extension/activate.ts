@@ -47,13 +47,29 @@ export const activate = async (context: vscode.ExtensionContext) => {
     id: vscode.env.machineId,
   });
 
-  process.on("uncaughtException", (err) => {
-    Sentry.captureException(err);
-  });
+  context.subscriptions.push(
+    (() => {
+      const exceptionHandler = (err: Error) => {
+        console.error(err);
+        // Check if the error call stack contains 'codemuse' in it, if not drop the error
+        if (!err.stack?.includes("codemuse")) {
+          return;
+        }
 
-  process.on("unhandledRejection", (err) => {
-    Sentry.captureException(err);
-  });
+        Sentry.captureException(err);
+      };
+
+      process.on("uncaughtException", exceptionHandler);
+      process.on("unhandledRejection", exceptionHandler);
+
+      return {
+        dispose: () => {
+          process.off("uncaughtException", exceptionHandler);
+          process.off("unhandledRejection", exceptionHandler);
+        },
+      };
+    })()
+  );
 
   // create authentication provider
   const authenticationProvider = new CodeMuseAuthenticationProvider(context);
