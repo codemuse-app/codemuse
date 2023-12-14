@@ -2,6 +2,8 @@ import { headers, cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { GitHubLoginButton } from "@/components/auth/githubButton";
+import Image from "next/image";
+import logo from "@/assets/logo-cutout.png";
 
 export default async function Login({
   searchParams,
@@ -167,7 +169,15 @@ export default async function Login({
   return (
     <div>
       <div className="flex flex-col items-center py-8 xl:py-24">
+        <Image
+          className="w-16 md:w-32"
+          src={logo}
+          alt="Picture of the author"
+        />
         <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground bg-white dark:bg-gray-900 p-8 rounded-xl border border-gray-200 dark:border-gray-600 max-w-md">
+          <p className="text-sm leading-4 text-gray-400 pb-4">
+            CodeMuse requires you to login to prevent system abuse.
+          </p>
           {searchParams?.message && (
             <p className="mb-4 p-4 rounded-md bg-foreground/10 text-foreground text-center">
               {searchParams.message}
