@@ -196,14 +196,20 @@ export class Index {
 
               // Rebuild the flattened graph and update the Vectra index
               newFlattenedGraph = buildFlattenedGraph(newOriginalGraph);
+              
+              // Temporary fix for the cycles issue: while findCycles does not return an empty array, rebuild the flattened graph
+              while (findCycles(newFlattenedGraph).length > 0) {
+                newFlattenedGraph = buildFlattenedGraph(newFlattenedGraph);
+              }
+
               const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(
                 instance.flattenedGraph || new MultiDirectedGraph(),
                 newFlattenedGraph
               );
 
+              
+
               flattenGraphSpan?.finish();
-
-
 
               const flattened_cycles = findCycles(newFlattenedGraph);
               console.log("Flattened cycles (should be NONE):");
