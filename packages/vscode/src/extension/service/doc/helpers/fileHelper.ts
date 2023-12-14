@@ -64,10 +64,11 @@ export function getContentInFile(filePath: string, position?: [number, number]):
     }
     const lines:string[] = content.split('\n')
 
-    const preSubLines:string[] = lines.slice(position[0], position[1]+1)
+    const preSubLines:string[] = lines.slice(position[0], position[1]+1);
     const lastString:string = preSubLines[preSubLines.length - 1];
-    const lastChar:string = lastString[lastString.length -1]
-    const subLines = lastChar != "\n" ? preSubLines.concat([""]) : preSubLines ;
+    const lastChar:string = lastString ? lastString[lastString.length -1] : "";
+    const subLines = (lastChar !== "\n") ? preSubLines.concat([""]) : preSubLines;
+    
     return subLines.join('\n');
 }
 /**
