@@ -33,6 +33,7 @@ export class Typescript extends LanguageProvider {
         allowJs: true,
       },
       include: [],
+      exclude: [],
     };
 
     let cleanUpTsconfig = false;
@@ -50,6 +51,7 @@ export class Typescript extends LanguageProvider {
         ...(existingTsConfig.include || []),
         files.map((file) => file.path),
       ].flat(),
+      exclude: [...(existingTsConfig.exclude || []), "**/node_modules/**"],
     };
 
     let storagePath = this.getStoragePath(cwd);
