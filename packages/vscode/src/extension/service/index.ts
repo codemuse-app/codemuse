@@ -3,7 +3,7 @@ import * as Sentry from "@sentry/node";
 
 import * as Languages from "../languages";
 import { Status } from "../status";
-import { union } from "graphology-operators";
+import { union, toSimple } from "graphology-operators";
 import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten";
 import {
@@ -209,6 +209,10 @@ export class Index {
         const original_cycles = findCycles(newOriginalGraph);
         console.log("Original cycles:");
         printCycles(original_cycles);
+
+        // remove duplicate edges from newOriginalGraph
+        /* const simpleGraph = toSimple(newOriginalGraph);
+        const testflattenGraph = buildFlattenedGraph(simpleGraph); */
 
         // Rebuild the flattened graph and update the Vectra index
         let newFlattenedGraph = buildFlattenedGraph(newOriginalGraph);
