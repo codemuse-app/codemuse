@@ -44,14 +44,17 @@ export class Typescript extends LanguageProvider {
     } catch (e) {}
 
     const targetTsConfig = {
-      ...existingTsConfig,
+      // ...existingTsConfig,
       // TODO: issue with extending other configs??
-      extends: undefined,
+      // extends: undefined,
       include: [
-        ...(existingTsConfig.include || []),
+        // ...(existingTsConfig.include || []),
         files.map((file) => file.path),
       ].flat(),
-      exclude: [...(existingTsConfig.exclude || []), "**/node_modules/**"],
+      exclude: [
+        //...(existingTsConfig.exclude || []),
+        "**/node_modules/**",
+      ],
     };
 
     let storagePath = this.getStoragePath(cwd);
