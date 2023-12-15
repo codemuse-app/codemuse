@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import * as Sentry from "@sentry/node";
 
 import * as Languages from "../languages";
-import { Status } from "../status";
 import { union } from "graphology-operators";
 import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten";
@@ -22,6 +21,7 @@ import { VectraManager } from "./embedding/embed";
 import { MultiDirectedGraph } from "graphology";
 import { batch } from "../../shared/utils";
 import { documentNode } from "./doc/build";
+import { capture } from "./logging/posthog";
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
@@ -151,6 +151,10 @@ export class Index {
             if (isLanguagePresent) {
               progress.report({
                 message: `indexing ${language.languageId}`,
+              });
+
+              capture("language", {
+                language: language.languageId,
               });
 
               const scipPath = await Sentry.startSpan(
