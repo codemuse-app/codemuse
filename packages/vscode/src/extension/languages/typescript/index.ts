@@ -13,7 +13,7 @@ export class Typescript extends LanguageProvider {
 
   async run(cwd: string) {
     const path = resolve(
-      __dirname + "../../../bin/scip-typescript/dist/src/main.js"
+      __dirname + "../../../bin/scip-typescript/dist/main.js"
     );
 
     console.log(path);
