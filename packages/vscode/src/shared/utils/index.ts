@@ -41,29 +41,38 @@ export const batch = async (
 };
 
 export const getSymbolName = (symbol: string) => {
-  const [scipIndexer, language, packageName, _version, identifier] =
-    symbol.split(" ");
+  const [scipIndexer, language, packageName, _version, identifier] = symbol
+    .trim()
+    .split(" ");
 
-  const moduleName = identifier.split("/")[0].replace("`", "");
-  const describer = identifier.split("/")[1].slice(0, -1);
+  const parts = identifier.split("/");
+  const describer = parts[parts.length - 1];
+  const moduleName = parts
+    .slice(0, parts.length - 1)
+    .join("/")
+    .replace(/`/g, "");
 
-  let type = "module";
+  let type = "file";
 
-  if (describer.indexOf("#") >= 0) {
-    type = "class";
+  if (describer.length > 0) {
+    if (describer.startsWith("__init__:")) {
+      // Do nothing
+    } else if (describer.indexOf("#") >= 0) {
+      type = "class";
 
-    if (describer.indexOf("(") >= 0) {
-      type = "method";
+      if (describer.indexOf("(") >= 0) {
+        type = "method";
+      }
+    } else if (describer.indexOf("(") >= 0) {
+      type = "function";
     }
-  } else if (describer.indexOf("(") >= 0) {
-    type = "function";
   }
 
   return {
     moduleName,
     language,
     type,
-    name: describer,
+    name: describer.length ? describer.slice(0, -1) : moduleName,
     scipIndexer,
     packageName,
   };

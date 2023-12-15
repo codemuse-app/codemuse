@@ -17,10 +17,13 @@ const clearBinFolder = () => {
 
 const copyScipTypescript = () => {
   // Find the package.json
-  const scipTypescriptPath = require.resolve('@sourcegraph/scip-typescript/package.json');
+  const scipTypescriptPath = path.resolve('../scip-typescript/');
 
   // Copy all the files in the parent directory of the scip-typescript package, including subdirectories
-  return gulp.src(`${scipTypescriptPath}/../**/*`).pipe(gulp.dest('./bin/scip-typescript'));
+  return Promise.all([
+    gulp.src(`${scipTypescriptPath}/dist/**/*`).pipe(gulp.dest('./bin/scip-typescript/dist')),
+    gulp.src(`${scipTypescriptPath}/package.json`).pipe(gulp.dest('./bin/scip-typescript/'))
+  ]);
 };
 
 const copyScipPython = () => {
@@ -34,7 +37,7 @@ const copyScipPython = () => {
 };
 
 const copyExternalLibs = gulp.parallel(
-  // copyScipTypescript,
+  copyScipTypescript,
   copyScipPython
 );
 

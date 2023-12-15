@@ -328,14 +328,28 @@ export const activate = async (context: vscode.ExtensionContext) => {
   // );
 
   // Attach the CodeLens provider
-  let selector: vscode.DocumentSelector = {
-    scheme: "file",
-    language: "python",
-  };
+  let selectors: vscode.DocumentSelector[] = [
+    {
+      scheme: "file",
+      language: "python",
+    },
+    {
+      scheme: "file",
+      language: "javascript",
+    },
+    {
+      scheme: "file",
+      language: "typescript",
+    },
+  ];
 
-  context.subscriptions.push(
-    vscode.languages.registerCodeLensProvider(selector, new CodeMuseCodeLens())
-  );
+  const codeLensProvider = new CodeMuseCodeLens();
+
+  selectors.forEach((selector) => {
+    context.subscriptions.push(
+      vscode.languages.registerCodeLensProvider(selector, codeLensProvider)
+    );
+  });
 
   // Run the index command on startup
   vscode.commands.executeCommand("codemuse.index");

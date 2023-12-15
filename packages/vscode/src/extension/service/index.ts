@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/node";
 
 import * as Languages from "../languages";
 import { Status } from "../status";
+import { union } from "graphology-operators";
 import { buildGraph } from "./graph/build";
 import { buildFlattenedGraph } from "./graph/flatten";
 import {
@@ -63,7 +64,7 @@ export class Index {
     Index.instance = new Index(context);
 
     Index.getInstance().languages = [
-      // new Languages.Typescript(context),
+      new Languages.Typescript(this.instance.context),
       new Languages.Python(this.instance.context),
     ];
   }
@@ -120,6 +121,8 @@ export class Index {
         cancellable: false,
       },
       async (progress) => {
+        let newOriginalGraph: Graph = new MultiDirectedGraph();
+
         for (const workspace of vscode.workspace.workspaceFolders!) {
           //TODO: how to handle multiple languages??
           const workspaceSpan = runSpan?.startChild({
@@ -128,9 +131,6 @@ export class Index {
           });
 
           for (const language of instance.languages) {
-            let newOriginalGraph: Graph | undefined = undefined,
-              newFlattenedGraph: Graph | undefined = undefined;
-
             const languageSpan = workspaceSpan?.startChild({
               op: "function",
               name: "language",
@@ -138,10 +138,6 @@ export class Index {
                 language: language.languageId,
               },
             });
-
-            const done = Status.getInstance().loading(
-              `indexing ${language.languageId}`
-            );
 
             const languageDetectionSpan = languageSpan?.startChild({
               op: "function",
@@ -176,188 +172,178 @@ export class Index {
                 name: "buildGraph",
               });
 
-              newOriginalGraph = await buildGraph(
+              const newLanguageGraph = await buildGraph(
                 workspace.uri.fsPath,
                 scipPath,
                 language.languageId
               );
 
-              buildGraphSpan?.finish();
-
-              // load documentation from the previous graph
-              if (instance.originalGraph) {
-                updateGraphNodes(newOriginalGraph, instance.originalGraph);
-              }
-
-              progress.report({
-                message: `parsing ${language.languageId} graph`,
-              });
-
-              const flattenGraphSpan = languageSpan?.startChild({
-                op: "function",
-                name: "flattenGraph",
-              });
-
-              // check the number of cycles in the original graph
-              const original_cycles = findCycles(newOriginalGraph);
-              console.log("Original cycles:");
-              printCycles(original_cycles);
-
-              // Rebuild the flattened graph and update the Vectra index
-              newFlattenedGraph = buildFlattenedGraph(newOriginalGraph);
-
-              // Temporary fix for the cycles issue: while findCycles does not return an empty array, rebuild the flattened graph
-              while (findCycles(newFlattenedGraph).length > 0) {
-                newFlattenedGraph = buildFlattenedGraph(newFlattenedGraph);
-              }
-
-              const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(
-                instance.flattenedGraph || new MultiDirectedGraph(),
-                newFlattenedGraph
-              );
-
-              flattenGraphSpan?.finish();
-
-              const flattened_cycles = findCycles(newFlattenedGraph);
-              console.log("Flattened cycles (should be NONE):");
-              printCycles(flattened_cycles);
-
-              // throw an error if flattened_cyles is not empty
-              if (flattened_cycles.length > 0) {
-                throw new Error(
-                  "Flattened graph has cycles. This should not happen."
-                );
-              }
-
-              // Update the Vectra index
-              await this.vectraManager.refreshIndex();
-              const allNodesToUpdate = addedNodes.concat(updatedNodes);
-
-              progress.report({
-                message: "getting embeddings",
-              });
-
-              const embeddingsSpan = languageSpan?.startChild({
-                name: "get embeddings",
-              });
-
-              await batch(
-                allNodesToUpdate.map((nodeId) => {
-                  const graph = newFlattenedGraph as Graph;
-
-                  return async () => {
-                    const nodeData = graph.getNodeAttributes(
-                      nodeId
-                    ) as LocalGraphNode;
-
-                    if (nodeData.content) {
-                      await this.vectraManager.upsertItem(
-                        nodeData.content,
-                        nodeId,
-                        nodeData.hash,
-                        nodeData.file
-                      );
-                    }
-
-                    progress.report({
-                      message: "getting embeddings",
-                      increment: 100 / allNodesToUpdate.length / 2,
-                    });
-                  };
-                }),
-                100,
-                async () => {
-                  await this.vectraManager.beginUpdate();
-                },
-                async () => {
-                  await this.vectraManager.endUpdate();
-                }
-              );
-
-              embeddingsSpan?.finish();
-
-              await this.vectraManager.beginUpdate();
-
-              // Delete embeddings for deleted nodes
-              for (const node of deletedNodes) {
-                await this.vectraManager.deleteItem(node);
-              }
-
-              await this.vectraManager.endUpdate();
-
-              const documentationSpan = languageSpan?.startChild({
-                op: "function",
-                name: "documentation",
-              });
-
-              // Builds documentation
-              // get the order of the nodes in which they should be documented:
-              const nodesOrder = findMultiUpdateOrderWithDepth(
-                newFlattenedGraph,
-                allNodesToUpdate
-              );
-
-              progress.report({
-                message: "generating documentation",
-              });
-
-              // get the different batch:
-              const nodesBatch = groupNodesByDepth(nodesOrder).reverse();
-
-              for (const nodeList of nodesBatch) {
-                // Map each nodeId to a documentNode promise
-                await batch(
-                  nodeList.map((nodeId) => {
-                    const graph = newOriginalGraph as Graph;
-
-                    return async () => {
-                      await documentNode(graph, nodeId);
-
-                      progress.report({
-                        message: "generating documentation",
-                        increment: 100 / allNodesToUpdate.length / 2,
-                      });
-                    };
-                  }),
-                  50
-                );
-              }
-
-              documentationSpan?.finish();
-
-              progress.report({
-                message: `${language.languageId} indexed`,
-              });
-            } else {
-              vscode.window.showWarningMessage(
-                `CodeMuse: ${language.languageId} not found`
-              );
-            }
-
-            // At the end of the run method, save the graphs
-            if (newOriginalGraph) {
-              saveGraphToFile(
+              newOriginalGraph = union(
                 newOriginalGraph,
-                "originalGraph.json",
-                this.context
-              );
-              this.originalGraph = newOriginalGraph;
-            }
-            if (newFlattenedGraph) {
-              saveGraphToFile(
-                newFlattenedGraph,
-                "flattenedGraph.json",
-                this.context
-              );
-              this.flattenedGraph = newFlattenedGraph;
-            }
+                newLanguageGraph
+              ) as Graph;
 
+              buildGraphSpan?.finish();
+            }
             languageSpan?.finish();
-
-            done();
           }
 
           workspaceSpan?.finish();
+        }
+
+        // load documentation from the previous graph
+        if (instance.originalGraph) {
+          updateGraphNodes(newOriginalGraph, instance.originalGraph);
+        }
+
+        progress.report({
+          message: `parsing graph`,
+        });
+
+        const flattenGraphSpan = runSpan?.startChild({
+          op: "function",
+          name: "flattenGraph",
+        });
+
+        // check the number of cycles in the original graph
+        const original_cycles = findCycles(newOriginalGraph);
+        console.log("Original cycles:");
+        printCycles(original_cycles);
+
+        // Rebuild the flattened graph and update the Vectra index
+        let newFlattenedGraph = buildFlattenedGraph(newOriginalGraph);
+
+        // Temporary fix for the cycles issue: while findCycles does not return an empty array, rebuild the flattened graph
+        while (findCycles(newFlattenedGraph).length > 0) {
+          newFlattenedGraph = buildFlattenedGraph(newFlattenedGraph);
+        }
+
+        const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(
+          instance.flattenedGraph || new MultiDirectedGraph(),
+          newFlattenedGraph
+        );
+
+        flattenGraphSpan?.finish();
+
+        const flattened_cycles = findCycles(newFlattenedGraph);
+        console.log("Flattened cycles (should be NONE):");
+        printCycles(flattened_cycles);
+
+        // throw an error if flattened_cyles is not empty
+        if (flattened_cycles.length > 0) {
+          throw new Error(
+            "Flattened graph has cycles. This should not happen."
+          );
+        }
+
+        // Update the Vectra index
+        await this.vectraManager.refreshIndex();
+        const allNodesToUpdate = addedNodes.concat(updatedNodes);
+
+        progress.report({
+          message: "getting embeddings",
+        });
+
+        const embeddingsSpan = runSpan?.startChild({
+          name: "get embeddings",
+        });
+
+        await batch(
+          allNodesToUpdate.map((nodeId) => {
+            const graph = newFlattenedGraph as Graph;
+
+            return async () => {
+              const nodeData = graph.getNodeAttributes(
+                nodeId
+              ) as LocalGraphNode;
+
+              if (nodeData.content) {
+                await this.vectraManager.upsertItem(
+                  nodeData.content,
+                  nodeId,
+                  nodeData.hash,
+                  nodeData.file
+                );
+              }
+
+              progress.report({
+                message: "getting embeddings",
+                increment: 100 / allNodesToUpdate.length / 2,
+              });
+            };
+          }),
+          100,
+          async () => {
+            await this.vectraManager.beginUpdate();
+          },
+          async () => {
+            await this.vectraManager.endUpdate();
+          }
+        );
+
+        embeddingsSpan?.finish();
+
+        await this.vectraManager.beginUpdate();
+
+        // Delete embeddings for deleted nodes
+        for (const node of deletedNodes) {
+          await this.vectraManager.deleteItem(node);
+        }
+
+        await this.vectraManager.endUpdate();
+
+        const documentationSpan = runSpan?.startChild({
+          op: "function",
+          name: "documentation",
+        });
+
+        // Builds documentation
+        // get the order of the nodes in which they should be documented:
+        const nodesOrder = findMultiUpdateOrderWithDepth(
+          newFlattenedGraph,
+          allNodesToUpdate
+        );
+
+        progress.report({
+          message: "generating documentation",
+        });
+
+        // get the different batch:
+        const nodesBatch = groupNodesByDepth(nodesOrder).reverse();
+
+        for (const nodeList of nodesBatch) {
+          // Map each nodeId to a documentNode promise
+          await batch(
+            nodeList.map((nodeId) => {
+              const graph = newOriginalGraph as Graph;
+
+              return async () => {
+                await documentNode(graph, nodeId);
+
+                progress.report({
+                  message: "generating documentation",
+                  increment: 100 / allNodesToUpdate.length / 2,
+                });
+              };
+            }),
+            50
+          );
+        }
+
+        documentationSpan?.finish();
+
+        // At the end of the run method, save the graphs
+        if (newOriginalGraph) {
+          saveGraphToFile(newOriginalGraph, "originalGraph.json", this.context);
+          this.originalGraph = newOriginalGraph;
+        }
+        if (newFlattenedGraph) {
+          saveGraphToFile(
+            newFlattenedGraph,
+            "flattenedGraph.json",
+            this.context
+          );
+          this.flattenedGraph = newFlattenedGraph;
         }
       }
     );

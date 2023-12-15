@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
 import { execFile } from "child_process";
 import { resolve } from "path";
-import { writeFileSync, existsSync, mkdirSync, rmSync } from "fs";
+import { writeFileSync, existsSync, rmSync } from "fs";
 import { promisify } from "util";
-import { createHash } from "crypto";
 
 import { LanguageProvider } from "../provider";
 
@@ -14,7 +13,7 @@ export class Typescript extends LanguageProvider {
 
   async run(cwd: string) {
     const path = resolve(
-      __dirname + "../../../../../bin/scip-typescript/dist/src/main.js"
+      __dirname + "../../../bin/scip-typescript/dist/src/main.js"
     );
 
     console.log(path);
@@ -27,6 +26,11 @@ export class Typescript extends LanguageProvider {
     if (!existsSync(tsconfigPath)) {
       cleanUpTsconfig = true;
 
+      const files = await vscode.workspace.findFiles(
+        "**/*.{js,jsx,ts,tsx}",
+        "**/node_modules/**"
+      );
+
       writeFileSync(
         tsconfigPath,
         JSON.stringify(
@@ -34,6 +38,7 @@ export class Typescript extends LanguageProvider {
             compilerOptions: {
               allowJs: true,
             },
+            include: files.map((file) => file.path),
           },
           null,
           2
@@ -41,19 +46,7 @@ export class Typescript extends LanguageProvider {
       );
     }
 
-    // Get the repository path and hash it to create a unique folder name
-    const repositoryHash = createHash("sha256")
-      .update(cwd)
-      .digest("hex")
-      .slice(0, 16);
-
-    let storagePath =
-      this.context!.storageUri!.fsPath + "/" + repositoryHash + "";
-
-    // Create the storage path if it doesn't exist
-    if (!existsSync(storagePath)) {
-      mkdirSync(storagePath, { recursive: true });
-    }
+    let storagePath = this.getStoragePath(cwd);
 
     storagePath += "/ts.scip";
 
