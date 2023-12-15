@@ -15,6 +15,30 @@ export function printCycles(cycles: string[][]): void {
   }
 }
 
+/**
+ * Removes duplicate edges from a multi-directed graph.
+ * @param {Graph} graph - The graph from which to remove duplicate edges.
+ * @returns {MultiDirectedGraph} A new graph with duplicate edges removed.
+ */
+export function removeDuplicateEdges(graph: Graph): MultiDirectedGraph {
+  let newGraph = new MultiDirectedGraph(); // Assuming Graph has a constructor like this
+
+  // Iterate over all nodes in the graph
+  graph.nodes().forEach((node) => {
+    let uniqueNeighbors = new Set();
+
+    // Iterate over all outgoing neighbors of the node
+    graph.outNeighbors(node).forEach((neighbor) => {
+      if (!uniqueNeighbors.has(neighbor)) {
+        uniqueNeighbors.add(neighbor);
+        newGraph.addEdge(node, neighbor); // Assuming addEdge method exists
+      }
+    });
+  });
+
+  return newGraph;
+}
+
 /* The findCycles function takes a graph and returns a list of cycles in the graph. */
 export function findCycles(graph: Graph): string[][] {
   let visited: Set<string> = new Set();
