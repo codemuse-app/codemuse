@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "ES2015"
+  }
+}

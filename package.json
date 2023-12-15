@@ -5,10 +5,11 @@
   "type": "module",
   "description": "AI Onboarding and peer programming assistant.",
   "workspaces": [
-    "packages/*"
+    "packages/[!scip]*"
   ],
   "scripts": {
-    "sync:scip-python": "rsync -ax --exclude='node_modules/' --exclude='.git/' ../scip-python/* ./packages/scip-python && npm install --workspace=pyright-root && cd packages/scip-python/packages/pyright-scip && npm run build"
+    "sync:scip-python": "rsync -ax --exclude='node_modules/' --exclude='.git/' ../scip-python/* ./packages/scip-python && npm install --workspace=pyright-root && cd packages/scip-python/packages/pyright-scip && npm run build",
+    "sync:scip-typescript": "cd ../scip-typescript && npm run build && cd ../codemuse && rsync -ax --exclude='node_modules/' --exclude='.git/' ../scip-typescript/* ./packages/scip-typescript"
   },
   "author": "CodeMuse <contact@codemuse.app>",
   "dependencies": {

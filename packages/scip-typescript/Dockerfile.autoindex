@@ -1,0 +1,24 @@
+# Keep in sync with default Dockerfile
+FROM node:18-alpine3.15@sha256:0677e437543d10f6cb050d92c792a14e5eb84340e3d5b4c25a88baa723d8a4ae
+
+ENV NODE_OPTIONS=--max-old-space-size=4096
+
+RUN apk add --no-cache git bash curl ca-certificates python3 make libstdc++ libgcc gcc g++ pkgconfig python2 automake autoconf curl
+
+# The following line is kept for legacy reasons. We previously invoke the
+# `scip-typescript-autoindex` script during auto-indexing in order to handle
+# SCIP->LSIF conversion. This script is no longer needed since src handles the
+# conversion.
+RUN echo 'scip-typescript "$@" --no-progress-bar' > /usr/bin/scip-typescript-autoindex && chmod +x /usr/bin/scip-typescript-autoindex
+
+RUN yarn global add npm yarn
+
+RUN yarn global add @sourcegraph/scip-typescript@${TAG} @sourcegraph/src
+
+RUN mv /usr/local/bin/yarn /usr/local/bin/actual-yarn
+COPY ./dev/lenient-yarn.sh /usr/local/bin/yarn
+
+RUN mv /usr/local/bin/npm /usr/local/bin/actual-npm
+COPY ./dev/lenient-npm.sh /usr/local/bin/npm
+
+CMD ["/bin/sh"]
