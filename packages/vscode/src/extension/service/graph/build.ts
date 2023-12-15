@@ -76,10 +76,6 @@ export const buildGraph = async (
 
     for (const occurrence of document.occurrences) {
       if (occurrence.enclosing_range.length > 0) {
-        if (occurrence.signature_documentation) {
-          console.log("here");
-        }
-
         documentRanges.push({
           range: formatRange(occurrence.enclosing_range),
           symbol: occurrence.symbol,
