@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
 import { execFile } from "child_process";
 import { resolve } from "path";
-import { writeFileSync, existsSync, rmSync } from "fs";
+import { writeFileSync, existsSync, rmSync, readFileSync, rm } from "fs";
 import { promisify } from "util";
+import * as Sentry from "@sentry/browser";
 
 import { LanguageProvider } from "../provider";
 
@@ -18,52 +19,75 @@ export class Typescript extends LanguageProvider {
 
     console.log(path);
 
+    const files = await vscode.workspace.findFiles(
+      "**/*.{js,jsx,ts,tsx}",
+      "**/node_modules/**"
+    );
+
     // Check if the path contains a tsconfig.json file. If it doesn't, write {"compilerOptions":{"allowJs":true}}
     const tsconfigPath = resolve(cwd, "tsconfig.json");
+    const tsBackupPath = resolve(cwd, "tsconfig.json.codemusebackup");
+
+    let existingTsConfig = {
+      compilerOptions: {
+        allowJs: true,
+      },
+      include: [],
+    };
 
     let cleanUpTsconfig = false;
 
-    if (!existsSync(tsconfigPath)) {
-      cleanUpTsconfig = true;
+    try {
+      const existingContents = readFileSync(tsconfigPath);
+      existingTsConfig = JSON.parse(existingContents.toString());
+    } catch (e) {}
 
-      const files = await vscode.workspace.findFiles(
-        "**/*.{js,jsx,ts,tsx}",
-        "**/node_modules/**"
-      );
-
-      writeFileSync(
-        tsconfigPath,
-        JSON.stringify(
-          {
-            compilerOptions: {
-              allowJs: true,
-            },
-            include: files.map((file) => file.path),
-          },
-          null,
-          2
-        )
-      );
-    }
+    const targetTsConfig = {
+      ...existingTsConfig,
+      // TODO: issue with extending other configs??
+      extends: undefined,
+      include: [
+        ...(existingTsConfig.include || []),
+        files.map((file) => file.path),
+      ].flat(),
+    };
 
     let storagePath = this.getStoragePath(cwd);
-
     storagePath += "/ts.scip";
 
-    const result = await execFileAsync(
-      `node`,
-      [path, "index", "--infer-tsconfig", "--output", storagePath],
-      {
-        cwd,
+    try {
+      if (existsSync(tsconfigPath)) {
+        writeFileSync(tsBackupPath, readFileSync(tsconfigPath));
+        rmSync(tsconfigPath);
+
+        cleanUpTsconfig = true;
       }
-    );
 
-    if (cleanUpTsconfig) {
-      rmSync(tsconfigPath);
+      writeFileSync(tsconfigPath, JSON.stringify(targetTsConfig, null, 2));
+
+      const result = await execFileAsync(
+        `node`,
+        [path, "index", "--output", storagePath],
+        {
+          cwd,
+        }
+      );
+
+      console.log(result.stdout);
+      console.log(result.stderr);
+    } catch (e) {
+      console.error(e);
+
+      Sentry.captureException(e);
+    } finally {
+      if (cleanUpTsconfig) {
+        rmSync(tsconfigPath);
+        writeFileSync(tsconfigPath, readFileSync(tsBackupPath));
+        rmSync(tsBackupPath);
+      } else {
+        rmSync(tsBackupPath);
+      }
     }
-
-    console.log(result.stdout);
-    console.log(result.stderr);
 
     return storagePath;
   }
