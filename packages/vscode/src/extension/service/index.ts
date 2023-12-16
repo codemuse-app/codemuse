@@ -114,6 +114,8 @@ export class Index {
       name: "run",
     });
 
+    const done = Status.getInstance().loading("indexing");
+
     // Show a notification with progress bar
     await vscode.window.withProgress(
       {
@@ -362,5 +364,7 @@ export class Index {
     runSpan?.finish();
 
     transaction?.finish();
+
+    done();
   }
 }

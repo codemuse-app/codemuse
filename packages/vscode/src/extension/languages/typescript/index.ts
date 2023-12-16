@@ -19,10 +19,7 @@ export class Typescript extends LanguageProvider {
 
     console.log(path);
 
-    const files = await vscode.workspace.findFiles(
-      "**/*.{js,jsx,ts,tsx,cjs,mjs}",
-      "**/node_modules/**"
-    );
+    const files = await this.getParsableFiles();
 
     // Check if the path contains a tsconfig.json file. If it doesn't, write {"compilerOptions":{"allowJs":true}}
     const tsconfigPath = resolve(cwd, "tsconfig.json");
@@ -49,9 +46,7 @@ export class Typescript extends LanguageProvider {
       // extends: undefined,
       include: [
         // ...(existingTsConfig.include || []),
-        files
-          .map((file) => file.path)
-          .filter((path) => !path.includes("node_modules")),
+        files,
       ].flat(),
       exclude: [
         "**/node_modules/**",
@@ -116,12 +111,22 @@ export class Typescript extends LanguageProvider {
     return storagePath;
   }
 
-  async detect() {
-    // Check if the workspace has any .js, .jsx, .ts, or .tsx files
-    const hasJsFiles = await vscode.workspace.findFiles(
+  private async getParsableFiles() {
+    const files = await vscode.workspace.findFiles(
       "**/*.{js,jsx,ts,tsx,cjs,mjs}",
       "**/node_modules/**"
     );
+
+    return files
+      .map((file) => file.path)
+      .filter(
+        (path) => !path.includes("node_modules") && !path.includes("dist")
+      );
+  }
+
+  async detect() {
+    // Check if the workspace has any .js, .jsx, .ts, or .tsx files
+    const hasJsFiles = await this.getParsableFiles();
 
     return hasJsFiles.length > 0;
   }
