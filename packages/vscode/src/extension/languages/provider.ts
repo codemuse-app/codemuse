@@ -42,7 +42,7 @@ export abstract class LanguageProvider {
   /**
    * Run the language provider on the given workspace folder. This builds the index file to the storage directory.
    * @param cwd The path to the workspace folder.
-   * @returns The location of the scip index file.
+   * @returns The location of the scip index file. It may be undefined if the language provider failed to run.
    */
-  abstract run(cwd: string): Promise<string>;
+  abstract run(cwd: string): Promise<string | undefined>;
 }

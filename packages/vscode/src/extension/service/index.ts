@@ -170,25 +170,27 @@ export class Index {
                 }
               );
 
-              // const originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
+              if (scipPath) {
+                // const originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
 
-              const buildGraphSpan = languageSpan?.startChild({
-                op: "function",
-                name: "buildGraph",
-              });
+                const buildGraphSpan = languageSpan?.startChild({
+                  op: "function",
+                  name: "buildGraph",
+                });
 
-              const newLanguageGraph = await buildGraph(
-                workspace.uri.fsPath,
-                scipPath,
-                language.languageId
-              );
+                const newLanguageGraph = await buildGraph(
+                  workspace.uri.fsPath,
+                  scipPath,
+                  language.languageId
+                );
 
-              newOriginalGraph = union(
-                newOriginalGraph,
-                newLanguageGraph
-              ) as Graph;
+                newOriginalGraph = union(
+                  newOriginalGraph,
+                  newLanguageGraph
+                ) as Graph;
 
-              buildGraphSpan?.finish();
+                buildGraphSpan?.finish();
+              }
             }
             languageSpan?.finish();
           }

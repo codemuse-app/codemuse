@@ -49,11 +49,13 @@ export class Typescript extends LanguageProvider {
       // extends: undefined,
       include: [
         // ...(existingTsConfig.include || []),
-        files.map((file) => file.path),
+        files
+          .map((file) => file.path)
+          .filter((path) => !path.includes("node_modules")),
       ].flat(),
       exclude: [
-        //...(existingTsConfig.exclude || []),
         "**/node_modules/**",
+        //...(existingTsConfig.exclude || []),
       ],
     };
 
@@ -62,7 +64,9 @@ export class Typescript extends LanguageProvider {
 
     try {
       if (existsSync(tsconfigPath)) {
-        writeFileSync(tsBackupPath, readFileSync(tsconfigPath));
+        if (!existsSync(tsBackupPath)) {
+          writeFileSync(tsBackupPath, readFileSync(tsconfigPath));
+        }
         rmSync(tsconfigPath);
 
         cleanUpTsconfig = true;
@@ -84,6 +88,8 @@ export class Typescript extends LanguageProvider {
       console.error(e);
 
       Sentry.captureException(e);
+
+      return undefined;
     } finally {
       if (cleanUpTsconfig) {
         rmSync(tsconfigPath);
