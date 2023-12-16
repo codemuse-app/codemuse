@@ -1,3 +1,5 @@
+import { Python } from "../../../languages";
+import {SupportedLanguage} from "../../graph/types";
 import { getClosestUpcomingCodeLine, getContentInFile, getIndentationAtLine, removeLastOccurrenceCharacter } from "../helpers/fileHelper";
 
 
@@ -7,7 +9,8 @@ export function getLineOfSignature(lines:string[]):number{
         return patterns.some(regex => regex.test(str));
     }
 
-    const types = [/class/, /def/, /function/]
+    const types = [/class[\s\t]{1}/, /def[\s\t]{1}/, /function[\s\t]{1}/, /interface[\s\t]{1}/];
+    
 
     for (let index = 0; index < lines.length; index++) {  // JavaScript arrays are 0-indexed
 
@@ -17,7 +20,7 @@ export function getLineOfSignature(lines:string[]):number{
             return index;
         }
     }
-    return 0
+    return 0;
 }
 /**
  * Extracts the body of a specified component and its indentation from a string of code.
@@ -48,11 +51,11 @@ export function getLineOfSignature(lines:string[]):number{
 export function getComponentBodyAndIndentation(code: string): [string, string] {
     let lines = code.split('\n');
 
-    const index = getLineOfSignature(lines)
+    const index = getLineOfSignature(lines);
 
     const [_, nonEmptyClosestLine] = getClosestUpcomingCodeLine(index+1, lines);
 
-    lines = lines.slice(index+1)
+    lines = lines.slice(index+1);
 
     const indentation = nonEmptyClosestLine.replace(nonEmptyClosestLine.trimStart(),"");
          
@@ -94,21 +97,21 @@ export function replaceCodeByDocumentation(filePath:string, code: string, locati
         return beforeIndex + afterIndex.replace(substringToReplace, replacement);
     }
 
-    let newContent = code
+    let newContent = code;
 
     
     for (let i = 0; i < locationsAndDocumentations.length ; i++){
 
-        let contentToRemove:string = getContentInFile(filePath, [locationsAndDocumentations[i][0],locationsAndDocumentations[i][1]])
-        const lineOfSignature:number = locationsAndDocumentations[i][3]
-        const signature:string = code.split("\n")[lineOfSignature]
-        const indexAtWhichSignatureStarts:number = newContent.indexOf(signature)
+        let contentToRemove:string = getContentInFile(filePath, [locationsAndDocumentations[i][0],locationsAndDocumentations[i][1]]);
+        const lineOfSignature:number = locationsAndDocumentations[i][3];
+        const signature:string = code.split("\n")[lineOfSignature];
+        const indexAtWhichSignatureStarts:number = newContent.indexOf(signature);
 
         //let contentBeforeToRemove:string = newContent.replace
 
         let indentation:string = getIndentationAtLine(getClosestUpcomingCodeLine(0,contentToRemove.split("\n"))[1])
          
-        let documentation = locationsAndDocumentations[i][2]
+        let documentation = locationsAndDocumentations[i][2];
         
         if(documentation && documentation !== ""){
            
@@ -118,7 +121,7 @@ export function replaceCodeByDocumentation(filePath:string, code: string, locati
 
     }
 
-    return newContent
+    return newContent;
 }
 
 /**
@@ -165,8 +168,8 @@ function groupDocumentationsByLineIndex(set:Set<[number,string, string  | undefi
  */
 export function insertDocumentationInCode(code: string, filePath:string, locationsAndDocumentations: Set<[number,string, string | undefined]>): string{
 
-    let alreadyInserted = new Set<[string,string]>([])
-    let newCode = code
+    let alreadyInserted = new Set<[string,string]>([]);
+    let newCode = code;
 
     const groupedLocationsAndDocumentations = groupDocumentationsByLineIndex(locationsAndDocumentations) // groupes documentations to insert per line where they need to be inserted to handle case with multiple comments to insert
 
@@ -174,35 +177,35 @@ export function insertDocumentationInCode(code: string, filePath:string, locatio
 
         const uniqueDocumentationsToInsert = documentationsToInsert.filter(documentation => !alreadyInserted.has(documentation)) // removes documentations that were already inserted earlier in the code (we are only inserting on the first occurence)
 
-        const codeLineAtIndex = getContentInFile(filePath,[index, index])
-        const indentation = getIndentationAtLine(codeLineAtIndex)
+        const codeLineAtIndex = getContentInFile(filePath,[index, index]);
+        const indentation = getIndentationAtLine(codeLineAtIndex);
         
         if(uniqueDocumentationsToInsert.length > 1){ // case with multiple documentations to insert per line
-            let documentationToInsert =  indentation+'"""\n'
+            let documentationToInsert =  indentation+'"""\n';
             
             uniqueDocumentationsToInsert.forEach(([componentName, documentation]:[string, string])=>{// writes all documentations on top of line with one component per line
 
-                const tempDoc = componentName+": "+documentation
-                documentationToInsert+=(indentation+tempDoc+"\n")
-                alreadyInserted.add([componentName, documentation])
+                const tempDoc = componentName+": "+documentation;
+                documentationToInsert+=(indentation+tempDoc+"\n");
+                alreadyInserted.add([componentName, documentation]);
 
-            })
+            });
 
             const codeLineAtIndexWithDocumentation:string = codeLineAtIndex+documentationToInsert+indentation+'"""\n'
             newCode = newCode.replace(codeLineAtIndex, codeLineAtIndexWithDocumentation)
 
 
-        }else if(uniqueDocumentationsToInsert.length == 1){ // case with unique documentation to insert per line
-            const [componentName,documentation] = uniqueDocumentationsToInsert[0]
+        }else if(uniqueDocumentationsToInsert.length === 1){ // case with unique documentation to insert per line
+            const [componentName,documentation] = uniqueDocumentationsToInsert[0];
             const codeLineAtIndexWithDocumentation:string = removeLastOccurrenceCharacter(codeLineAtIndex,"\n")+" #"+documentation+"\n" //removes last \n occurence to insert documentation at line end
-            newCode = newCode.replace(codeLineAtIndex,codeLineAtIndexWithDocumentation)
-            alreadyInserted.add([componentName, documentation])
+            newCode = newCode.replace(codeLineAtIndex,codeLineAtIndexWithDocumentation);
+            alreadyInserted.add([componentName, documentation]);
         }
 
 
-    })
+    });
 
-    return newCode
+    return newCode;
 
 }
 
