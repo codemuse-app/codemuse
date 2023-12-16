@@ -67,6 +67,7 @@ export class Typescript extends LanguageProvider {
         if (!existsSync(tsBackupPath)) {
           writeFileSync(tsBackupPath, readFileSync(tsconfigPath));
         }
+
         rmSync(tsconfigPath);
 
         cleanUpTsconfig = true;
@@ -96,7 +97,7 @@ export class Typescript extends LanguageProvider {
         writeFileSync(tsconfigPath, readFileSync(tsBackupPath));
         rmSync(tsBackupPath);
       } else {
-        rmSync(tsBackupPath);
+        rmSync(tsconfigPath);
       }
     }
 
