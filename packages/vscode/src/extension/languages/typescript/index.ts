@@ -20,7 +20,7 @@ export class Typescript extends LanguageProvider {
     console.log(path);
 
     const files = await vscode.workspace.findFiles(
-      "**/*.{js,jsx,ts,tsx}",
+      "**/*.{js,jsx,ts,tsx,cjs,mjs}",
       "**/node_modules/**"
     );
 
@@ -106,7 +106,7 @@ export class Typescript extends LanguageProvider {
   async detect() {
     // Check if the workspace has any .js, .jsx, .ts, or .tsx files
     const hasJsFiles = await vscode.workspace.findFiles(
-      "**/*.{js,jsx,ts,tsx}",
+      "**/*.{js,jsx,ts,tsx,cjs,mjs}",
       "**/node_modules/**"
     );
 
