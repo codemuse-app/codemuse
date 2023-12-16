@@ -88,6 +88,18 @@ export class Typescript extends LanguageProvider {
     } catch (e) {
       console.error(e);
 
+      // @ts-ignore
+      if (e && e.stdout) {
+        // @ts-ignore
+        Sentry.captureMessage(e.stdout);
+      }
+
+      // @ts-ignore
+      if (e && e.stderr) {
+        // @ts-ignore
+        Sentry.captureMessage(e.stderr);
+      }
+
       Sentry.captureException(e);
 
       return undefined;
