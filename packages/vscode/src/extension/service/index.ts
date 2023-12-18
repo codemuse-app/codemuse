@@ -16,6 +16,7 @@ import {
   findMultiUpdateOrderWithDepth,
   groupNodesByDepth,
   updateGraphNodes,
+  removeDuplicateEdges,
 } from "./graph/utils_graph";
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
@@ -220,21 +221,24 @@ export class Index {
         printCycles(original_cycles);
 
         // remove duplicate edges from newOriginalGraph
-        /* const simpleGraph = toSimple(newOriginalGraph);
-        const testflattenGraph = buildFlattenedGraph(simpleGraph); */
+        const simpleGraph = toSimple(newOriginalGraph);
+        const testflattenGraph1 = buildFlattenedGraph(simpleGraph);
 
-        // Rebuild the flattened graph and update the Vectra index
-        let newFlattenedGraph = buildFlattenedGraph(newOriginalGraph);
+        // Remove duplicate edges from newOriginalGraph using our handwritten method (see utils_graph.ts)
+        const originalGraphNoDuplicate = removeDuplicateEdges(newOriginalGraph);
+
+        // build the flattened graph
+        let newFlattenedGraph = buildFlattenedGraph(originalGraphNoDuplicate);
 
         // Temporary fix for the cycles issue: while findCycles does not return an empty array, rebuild the flattened graph
-        while (findCycles(newFlattenedGraph).length > 0) {
+        /* while (findCycles(newFlattenedGraph).length > 0) {
           newFlattenedGraph = buildFlattenedGraph(newFlattenedGraph);
         }
 
         const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(
           instance.flattenedGraph || new MultiDirectedGraph(),
           newFlattenedGraph
-        );
+        ); */
 
         flattenGraphSpan?.finish();
 
