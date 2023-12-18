@@ -111,6 +111,7 @@ export const Search = () => {
             setSearch(e.target.value);
           }}
           disabled={!isInitialized}
+          placeholder="Function that checks permissions..."
         >
           Search
         </VSCodeTextField>

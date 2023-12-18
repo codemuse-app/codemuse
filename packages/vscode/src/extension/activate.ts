@@ -187,11 +187,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
       );
     })
   );
-  context.subscriptions.push(
-    vscode.commands.registerCommand("codemuse.openSidebar", () => {
-      capture("openSidebar");
 
-      searchViewProvider.show();
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codemuse.openSidebar", async () => {
+      capture("openSidebar");
+      await vscode.commands.executeCommand("workbench.view.extension.codemuse");
     })
   );
 
