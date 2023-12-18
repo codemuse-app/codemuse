@@ -56,6 +56,17 @@ export class GenericViewProvider implements vscode.WebviewViewProvider {
     return html;
   }
 
+  public setBadge(value?: number, tooltip?: string) {
+    if (this.view) {
+      this.view.badge = value
+        ? {
+            value,
+            tooltip: tooltip || "",
+          }
+        : undefined;
+    }
+  }
+
   resolveWebviewView(
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext<unknown>,

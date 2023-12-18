@@ -141,23 +141,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
     })
   );
 
-  // Create a command called "CodeMuse: Index Workspace" that will run the index
-  context.subscriptions.push(
-    vscode.commands.registerCommand("codemuse.index", async () => {
-      capture("index");
-
-      await Sentry.startSpan(
-        {
-          op: "function",
-          name: "index",
-        },
-        async () => {
-          await Index.getInstance().run();
-        }
-      );
-    })
-  );
-
   // Attach the search view
   const searchViewProvider = new SearchViewProvider(context);
 
@@ -172,6 +155,25 @@ export const activate = async (context: vscode.ExtensionContext) => {
         },
       }
     )
+  );
+
+  // Create a command called "CodeMuse: Index Workspace" that will run the index
+  context.subscriptions.push(
+    vscode.commands.registerCommand("codemuse.index", async () => {
+      capture("index");
+
+      await Sentry.startSpan(
+        {
+          op: "function",
+          name: "index",
+        },
+        async () => {
+          await Index.getInstance().run();
+
+          searchViewProvider.setBadge(1, "CodeMuse is ready");
+        }
+      );
+    })
   );
 
   context.subscriptions.push(

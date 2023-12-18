@@ -255,8 +255,6 @@ export class Python extends LanguageProvider {
       result = await execFileAsync(
         `node`,
         [
-          "--max-old-space-size",
-          "8192",
           path,
           "index",
           cwd,
@@ -287,11 +285,13 @@ export class Python extends LanguageProvider {
 
       Sentry.captureException(err);
 
-      return undefined;
-    } finally {
       console.log(result?.stdout);
       console.error(result?.stderr);
+
+      return undefined;
     }
+    console.log(result?.stdout);
+    console.error(result?.stderr);
 
     return result ? storagePath : undefined;
   }

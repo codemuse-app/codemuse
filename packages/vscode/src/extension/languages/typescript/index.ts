@@ -72,14 +72,7 @@ export class Typescript extends LanguageProvider {
 
       const result = await execFileAsync(
         `node`,
-        [
-          "--max-old-space-size",
-          "8192",
-          path,
-          "index",
-          "--output",
-          storagePath,
-        ],
+        [path, "index", "--output", storagePath],
         {
           cwd,
         }
