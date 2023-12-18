@@ -222,13 +222,9 @@ export class Index {
 
         // remove duplicate edges from newOriginalGraph
         const simpleGraph = toSimple(newOriginalGraph);
-        const testflattenGraph1 = buildFlattenedGraph(simpleGraph);
-
-        // Remove duplicate edges from newOriginalGraph using our handwritten method (see utils_graph.ts)
-        const originalGraphNoDuplicate = removeDuplicateEdges(newOriginalGraph);
 
         // build the flattened graph
-        let newFlattenedGraph = buildFlattenedGraph(originalGraphNoDuplicate);
+        let newFlattenedGraph = buildFlattenedGraph(simpleGraph);
 
         // Temporary fix for the cycles issue: while findCycles does not return an empty array, rebuild the flattened graph
         /* while (findCycles(newFlattenedGraph).length > 0) {
