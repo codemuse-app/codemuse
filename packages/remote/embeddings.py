@@ -65,7 +65,7 @@ stub = Stub("embeddings", image=image)
 BATCH_SIZE = 50
 TIMEOUT = 0.5
 
-@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs= 10 * BATCH_SIZE, concurrency_limit=3)
+@stub.cls(gpu="T4", secret=Secret.from_name("huggingface"), container_idle_timeout=60, allow_concurrent_inputs= 10 * BATCH_SIZE, concurrency_limit=5)
 class Model:
     def __enter__(self):
         # Load the model. Tip: MPT models may rdequire `trust_remote_code=true`.
