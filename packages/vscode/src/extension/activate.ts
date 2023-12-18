@@ -170,12 +170,23 @@ export const activate = async (context: vscode.ExtensionContext) => {
         async () => {
           await Index.getInstance().run();
 
-          searchViewProvider.setBadge(1, "CodeMuse is ready");
+          // Show a notification that proposes to be taken to the search view
+          vscode.window
+            .showInformationMessage(
+              "CodeMuse has finished indexing your workspace. Would you like to open the search view?",
+              "Yes",
+              "No"
+            )
+            .then((selection) => {
+              // Run the command to open the search view if the user selects "Yes"
+              if (selection === "Yes") {
+                vscode.commands.executeCommand("codemuse.openSidebar");
+              }
+            });
         }
       );
     })
   );
-
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.openSidebar", () => {
       capture("openSidebar");
