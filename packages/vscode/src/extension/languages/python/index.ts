@@ -252,6 +252,8 @@ export class Python extends LanguageProvider {
     const result = await execFileAsync(
       `node`,
       [
+        "--max-old-space-size",
+        "8192",
         path,
         "index",
         cwd,
