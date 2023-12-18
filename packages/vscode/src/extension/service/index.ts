@@ -233,12 +233,12 @@ export class Index {
         // Temporary fix for the cycles issue: while findCycles does not return an empty array, rebuild the flattened graph
         /* while (findCycles(newFlattenedGraph).length > 0) {
           newFlattenedGraph = buildFlattenedGraph(newFlattenedGraph);
-        }
+        } */
 
         const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(
           instance.flattenedGraph || new MultiDirectedGraph(),
           newFlattenedGraph
-        ); */
+        );
 
         flattenGraphSpan?.finish();
 
