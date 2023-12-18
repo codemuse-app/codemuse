@@ -44,6 +44,7 @@ export class Typescript extends LanguageProvider {
       // ...existingTsConfig,
       // TODO: issue with extending other configs??
       // extends: undefined,
+      compilerOptions: { allowJs: true },
       include: [
         // ...(existingTsConfig.include || []),
         files,
