@@ -249,38 +249,51 @@ export class Python extends LanguageProvider {
 
     storagePath += "/python.scip";
 
-    const result = await execFileAsync(
-      `node`,
-      [
-        "--max-old-space-size",
-        "8192",
-        path,
-        "index",
-        cwd,
-        "--environment",
-        environmentLocation,
-        "--cwd",
-        cwd,
-        "--output",
-        storagePath,
-        "--project-name",
-        cwd.split("/").pop() ?? "",
-        "--project-version",
-        "indexer",
-      ],
-      {
-        env: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          PATH: pythonPath + ":" + process.env.PATH,
-        },
-        cwd,
-      }
-    );
+    let result = undefined;
 
-    console.log(result.stdout);
-    console.log(result.stderr);
+    try {
+      result = await execFileAsync(
+        `node`,
+        [
+          "--max-old-space-size",
+          "8192",
+          path,
+          "index",
+          cwd,
+          "--environment",
+          environmentLocation,
+          "--cwd",
+          cwd,
+          "--output",
+          storagePath,
+          "--project-name",
+          cwd.split("/").pop() ?? "",
+          "--project-version",
+          "indexer",
+        ],
+        {
+          env: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            PATH: pythonPath + ":" + process.env.PATH,
+          },
+          cwd,
+        }
+      );
+    } catch (err) {
+      // @ts-ignore
+      err.stderr && Sentry.captureMessage(err.stderr);
+      // @ts-ignore
+      err.stdout && Sentry.captureMessage(err.stdout);
 
-    return storagePath;
+      Sentry.captureException(err);
+
+      return undefined;
+    } finally {
+      console.log(result?.stdout);
+      console.error(result?.stderr);
+    }
+
+    return result ? storagePath : undefined;
   }
 
   async detect() {
