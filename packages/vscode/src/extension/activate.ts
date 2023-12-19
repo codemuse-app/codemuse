@@ -36,7 +36,7 @@ function resetCountdownTimer(statusBarItem: vscode.StatusBarItem) {
       vscode.commands.executeCommand("codemuse.index");
       return;
     }
-    statusBarItem.text = `$(sync~spin) ${formatTime(timeLeft)}`;
+    statusBarItem.text = `${formatTime(timeLeft)}`;
     timeLeft--;
   };
 
@@ -216,7 +216,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
       // Stop the timer during indexing
       if (countdownTimer) {
         clearInterval(countdownTimer);
-        statusBarBtn.text = `$(sync~spin) Indexing...`;
+        statusBarBtn.text = `Indexing...`;
       }
 
 
