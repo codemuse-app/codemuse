@@ -13,6 +13,39 @@ import { CodeMuseAuthenticationProvider } from "./service/auth";
 
 // import { telemetryLogger } from "./service/logging";
 
+// Declare a global variable to keep track of whether indexing is in progress, a timer to run indexing every 5 minutes, and a status bar item
+let indexingInProgress = false;
+const INDEXING_INTERVAL = 5; // in minutes
+let countdownTimer: NodeJS.Timeout | null = null;
+let timeLeft = INDEXING_INTERVAL*60; // 5 minutes in seconds
+
+function formatTime(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+function resetCountdownTimer(statusBarItem: vscode.StatusBarItem) {
+  if (countdownTimer) {
+    clearTimeout(countdownTimer);
+    timeLeft = INDEXING_INTERVAL*60; // Reset time to 5 minutes
+  }
+
+  const updateTimer = () => {
+    if (timeLeft <= 0) {
+      vscode.commands.executeCommand("codemuse.index");
+      return;
+    }
+    statusBarItem.text = `$(sync~spin) ${formatTime(timeLeft)}`;
+    timeLeft--;
+  };
+
+  updateTimer(); // Update immediately
+  countdownTimer = setInterval(updateTimer, 1000);
+
+  statusBarItem.tooltip = "Time remaining before the next auto-indexing. Click to force indexing now.";
+}
+
 export const highlight = vscode.window.createTextEditorDecorationType({
   isWholeLine: true,
   light: {
@@ -157,9 +190,36 @@ export const activate = async (context: vscode.ExtensionContext) => {
     )
   );
 
+  const statusBarBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarBtn.command = "codemuse.index";
+  resetCountdownTimer(statusBarBtn);
+  statusBarBtn.show();
+  context.subscriptions.push(statusBarBtn);
+
+  resetCountdownTimer(statusBarBtn);
+
   // Create a command called "CodeMuse: Index Workspace" that will run the index
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.index", async () => {
+
+      //reset the timer
+      resetCountdownTimer(statusBarBtn);
+
+      // If indexing is already in progress, show a message and return early
+      if (indexingInProgress) {
+        vscode.window.showInformationMessage("Indexing is already in progress.");
+        resetCountdownTimer(statusBarBtn);
+        return;
+      }
+      indexingInProgress = true;
+
+      // Stop the timer during indexing
+      if (countdownTimer) {
+        clearInterval(countdownTimer);
+        statusBarBtn.text = `$(sync~spin) Indexing...`;
+      }
+
+
       capture("index");
 
       await Sentry.startSpan(
@@ -185,6 +245,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
             });
         }
       );
+
+      indexingInProgress = false;
+      resetCountdownTimer(statusBarBtn);
+
     })
   );
 
