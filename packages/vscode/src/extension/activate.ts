@@ -354,6 +354,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
       scheme: "file",
       language: "typescript",
     },
+    {
+      scheme: "file",
+      language: "javascriptreact",
+    },
+    {
+      scheme: "file",
+      language: "typescriptreact",
+    },
   ];
 
   const codeLensProvider = new CodeMuseCodeLens();
