@@ -147,7 +147,7 @@ export class CodeMuseAuthenticationProvider implements AuthenticationProvider {
               () => {
                 reject(new Error("Timed out"));
               },
-              2 * 60 * 1000
+              5 * 60 * 1000
             );
           }),
         ])) as {
