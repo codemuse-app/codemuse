@@ -190,7 +190,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
     )
   );
 
-  const statusBarBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  const statusBarBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, -1); // -1 to force it to the righ
   statusBarBtn.command = "codemuse.index";
   resetCountdownTimer(statusBarBtn);
   statusBarBtn.show();
