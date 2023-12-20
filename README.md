@@ -21,8 +21,6 @@ Our [CodeMuse VSCode Extension](https://marketplace.visualstudio.com/items?itemN
 > ### What Makes CodeMuse Unique ? <br />
 > Unlike traditional tools, CodeMuse uses AI and semantic tools to create a real-time experience, allowing you to seamlessly use our tool while coding without ever needing to exit your workflow. Shipped as a VSCode extension, we aim at maintaining an uninterrupted coding experience, ensuring that assistance from CodeMuse is always just a keystroke away, integrated directly into your daily coding activities.
 
-
-
 # Features
 
 - 🔍 **Search**: **CodeMuse** allows you to search on an automatically-generated graph and semantic index of your codebase, including business descriptions, using natural language query.
@@ -44,6 +42,13 @@ Automated recursive documentation gives a proper understanding of each and every
 
 
 https://github.com/codemuse-app/codemuse/assets/33000377/ed3c0454-ccdc-4980-bc13-c957ec377847
+
+
+# Getting Started
+### How-to Video
+Find here a simple video on how to use [CodeMuse VSCode Extension](https://marketplace.visualstudio.com/items?itemName=codemuse-app.codemuse&ssr=false#overview), from installation to your first search query !
+
+[![CodeMuse Youtube Tutorial](assets/banner.png)](https://www.youtube.com/watch?v=8JmVMXH8kq4)
 
 
 
