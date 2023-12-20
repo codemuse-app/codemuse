@@ -1,3 +1,5 @@
+![CodeMuse banner. Screenshot of the CodeMuse extension along with the CodeMuse icon.](./assets/codemuse-banner-github.png)
+
 # CodeMuse: Get the fun coding back !
 1. [Introduction](#introduction)
    - [Problem](#problem)
