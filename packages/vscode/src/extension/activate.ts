@@ -33,7 +33,7 @@ function resetCountdownTimer(statusBarItem: vscode.StatusBarItem) {
 
   const updateTimer = () => {
     if (timeLeft <= 0) {
-      vscode.commands.executeCommand("codemuse.index");
+      vscode.commands.executeCommand("codemuse.index", true);
       return;
     }
     statusBarItem.text = `${formatTime(timeLeft)}`;
@@ -191,7 +191,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
     )
   );
 
-  const statusBarBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, -2); // -1 to force it to the righ
+  const statusBarBtn = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    -2
+  ); // -1 to force it to the righ
   statusBarBtn.command = "codemuse.index";
   resetCountdownTimer(statusBarBtn);
   statusBarBtn.show();
@@ -201,60 +204,67 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   // Create a command called "CodeMuse: Index Workspace" that will run the index
   context.subscriptions.push(
-    vscode.commands.registerCommand("codemuse.index", async () => {
-      //reset the timer
-      resetCountdownTimer(statusBarBtn);
-
-      // If indexing is already in progress, show a message and return early
-      if (indexingInProgress) {
-        vscode.window.showInformationMessage(
-          "Indexing is already in progress."
-        );
+    vscode.commands.registerCommand(
+      "codemuse.index",
+      async (isReindex: boolean) => {
+        //reset the timer
         resetCountdownTimer(statusBarBtn);
-        return;
-      }
-      indexingInProgress = true;
 
-      // Stop the timer during indexing
-      if (countdownTimer) {
-        clearInterval(countdownTimer);
-        statusBarBtn.text = `Indexing...`;
-      }
-
-      capture("index");
-
-      await Sentry.startSpan(
-        {
-          op: "function",
-          name: "index",
-        },
-        async () => {
-          // Get an authentication session
-          await vscode.authentication.getSession("codemuse", [], {
-            createIfNone: true,
-          });
-
-          await Index.getInstance().run();
-
-          // Show a notification that proposes to be taken to the search view
-          vscode.window
-            .showInformationMessage(
-              "CodeMuse has finished indexing your workspace. Would you like to open the search view?",
-              "Yes",
-              "No"
-            )
-            .then((selection) => {
-              // Run the command to open the search view if the user selects "Yes"
-              if (selection === "Yes") {
-                vscode.commands.executeCommand("codemuse.openSidebar");
-              }
-            });
+        // If indexing is already in progress, show a message and return early
+        if (indexingInProgress) {
+          vscode.window.showInformationMessage(
+            "Indexing is already in progress."
+          );
+          resetCountdownTimer(statusBarBtn);
+          return;
         }
-      );
+        indexingInProgress = true;
 
-      indexingInProgress = false;
-      resetCountdownTimer(statusBarBtn);
-    })
+        // Stop the timer during indexing
+        if (countdownTimer) {
+          clearInterval(countdownTimer);
+          statusBarBtn.text = `Indexing...`;
+        }
+
+        capture("index");
+
+        await Sentry.startSpan(
+          {
+            op: "function",
+            name: "index",
+          },
+          async () => {
+            // Get an authentication session
+            await vscode.authentication.getSession("codemuse", [], {
+              createIfNone: true,
+            });
+
+            await Index.getInstance().run();
+
+            if (isReindex) {
+              return;
+            }
+
+            // Show a notification that proposes to be taken to the search view
+            vscode.window
+              .showInformationMessage(
+                "CodeMuse has finished indexing your workspace. Would you like to open the search view?",
+                "Yes",
+                "No"
+              )
+              .then((selection) => {
+                // Run the command to open the search view if the user selects "Yes"
+                if (selection === "Yes") {
+                  vscode.commands.executeCommand("codemuse.openSidebar");
+                }
+              });
+          }
+        );
+
+        indexingInProgress = false;
+        resetCountdownTimer(statusBarBtn);
+      }
+    )
   );
 
   context.subscriptions.push(
