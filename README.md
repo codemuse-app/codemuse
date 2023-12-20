@@ -45,6 +45,14 @@ https://github.com/codemuse-app/codemuse/assets/33000377/ed3c0454-ccdc-4980-bc13
 
 
 # Getting Started
+
+# Installation and Log In
+
+CodeMuse Alpha can be downloaded from the VSCode extension marketplace. You should be able to install it and start using it in your current projects. You can also search for `CodeMuse` in the VSCode extension panel.
+
+If you wish to use the `.vsix` file for a manual installation, you can get the extension from the marketplace and use the `Download extension` link. You can then follow the [manual installation instructions](https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-vsix).
+
+
 ### How-to Video
 Find here a simple video on how to use [CodeMuse VSCode Extension](https://marketplace.visualstudio.com/items?itemName=codemuse-app.codemuse&ssr=false#overview), from installation to your first search query !
 
