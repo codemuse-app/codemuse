@@ -1,6 +1,7 @@
-# Table of Contents
-1. [Problem](#problem)
-2. [Solution](#solution)
+# CodeMuse: Get the fun coding back !
+1. [Introduction](#introduction)
+   - [Problem](#problem)
+   - [Solution](#solution)
 3. [Features](#features)
    - [Code Navigation with AI](#code-navigation-with-ai)
    - [Automated and Intelligent Documentation](#automated-and-intelligent-documentation)
@@ -12,7 +13,7 @@
 7. [Contributing](#contributing)
 8. [Our Team](#our-team)
 
-# CodeMuse: Get the fun coding back !
+# Introduction
 
 **[CodeMuse](https://www.codemuse.app/)** is an AI code assistant that works hand in hand with the developer, and automates the boring parts of coding.
 
@@ -22,13 +23,13 @@ https://github.com/codemuse-app/codemuse/assets/33000377/6504f95d-9aec-4f80-8d3f
 
 
 
-**CodeMuse** is an exhilarating and innovative AI code assistant, designed to revolutionize the coding experience. It specializes in speeding up the onboarding process of a repository, enabling developers to focus on what truly matters. Its standout features include an automatically-generated graph and semantic index of codebases, automated documentation, and semantic browsing for a deeper understanding of code elements. Furthermore, **CodeMuse** assists in real-time as you type and can even convert business needs into actionable code changes. This tool promises to bring back the joy and creativity in coding by automating the mundane aspects, letting developers focus on the fun parts of coding.
+**CodeMuse** is an innovative AI code assistant, designed to revolutionize the coding experience. It specializes in speeding up the onboarding process of a repository, enabling developers to focus on what truly matters. Its standout features include an automatically-generated graph and semantic index of codebases, automated documentation, and semantic browsing for a deeper understanding of code elements. Furthermore, **CodeMuse** assists in real-time as you type and can even convert business needs into actionable code changes. This tool promises to bring back the joy and creativity in coding by automating the mundane aspects, letting developers focus on the fun parts of coding.
 
-# Problem
+## Problem
 ✅ Human resources are more dynamic now than ever. We can scale teams up and down in a matter of days. <br />
 ❌ However, for software engineers, diving into an unfamiliar codebase often means hours, if not days, of navigating through complex code to grasp its structure and functionality. This is not just daunting but also a drain on productivity and efficiency. What’s worse, business and technical documentations are often outdated or not aligned. This leads to confusion, inefficiencies and regressions when working on larger codebases.
 
-# Solution
+## Solution
 Our [CodeMuse VSCode Extension](https://marketplace.visualstudio.com/items?itemName=codemuse-app.codemuse&ssr=false#overview) solve theses issues thanks to feature like code search and automated documentation! With our VSCode extension, getting started is as effortless as downloading the extension and logging in. Search is snappy and to the point. Documentation is readily available, from your IDE. This hassle-free approach, complemented by comprehensive documentation and how-to videos, ensures a seamless integration into your existing workflow. Currently optimized for Python, JavaScript and TypeScript projects, we are actively working on expanding our support to include more programming languages and other popular IDEs.
 
 > [!NOTE]
