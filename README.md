@@ -1,3 +1,17 @@
+# Table of Contents
+1. [Problem](#problem)
+2. [Solution](#solution)
+3. [Features](#features)
+   - [Code Navigation with AI](#code-navigation-with-ai)
+   - [Automated and Intelligent Documentation](#automated-and-intelligent-documentation)
+4. [Getting Started](#getting-started)
+   - [Installation and Log In](#installation-and-log-in)
+   - [How-to Video](#how-to-video)
+5. [Tech Stack](#tech-stack)
+6. [Story](#story)
+7. [Contributing](#contributing)
+8. [Our Team](#our-team)
+
 # CodeMuse: Get the fun coding back !
 
 **[CodeMuse](https://www.codemuse.app/)** is an AI code assistant that works hand in hand with the developer, and automates the boring parts of coding.
@@ -46,7 +60,7 @@ https://github.com/codemuse-app/codemuse/assets/33000377/ed3c0454-ccdc-4980-bc13
 
 # Getting Started
 
-###Installation and Log In
+### Installation and Log In
 
 CodeMuse Alpha can be downloaded from the VSCode extension marketplace. You should be able to install it and start using it in your current projects. You can also search for `CodeMuse` in the VSCode extension panel.
 
