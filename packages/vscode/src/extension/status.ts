@@ -8,7 +8,7 @@ export class Status {
   private constructor() {
     this.statusBarItem = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Right,
-      -2 // to the left of the language picker
+      -3 // to the left of the language picker
     );
     this.statusBarItem.command = "codemuse.index";
     this.statusBarItem.tooltip = "Index Workspace";
