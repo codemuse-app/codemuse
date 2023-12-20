@@ -73,7 +73,7 @@ You can also have a look at our extensive [documentation](https://codemuse.notio
 
 
 ### How-to Video
-Find here a simple [video](https://www.youtube.com/watch?v=8JmVMXH8kq4) on how to use [CodeMuse VSCode Extension](https://marketplace.visualstudio.com/items?itemName=codemuse-app.codemuse&ssr=false#overview), from installation to your first search query !
+Find here a [simple](https://www.youtube.com/watch?v=8JmVMXH8kq4) video on how to use [CodeMuse VSCode Extension](https://marketplace.visualstudio.com/items?itemName=codemuse-app.codemuse&ssr=false#overview), from installation to your first search query !
 
 
 
