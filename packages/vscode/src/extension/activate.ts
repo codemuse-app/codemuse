@@ -232,6 +232,11 @@ export const activate = async (context: vscode.ExtensionContext) => {
           name: "index",
         },
         async () => {
+          // Get an authentication session
+          await vscode.authentication.getSession("codemuse", [], {
+            createIfNone: true,
+          });
+
           await Index.getInstance().run();
 
           // Show a notification that proposes to be taken to the search view
@@ -451,11 +456,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
     );
 
     if (consent === "Yes") {
-      // Get an authentication session
-      await vscode.authentication.getSession("codemuse", [], {
-        createIfNone: true,
-      });
-
       // Run indexing
       vscode.commands.executeCommand("codemuse.index");
     }
