@@ -2,9 +2,26 @@
 
 **[CodeMuse](https://www.codemuse.app/)** is an AI code assistant that works hand in hand with the developer, and automates the boring parts of coding.
 
-[CodeMuse: Get the fun coding back !](/assets/LandingPage.mp4)
+
+
+https://github.com/codemuse-app/codemuse/assets/33000377/6504f95d-9aec-4f80-8d3f-f529d8fbbff2
+
+
 
 **CodeMuse** is an exhilarating and innovative AI code assistant, designed to revolutionize the coding experience. It specializes in speeding up the onboarding process of a repository, enabling developers to focus on what truly matters. Its standout features include an automatically-generated graph and semantic index of codebases, automated documentation, and semantic browsing for a deeper understanding of code elements. Furthermore, **CodeMuse** assists in real-time as you type and can even convert business needs into actionable code changes. This tool promises to bring back the joy and creativity in coding by automating the mundane aspects, letting developers focus on the fun parts of coding.
+
+# Problem
+✅ Human resources are more dynamic now than ever. We can scale teams up and down in a matter of days. <br />
+❌ However, for software engineers, diving into an unfamiliar codebase often means hours, if not days, of navigating through complex code to grasp its structure and functionality. This is not just daunting but also a drain on productivity and efficiency. What’s worse, business and technical documentations are often outdated or not aligned. This leads to confusion, inefficiencies and regressions when working on larger codebases.
+
+# Solution
+Our [CodeMuse VSCode Extension](https://marketplace.visualstudio.com/items?itemName=codemuse-app.codemuse&ssr=false#overview) solve theses issues thanks to feature like code search and automated documentation! With our VSCode extension, getting started is as effortless as downloading the extension and logging in. Search is snappy and to the point. Documentation is readily available, from your IDE. This hassle-free approach, complemented by comprehensive documentation and how-to videos, ensures a seamless integration into your existing workflow. Currently optimized for Python, JavaScript and TypeScript projects, we are actively working on expanding our support to include more programming languages and other popular IDEs.
+
+> [!NOTE]
+> ### What Makes CodeMuse Unique ? <br />
+> Unlike traditional tools, CodeMuse uses AI and semantic tools to create a real-time experience, allowing you to seamlessly use our tool while coding without ever needing to exit your workflow. Shipped as a VSCode extension, we aim at maintaining an uninterrupted coding experience, ensuring that assistance from CodeMuse is always just a keystroke away, integrated directly into your daily coding activities.
+
+
 
 # Features
 
@@ -12,6 +29,23 @@
 - 📄 **Automated Documentation**: **CodeMuse** automatically generates developer and business-oriented documentation.
 - 🧑‍💻 **************************************************Key-up assistant**************************************************: [in progress]
 - 🤖 **Code implementation**: [in progress]
+
+### Code Navigation with AI
+
+Code navigation is our cornerstone feature, designed to streamline the way developers interact with codebases. Whether you're looking for specific functionality, business logic, or just a particular keyword, CodeMuse brings you the relevant code snippets in milliseconds. We ditch the “chat-like” experience for snappy, relevant links to your codebase.
+
+
+https://github.com/codemuse-app/codemuse/assets/33000377/1cad0c66-c840-4ec1-9352-7977d1e6cb13
+
+
+### Automated and Intelligent Documentation
+
+Automated recursive documentation gives a proper understanding of each and every function of a codebase. As you browse, CodeMuse describes the role of functions, classes or modules based on a deep semantic graph and AI extraction. This prevents you from digging through multiple files, and bridges the communication between developers and project managers.
+
+
+https://github.com/codemuse-app/codemuse/assets/33000377/ed3c0454-ccdc-4980-bc13-c957ec377847
+
+
 
 # Tech Stack
 
@@ -33,9 +67,9 @@ Join us at **CodeMuse**, where we're making coding more accessible and bridging 
 
 Join us in shaping **CodeMuse**! Start by exploring our free access plan and share your feedback. Your insights are vital in refining our solution. Connect with us on our Discord channel, where you can discuss with our dev team and fellow users, contributing to the evolution of a tool that meets everyone's needs. Encounter an issue? Submit a ticket error promptly for a swift resolution. For those keen on a deeper involvement or with ideas for improvement, reach out to us directly. Your active contribution can significantly impact this project's success. Let's build something extraordinary together!
 
-Join our [**Discord!**](https://discord.gg/KSzM9kFq)
+[**Join our Discord!**](https://discord.gg/KSzM9kFq)
 
-Follow us on [**X**](https://twitter.com/CodeMuseApp) and [**LinkedIn**](https://www.linkedin.com/company/codemuse)!
+[**Follow us on X**](https://twitter.com/CodeMuseApp) and [**LinkedIn**](https://www.linkedin.com/company/codemuse)!
 
 [**Stay Tuned !**](https://www.codemuse.app/get-involved)
 
