@@ -17,18 +17,18 @@ import { CodeMuseAuthenticationProvider } from "./service/auth";
 let indexingInProgress = false;
 const INDEXING_INTERVAL = 5; // in minutes
 let countdownTimer: NodeJS.Timeout | null = null;
-let timeLeft = INDEXING_INTERVAL*60; // 5 minutes in seconds
+let timeLeft = INDEXING_INTERVAL * 60; // 5 minutes in seconds
 
 function formatTime(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 }
 
 function resetCountdownTimer(statusBarItem: vscode.StatusBarItem) {
   if (countdownTimer) {
     clearTimeout(countdownTimer);
-    timeLeft = INDEXING_INTERVAL*60; // Reset time to 5 minutes
+    timeLeft = INDEXING_INTERVAL * 60; // Reset time to 5 minutes
   }
 
   const updateTimer = () => {
@@ -43,7 +43,8 @@ function resetCountdownTimer(statusBarItem: vscode.StatusBarItem) {
   updateTimer(); // Update immediately
   countdownTimer = setInterval(updateTimer, 1000);
 
-  statusBarItem.tooltip = "Time remaining before the next auto-indexing. Click to force indexing now.";
+  statusBarItem.tooltip =
+    "Time remaining before the next auto-indexing. Click to force indexing now.";
 }
 
 export const highlight = vscode.window.createTextEditorDecorationType({
@@ -190,7 +191,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
     )
   );
 
-  const statusBarBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  const statusBarBtn = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100
+  );
   statusBarBtn.command = "codemuse.index";
   resetCountdownTimer(statusBarBtn);
   statusBarBtn.show();
@@ -201,13 +205,14 @@ export const activate = async (context: vscode.ExtensionContext) => {
   // Create a command called "CodeMuse: Index Workspace" that will run the index
   context.subscriptions.push(
     vscode.commands.registerCommand("codemuse.index", async () => {
-
       //reset the timer
       resetCountdownTimer(statusBarBtn);
 
       // If indexing is already in progress, show a message and return early
       if (indexingInProgress) {
-        vscode.window.showInformationMessage("Indexing is already in progress.");
+        vscode.window.showInformationMessage(
+          "Indexing is already in progress."
+        );
         resetCountdownTimer(statusBarBtn);
         return;
       }
@@ -218,7 +223,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
         clearInterval(countdownTimer);
         statusBarBtn.text = `Indexing...`;
       }
-
 
       capture("index");
 
@@ -248,7 +252,6 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
       indexingInProgress = false;
       resetCountdownTimer(statusBarBtn);
-
     })
   );
 
@@ -437,7 +440,26 @@ export const activate = async (context: vscode.ExtensionContext) => {
   });
 
   // Run the index command on startup
-  vscode.commands.executeCommand("codemuse.index");
+  // vscode.commands.executeCommand("codemuse.index");
+
+  (async () => {
+    // Ask the user for consent to auto-run codemuse on startup
+    const consent = await vscode.window.showInformationMessage(
+      "Would you like to run CodeMuse?",
+      "Yes",
+      "No"
+    );
+
+    if (consent === "Yes") {
+      // Get an authentication session
+      await vscode.authentication.getSession("codemuse", [], {
+        createIfNone: true,
+      });
+
+      // Run indexing
+      vscode.commands.executeCommand("codemuse.index");
+    }
+  })();
 
   capture("activate");
   transaction.finish();

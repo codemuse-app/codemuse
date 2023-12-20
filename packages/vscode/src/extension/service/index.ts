@@ -122,9 +122,9 @@ export class Index {
       {
         location: vscode.ProgressLocation.Notification,
         title: "CodeMuse is indexing your workspace",
-        cancellable: false,
+        cancellable: true,
       },
-      async (progress) => {
+      async (progress, cancellationToken) => {
         let newOriginalGraph: Graph = new MultiDirectedGraph();
 
         for (const workspace of vscode.workspace.workspaceFolders!) {
@@ -135,6 +135,10 @@ export class Index {
           });
 
           for (const language of instance.languages) {
+            if (cancellationToken.isCancellationRequested) {
+              return;
+            }
+
             const languageSpan = workspaceSpan?.startChild({
               op: "function",
               name: "language",
@@ -172,6 +176,10 @@ export class Index {
                   return language.run(workspace.uri.fsPath);
                 }
               );
+
+              if (cancellationToken.isCancellationRequested) {
+                return;
+              }
 
               if (scipPath) {
                 // const originalGraph = await buildGraph(workspace.uri.fsPath, scipPath);
@@ -261,6 +269,10 @@ export class Index {
           name: "get embeddings",
         });
 
+        if (cancellationToken.isCancellationRequested) {
+          return;
+        }
+
         await batch(
           allNodesToUpdate.map((nodeId) => {
             const graph = newFlattenedGraph as Graph;
@@ -305,6 +317,25 @@ export class Index {
 
         await this.vectraManager.endUpdate();
 
+        const cleanUpVectors = async () => {
+          await this.vectraManager.beginUpdate();
+
+          for (const node of [
+            ...updatedNodes,
+            ...addedNodes,
+            ...deletedNodes,
+          ]) {
+            await this.vectraManager.deleteItem(node);
+          }
+
+          await this.vectraManager.endUpdate();
+        };
+
+        if (cancellationToken.isCancellationRequested) {
+          await cleanUpVectors();
+          return;
+        }
+
         const documentationSpan = runSpan?.startChild({
           op: "function",
           name: "documentation",
@@ -325,6 +356,11 @@ export class Index {
         const nodesBatch = groupNodesByDepth(nodesOrder).reverse();
 
         for (const nodeList of nodesBatch) {
+          if (cancellationToken.isCancellationRequested) {
+            await cleanUpVectors();
+            return;
+          }
+
           // Map each nodeId to a documentNode promise
           await batch(
             nodeList.map((nodeId) => {
