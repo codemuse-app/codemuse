@@ -34,7 +34,8 @@ export default async function Login({
 
       if (
         !decodedRedirect.startsWith("vscode://") &&
-        !decodedRedirect.startsWith("vscode-insiders://")
+        !decodedRedirect.startsWith("vscode-insiders://") &&
+        !decodedRedirect.startsWith("cursor://")
       ) {
         return redirect(decodedRedirect);
       }
