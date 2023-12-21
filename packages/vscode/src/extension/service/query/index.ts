@@ -2,7 +2,8 @@ import { ParsedSymbolName } from "../../../shared/utils";
 import { VectraManager } from "../embedding/embed";
 import { Graph, LocalGraphNode } from "../graph/types";
 import { Orama, Results, create, insert, search } from "@orama/orama";
-import * as stopWords from "@orama/stopwords/english";
+// @ts-ignore
+import * as stopwords from "@orama/stopwords/english";
 
 const DAMPING = 0.95;
 const TOLERANCE = 0.05;
@@ -116,7 +117,7 @@ export const boost = async (
     } satisfies BoostDocument,
     components: {
       tokenizer: {
-        stopWords: [...stopWords.stopwords, "a"],
+        stopWords: [...stopwords.stopwords, "a"],
       },
     },
   });
