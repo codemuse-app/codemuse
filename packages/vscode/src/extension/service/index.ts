@@ -21,10 +21,10 @@ import {
 import { Graph, LocalGraphNode, ResultGraphNode } from "./graph/types";
 import { VectraManager } from "./embedding/embed";
 import { MultiDirectedGraph } from "graphology";
-import { batch } from "../../shared/utils";
+import { batch, getSymbolName } from "../../shared/utils";
 import { documentNode } from "./doc/build";
 import { capture } from "./logging/posthog";
-import { graphQuery } from "./query";
+import { boost, graphQuery } from "./query";
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
@@ -74,9 +74,13 @@ export class Index {
 
   // Function that queries the Vectra index and returns the top K results as a list of ResultGraphNode objects
   async query(text: string): Promise<ResultGraphNode[]> {
-    await graphQuery(this.vectraManager, this.originalGraph!, text);
+    const vectraResults = await graphQuery(
+      this.vectraManager,
+      this.originalGraph!,
+      text
+    );
 
-    const vectraResults = await this.vectraManager.query(text);
+    // const vectraResults = await this.vectraManager.query(text);
     let queryResults: ResultGraphNode[] = [];
 
     for (const [nodeId, score] of vectraResults) {
@@ -91,6 +95,33 @@ export class Index {
         queryResults.push(resultNode);
       }
     }
+
+    const boosts = await boost(
+      queryResults.map((result) => {
+        return {
+          id: result.symbol,
+          document: {
+            ...result,
+            ...getSymbolName(result.symbol),
+          },
+          score: 0,
+        };
+      }),
+      text
+    );
+
+    queryResults = queryResults.map((result) => {
+      return {
+        ...result,
+        score: result.score + (boosts.get(result.symbol) || 0) * result.score,
+      };
+    });
+
+    // Resort the results
+    queryResults = queryResults.sort((a, b) => {
+      return b.score - a.score;
+    });
+
     return queryResults;
   }
 
