@@ -89,6 +89,11 @@ Briefly explain the above code. Focus on business aspects, and be as concise as 
         # This number has been determined empirically depending on the current prompt token count. If you change the prompt, you may need to change this number.
         # Changing the GPU may also change this number.
         MAX_CODE_TOKENS = 12000
+        CHARS_PER_TOKEN = 10
+
+        # Heuristic to prevent the input from being too long.
+        if len(code) > MAX_CODE_TOKENS * CHARS_PER_TOKEN:
+            code = code[0:MAX_CODE_TOKENS * CHARS_PER_TOKEN]
 
         # Check if the input goes over the token limit of MAX_CODE_TOKENS. If it does, truncate it. Use vllm tokenizer to get the exact token count.
         # TODO: would it be smarter to take some part from the beginning and some part from the end?
