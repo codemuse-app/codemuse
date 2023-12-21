@@ -15,8 +15,11 @@ export interface LocalGraphNode extends BasicGraphNode {
   content: string;
   hash: string; // Hash of the content + outbouds links
   fileHash?: string;
-  processedContent?:string;
-  documentation?:string;
+  processedContent?: string;
+  documentation?: string;
+  // Search parameter
+  score?: number;
+  graphScore?: number;
 }
 
 export interface ResultGraphNode extends Omit<LocalGraphNode, "hash"> {
@@ -28,6 +31,7 @@ export type GraphNode = LocalGraphNode | LocalGraphNode;
 export interface GraphEdge {
   type: "uses" | "defines";
   at: Range;
+  weight?: number;
 }
 
 export type Graph = MultiDirectedGraph<GraphNode, GraphEdge>;

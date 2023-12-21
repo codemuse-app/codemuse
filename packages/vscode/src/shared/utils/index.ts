@@ -77,3 +77,5 @@ export const getSymbolName = (symbol: string) => {
     packageName,
   };
 };
+
+export type ParsedSymbolName = ReturnType<typeof getSymbolName>;
