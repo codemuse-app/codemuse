@@ -24,6 +24,7 @@ import { MultiDirectedGraph } from "graphology";
 import { batch } from "../../shared/utils";
 import { documentNode } from "./doc/build";
 import { capture } from "./logging/posthog";
+import { graphQuery } from "./query";
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
@@ -73,6 +74,8 @@ export class Index {
 
   // Function that queries the Vectra index and returns the top K results as a list of ResultGraphNode objects
   async query(text: string): Promise<ResultGraphNode[]> {
+    await graphQuery(this.vectraManager, this.originalGraph!, text);
+
     const vectraResults = await this.vectraManager.query(text);
     let queryResults: ResultGraphNode[] = [];
 

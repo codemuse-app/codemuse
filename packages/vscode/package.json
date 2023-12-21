@@ -123,6 +123,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "google-protobuf": "^3.21.2",
     "graphology": "^0.25.4",
+    "graphology-metrics": "^2.2.0",
     "graphology-operators": "^1.6.0",
     "posthog-js": "^1.93.3",
     "react": "^18.2.0",

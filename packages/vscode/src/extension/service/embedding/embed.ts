@@ -2,7 +2,7 @@ import { LocalIndex } from "vectra/src/LocalIndex";
 import * as vscode from "vscode";
 import { apiFetch } from "../../utils/fetch";
 
-const TOPK = 10; // Top K results to return
+const TOPK = 100; // Top K results to return
 
 export class VectraManager {
   private index: LocalIndex;
@@ -126,9 +126,9 @@ export class VectraManager {
   }
 
   // Query the index for the given text and return the top K results as a list of tuples [node_id, score]
-  async query(text: string): Promise<[string, number][]> {
+  async query(text: string, topK: number = TOPK): Promise<[string, number][]> {
     const vector = await this.getVector(text);
-    const results = await this.index.queryItems(vector, TOPK);
+    const results = await this.index.queryItems(vector, topK);
 
     if (results.length === 0) {
       console.log(`No results found.`);
