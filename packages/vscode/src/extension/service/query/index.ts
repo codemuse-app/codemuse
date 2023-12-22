@@ -56,7 +56,7 @@ export const graphQuery = async (
   graph: Graph,
   text: string
 ): Promise<[string, number][]> => {
-  const vectraResults = await vectraManager.query(text, 1000);
+  const vectraResults = await vectraManager.query(text);
   const graphCopy = graph.copy();
 
   for (const node of graphCopy.nodes()) {
@@ -135,6 +135,7 @@ export const boost = async (
       type: 2,
     },
     limit: 100,
+    tolerance: 2,
   });
 
   const maxScore = results.hits[0].score || 0;

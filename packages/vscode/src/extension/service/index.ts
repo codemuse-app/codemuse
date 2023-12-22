@@ -25,6 +25,8 @@ import { batch, getSymbolName } from "../../shared/utils";
 import { documentNode } from "./doc/build";
 import { capture } from "./logging/posthog";
 import { boost, graphQuery } from "./query";
+
+const MAX_RESULTS = 100;
 export class Index {
   private static instance: Index;
   private languages: Languages.LanguageProvider[] = [];
@@ -122,7 +124,9 @@ export class Index {
       return b.score - a.score;
     });
 
-    return queryResults;
+    return queryResults.length > MAX_RESULTS
+      ? queryResults.slice(0, MAX_RESULTS)
+      : queryResults;
   }
 
   static getInstance() {
