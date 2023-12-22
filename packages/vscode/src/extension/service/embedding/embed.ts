@@ -31,8 +31,13 @@ export class VectraManager {
 
     while (retries < maxRetries) {
       try {
+        const session = await vscode.authentication.getSession("codemuse", [], {
+          createIfNone: true,
+        });
+
         const response = await apiFetch(
           "https://codemuse-app--api-api-asgi.modal.run/embedding",
+          session.accessToken,
           {
             method: "POST",
             headers: {

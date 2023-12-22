@@ -5,7 +5,6 @@ import {
 } from "@sentry/utils";
 import { getDynamicSamplingContextFromClient } from "@sentry/core";
 import * as Sentry from "@sentry/browser";
-import * as vscode from "vscode";
 
 const CODEMUSE_DOMAINS = [
   "https://app.codemuse.app/",
@@ -15,6 +14,7 @@ const CODEMUSE_DOMAINS = [
 
 export const apiFetch = (
   input: RequestInfo | URL,
+  token: string,
   info?: RequestInit | undefined
 ) => {
   const scope = Sentry.getCurrentHub().getScope();
@@ -56,19 +56,13 @@ export const apiFetch = (
   };
 
   return (async () => {
-    const session = await vscode.authentication.getSession("codemuse", [], {
-      createIfNone: true,
-    });
-
-    console.log(session.accessToken);
-
     return await fetch(input.toString(), {
       ...info,
       // @ts-ignore
       headers: {
         ...info?.headers,
         ...sentryHeaders,
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
     });
   })();

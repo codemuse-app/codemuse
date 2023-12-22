@@ -96,8 +96,13 @@ async function buildDocumentation(code: string): Promise<string> {
 
   while (retries < maxRetries) {
     try {
+      const session = await vscode.authentication.getSession("codemuse", [], {
+        createIfNone: true,
+      });
+
       const response = await apiFetch(
         "https://codemuse-app--api-api-asgi.modal.run/documentation",
+        session.accessToken,
         {
           method: "POST",
           headers: {
