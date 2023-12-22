@@ -6,7 +6,7 @@ import { Orama, Results, create, insert, search } from "@orama/orama";
 import * as stopwords from "@orama/stopwords/english";
 
 const DAMPING = 0.95;
-const TOLERANCE = 0.05;
+const TOLERANCE = 0.02;
 
 const propagate = (graph: Graph) => {
   const scoreBoost = new Map<string, number>();
@@ -54,9 +54,10 @@ const propagate = (graph: Graph) => {
 export const graphQuery = async (
   vectraManager: VectraManager,
   graph: Graph,
-  text: string
+  text: string,
+  token: string
 ): Promise<[string, number][]> => {
-  const vectraResults = await vectraManager.query(text);
+  const vectraResults = await vectraManager.query(text, token);
   const graphCopy = graph.copy();
 
   for (const node of graphCopy.nodes()) {
