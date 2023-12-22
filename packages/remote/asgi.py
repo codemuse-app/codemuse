@@ -20,8 +20,7 @@ api_functions = {}
 stub = Stub("api")
 
 class ExtensionRequest(BaseModel):
-    # VSCode extension machine ID
-    machineId: str
+    pass
 
 class EmbeddingRequest(ExtensionRequest):
     code: str

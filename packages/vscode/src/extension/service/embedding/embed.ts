@@ -39,7 +39,6 @@ export class VectraManager {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              machineId: vscode.env.machineId,
               code: text,
             }), // Ensure this matches the expected format
           }

@@ -104,7 +104,6 @@ async function buildDocumentation(code: string): Promise<string> {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            machineId: vscode.env.machineId,
             code: code,
           }),
         }
