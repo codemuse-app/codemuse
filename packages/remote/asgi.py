@@ -21,7 +21,7 @@ stub = Stub("api")
 
 class ExtensionRequest(BaseModel):
     # VSCode extension machine ID
-    machineId: Optional[str]
+    machineId: Optional[str] = None
 
 class EmbeddingRequest(ExtensionRequest):
     code: str
