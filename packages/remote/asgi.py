@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 import sentry_sdk
@@ -20,7 +20,8 @@ api_functions = {}
 stub = Stub("api")
 
 class ExtensionRequest(BaseModel):
-    pass
+    # VSCode extension machine ID
+    machineId: Optional[str]
 
 class EmbeddingRequest(ExtensionRequest):
     code: str
