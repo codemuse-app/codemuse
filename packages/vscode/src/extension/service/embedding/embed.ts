@@ -6,12 +6,10 @@ const TOPK = 100; // Top K results to return
 
 export class VectraManager {
   private index: LocalIndex;
-  private context: vscode.ExtensionContext;
 
   constructor(context: vscode.ExtensionContext) {
     //this.index = new LocalIndex(path.join(__dirname, '..', 'index'));
     this.index = new LocalIndex(context!.storageUri!.fsPath);
-    this.context = context;
   }
 
   async initializeIndex() {
