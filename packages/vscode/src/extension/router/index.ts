@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 
 import { router as vrpcRouter, procedure } from "../../shared/vrpc";
 import { goTo } from "../commands";
-import { Index } from "../service";
+import { Index } from "../service/index/vscode";
 import { capture } from "../service/logging/posthog";
 
 export const router = vrpcRouter({
@@ -11,13 +11,17 @@ export const router = vrpcRouter({
   query: procedure(async (text: string) => {
     capture("query");
 
+    const session = await vscode.authentication.getSession("codemuse", [], {
+      createIfNone: true,
+    });
+
     return await Sentry.startSpan(
       {
         op: "function",
         name: "query",
       },
       () => {
-        return Index.getInstance().query(text);
+        return Index.getInstance().query(text, session.accessToken);
       }
     );
   }),

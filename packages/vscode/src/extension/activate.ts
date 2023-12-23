@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as Sentry from "@sentry/browser";
 
 import { Status } from "./status";
-import { Index } from "./service/index";
+import { Index } from "./service/index/vscode";
 import { SearchViewProvider } from "./views/search";
 import { CodeMuseCodeLens } from "./codelense";
 import { capture } from "./service/logging/posthog";

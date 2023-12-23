@@ -54,9 +54,10 @@ const propagate = (graph: Graph) => {
 export const graphQuery = async (
   vectraManager: VectraManager,
   graph: Graph,
-  text: string
+  text: string,
+  token: string
 ): Promise<[string, number][]> => {
-  const vectraResults = await vectraManager.query(text);
+  const vectraResults = await vectraManager.query(text, token);
   const graphCopy = graph.copy();
 
   for (const node of graphCopy.nodes()) {

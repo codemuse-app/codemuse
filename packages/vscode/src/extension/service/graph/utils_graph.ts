@@ -134,11 +134,12 @@ export function findMultiUpdateOrder(
 }
 
 /* The findMultiUpdateOrderWithDepth function takes a list of updated nodes and returns a list of nodes with their depth
-*/
+ */
 export function findMultiUpdateOrderWithDepth(
   graph: Graph,
   updatedNodes: string[]
-): [string, number][] {  // Updated return type to include depth
+): [string, number][] {
+  // Updated return type to include depth
   let depths: Map<string, number> = new Map();
   let allNodes: Set<string> = new Set();
 
@@ -156,7 +157,7 @@ export function findMultiUpdateOrderWithDepth(
   return Array.from(allNodes)
     .sort((a, b) => depths.get(b)! - depths.get(a)!)
     .filter((node, index, self) => self.indexOf(node) === index)
-    .map(node => [node, depths.get(node)!]);  // Map each node to a tuple [node, depth]
+    .map((node) => [node, depths.get(node)!]); // Map each node to a tuple [node, depth]
 }
 
 /* Function that detect if GraphNode is LocalGraphNode or ExternalGraphNode --> TODO: remove this function and use type check in TS instead */
@@ -165,7 +166,9 @@ function isLocalGraphNode(node: GraphNode): node is LocalGraphNode {
 }
 
 /* Funtion that group nodes by depth in order to have different executin batch that can be run in parallel */
-export function groupNodesByDepth(nodesWithDepth: [string, number][]): string[][] {
+export function groupNodesByDepth(
+  nodesWithDepth: [string, number][]
+): string[][] {
   // Create a Map to group nodes by their depth
   const depthGroups: Map<number, string[]> = new Map();
 
@@ -181,7 +184,7 @@ export function groupNodesByDepth(nodesWithDepth: [string, number][]): string[][
   // Sort the depths in decreasing order and map each depth to its group of nodes
   return Array.from(depthGroups.entries())
     .sort((a, b) => b[0] - a[0]) // Sort by depth in decreasing order
-    .map(entry => entry[1]); // Extract only the list of nodes
+    .map((entry) => entry[1]); // Extract only the list of nodes
 }
 
 /* Function that compare two graphs and return the added, updated and deleted nodes between the two graphs. */
@@ -215,26 +218,18 @@ export function compareGraphs(
   return { addedNodes, updatedNodes, deletedNodes };
 }
 
-export function saveGraphToFile(
-  graph: MultiDirectedGraph,
-  filename: string,
-  context: vscode.ExtensionContext
-) {
-  const filePath = path.join(context.storageUri!.fsPath, filename);
+export function saveGraphToFile(graph: Graph, filePath: string) {
   const graphData = graph.export();
   fs.writeFileSync(filePath, JSON.stringify(graphData));
 }
 
-export function loadGraphFromFile(
-  filename: string,
-  context: vscode.ExtensionContext
-): MultiDirectedGraph | undefined {
-  const filePath = path.join(context.storageUri!.fsPath, filename);
+export function loadGraphFromFile(filePath: string): Graph | undefined {
+  // const filePath = path.join(context.storageUri!.fsPath, filename);
   if (fs.existsSync(filePath)) {
     const graphData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     const graph = new MultiDirectedGraph();
     graph.import(graphData);
-    return graph;
+    return graph as Graph;
   }
   return undefined;
 }
@@ -248,26 +243,35 @@ export const hashNode = (node: Omit<LocalGraphNode, "hash">): string => {
 };
 
 // copy documentatin and processedContent of a all nodes
-export function updateGraphNodes(newOriginalGraph: Graph, originalGraph: Graph): void {
+export function updateGraphNodes(
+  newOriginalGraph: Graph,
+  originalGraph: Graph
+): void {
   // Iterate over all nodes in newOriginalGraph
   newOriginalGraph.forEachNode((nodeKey, attributes) => {
     // Assuming 'hash' is the unique identifier
     const nodeHash = attributes.hash;
 
     // Check if this.originalGraph has a node with the same hash
-    let originalNodeKey = originalGraph.findNode(node => {
-      return originalGraph.getNodeAttribute(node, 'hash') === nodeHash;
+    let originalNodeKey = originalGraph.findNode((node) => {
+      return originalGraph.getNodeAttribute(node, "hash") === nodeHash;
     });
 
     if (originalNodeKey !== undefined) {
       // Copy attributes from this.originalGraph to newOriginalGraph
-      const processedContent = originalGraph.getNodeAttribute(originalNodeKey, 'processedContent');
-      const documentation = originalGraph.getNodeAttribute(originalNodeKey, 'documentation');
+      const processedContent = originalGraph.getNodeAttribute(
+        originalNodeKey,
+        "processedContent"
+      );
+      const documentation = originalGraph.getNodeAttribute(
+        originalNodeKey,
+        "documentation"
+      );
 
       // Update newOriginalGraph node attributes
       newOriginalGraph.mergeNodeAttributes(nodeKey, {
         processedContent,
-        documentation
+        documentation,
       });
     }
   });

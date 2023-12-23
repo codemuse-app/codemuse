@@ -1,5 +1,4 @@
 import { LocalIndex } from "vectra/src/LocalIndex";
-import * as vscode from "vscode";
 import { apiFetch } from "../../utils/fetch";
 
 const TOPK = 100; // Top K results to return
@@ -7,9 +6,9 @@ const TOPK = 100; // Top K results to return
 export class VectraManager {
   private index: LocalIndex;
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(storagePath: string) {
     //this.index = new LocalIndex(path.join(__dirname, '..', 'index'));
-    this.index = new LocalIndex(context!.storageUri!.fsPath);
+    this.index = new LocalIndex(storagePath);
   }
 
   async initializeIndex() {
@@ -24,20 +23,16 @@ export class VectraManager {
     await this.index.listItemsByMetadata({});
   }
 
-  async getVector(text: string): Promise<number[]> {
+  async getVector(text: string, token: string): Promise<number[]> {
     const maxRetries = 2;
     let retries = 0;
     let error: Error | undefined;
 
     while (retries < maxRetries) {
       try {
-        const session = await vscode.authentication.getSession("codemuse", [], {
-          createIfNone: true,
-        });
-
         const response = await apiFetch(
           "https://codemuse-app--api-api-asgi.modal.run/embedding",
-          session.accessToken,
+          token,
           {
             method: "POST",
             headers: {
@@ -69,9 +64,15 @@ export class VectraManager {
   }
 
   // Add an item with the given node ID
-  async addItem(text: string, id: string, hash: string, path: string) {
+  async addItem(
+    text: string,
+    id: string,
+    hash: string,
+    path: string,
+    token: string
+  ) {
     await this.index.insertItem({
-      vector: await this.getVector(text),
+      vector: await this.getVector(text, token),
       metadata: { id, hash, path },
     });
   }
@@ -99,7 +100,13 @@ export class VectraManager {
   }
 
   // Update or insert an item with the given node ID
-  async upsertItem(text: string, id: string, hash: string, filePath: string) {
+  async upsertItem(
+    text: string,
+    id: string,
+    hash: string,
+    filePath: string,
+    token: string
+  ) {
     let recompute = true;
 
     const existingItems = await this.index.listItemsByMetadata({ id });
@@ -112,7 +119,7 @@ export class VectraManager {
       return;
     }
 
-    const vector = await this.getVector(text);
+    const vector = await this.getVector(text, token);
     const metadata = { id, hash, path: filePath };
 
     const existingItem = existingItems[0];
@@ -128,8 +135,12 @@ export class VectraManager {
   }
 
   // Query the index for the given text and return the top K results as a list of tuples [node_id, score]
-  async query(text: string, topK: number = TOPK): Promise<[string, number][]> {
-    const vector = await this.getVector(text);
+  async query(
+    text: string,
+    token: string,
+    topK: number = TOPK
+  ): Promise<[string, number][]> {
+    const vector = await this.getVector(text, token);
     const results = await this.index.queryItems(vector, topK);
 
     if (results.length === 0) {
