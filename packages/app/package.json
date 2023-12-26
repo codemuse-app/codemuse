@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "sync:indexed": "cp -R ../indexer/indexed ./app/playground/indexed"
   },
   "dependencies": {
     "@mailchimp/mailchimp_marketing": "^3.0.80",
