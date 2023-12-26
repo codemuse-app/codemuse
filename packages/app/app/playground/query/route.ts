@@ -75,16 +75,25 @@ export async function GET(request: Request) {
     return url;
   };
 
-  return NextResponse.json({
-    done: true,
-    results: results
-      .filter((result) => result.fileHash)
-      .map((result) => ({
-        ...result,
-        parsedName: getSymbolName(result.symbol),
-        content: undefined,
-        processedContent: undefined,
-        url: buildUrl(result, foundRepository),
-      })),
-  });
+  return NextResponse.json(
+    {
+      done: true,
+      results: results
+        .filter((result) => result.fileHash)
+        .map((result) => ({
+          ...result,
+          parsedName: getSymbolName(result.symbol),
+          content: undefined,
+          processedContent: undefined,
+          url: buildUrl(result, foundRepository),
+        })),
+    },
+    {
+      headers: {
+        // CORS allow from codemuse.app and localhost
+        "Access-Control-Allow-Origin":
+          "https://codemuse.app, http://localhost:3000",
+      },
+    }
+  );
 }

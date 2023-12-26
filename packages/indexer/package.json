@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.3.1",
     "ignore": "^5.3.0",
     "simple-git": "^3.21.0"
   },

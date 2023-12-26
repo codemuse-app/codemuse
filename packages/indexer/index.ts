@@ -11,6 +11,9 @@ import {
   rmdirSync,
   writeFileSync,
 } from "fs";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const reposList = [
   /*"https://github.com/Stevenic/vectra",
