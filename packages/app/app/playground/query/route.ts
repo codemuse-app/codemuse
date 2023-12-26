@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { QueryIndex } from "../../../../vscode/src/extension/service/index/query";
 import { getRepositories } from "../utils";
 import { ResultGraphNode } from "../../../../vscode/src/extension/service/graph/types";
+import { getSymbolName } from "../../../../vscode/src/shared/utils";
 
 export async function GET(request: Request) {
   const repositories = await getRepositories();
@@ -80,6 +81,7 @@ export async function GET(request: Request) {
       .filter((result) => result.fileHash)
       .map((result) => ({
         ...result,
+        parsedName: getSymbolName(result.symbol),
         content: undefined,
         processedContent: undefined,
         url: buildUrl(result, foundRepository),
