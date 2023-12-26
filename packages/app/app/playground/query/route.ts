@@ -60,6 +60,9 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     done: true,
-    results,
+    results: results.map((result) => ({
+      ...result,
+      contents: undefined,
+    })),
   });
 }
