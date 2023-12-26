@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { QueryIndex } from "../../../../vscode/src/extension/service/index/query";
 import { getRepositories } from "../utils";
+import { ResultGraphNode } from "../../../../vscode/src/extension/service/graph/types";
 
 export async function GET(request: Request) {
   const repositories = await getRepositories();
@@ -21,9 +22,10 @@ export async function GET(request: Request) {
     );
   }
 
-  const foundRepository = repositories.find(
-    (repo) => repo.repo.split("/").pop() === repository
-  );
+  console.log({ repository });
+  console.log(repositories);
+
+  const foundRepository = repositories.find((repo) => repo.repo === repository);
 
   if (!foundRepository) {
     return NextResponse.json(
@@ -58,12 +60,29 @@ export async function GET(request: Request) {
     process.env.PLAYGROUND_TOKEN as string
   );
 
+  const buildUrl = (
+    result: ResultGraphNode,
+    repo: Awaited<ReturnType<typeof getRepositories>>[number]
+  ) => {
+    let url = repo.url;
+    url += `/blob/${repo.commit}${result.file}`;
+
+    if (result.range) {
+      url += `#L${result.range[0] + 1}-L${result.range[2] + 1}`;
+    }
+
+    return url;
+  };
+
   return NextResponse.json({
     done: true,
-    results: results.map((result) => ({
-      ...result,
-      content: undefined,
-      processedContent: undefined,
-    })),
+    results: results
+      .filter((result) => result.fileHash)
+      .map((result) => ({
+        ...result,
+        content: undefined,
+        processedContent: undefined,
+        url: buildUrl(result, foundRepository),
+      })),
   });
 }

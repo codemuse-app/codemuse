@@ -1,13 +1,7 @@
 import { readFile, readdir } from "fs/promises";
 import { join } from "path";
 
-export const getRepositories = async (): Promise<
-  {
-    repo: string;
-    commit: string;
-    repositoryPath: string;
-  }[]
-> => {
+export const getRepositories = async () => {
   const indexPath = join(process.cwd(), "./app/playground/indexed");
 
   const folders = await readdir(indexPath);
@@ -21,6 +15,7 @@ export const getRepositories = async (): Promise<
   const repositories: {
     commit: string;
     repo: string;
+    url: string;
     repositoryPath: string;
   }[] = await Promise.all(
     repositoriesPaths.map(async (repositoryPath) => {
@@ -31,6 +26,8 @@ export const getRepositories = async (): Promise<
 
       return {
         ...meta,
+        repo: meta.repo.split("github.com/")[1],
+        url: meta.repo,
         repositoryPath,
       };
     })
