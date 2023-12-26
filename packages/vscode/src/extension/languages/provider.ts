@@ -1,14 +1,13 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync } from "fs";
-import * as vscode from "vscode";
 import { SupportedLanguage } from "../service/graph/types";
 
 export abstract class LanguageProvider {
   abstract languageId: SupportedLanguage;
-  protected context: vscode.ExtensionContext;
+  protected basePath: string;
 
-  constructor(context: vscode.ExtensionContext) {
-    this.context = context;
+  constructor(basePath: string) {
+    this.basePath = basePath;
   }
 
   /**
@@ -22,8 +21,7 @@ export abstract class LanguageProvider {
       .digest("hex")
       .slice(0, 16);
 
-    const storagePath =
-      this.context!.storageUri!.fsPath + "/" + repositoryHash + "";
+    const storagePath = this.basePath + "/" + repositoryHash + "";
 
     if (!existsSync(storagePath)) {
       mkdirSync(storagePath, { recursive: true });
@@ -37,7 +35,7 @@ export abstract class LanguageProvider {
    * @returns Whether the language provider should be run on the given workspace folder.
    * @todo This could return a sublist of the workspace folders that should be run.
    */
-  abstract detect(): Promise<boolean>;
+  abstract detect(path: string): Promise<boolean>;
 
   /**
    * Run the language provider on the given workspace folder. This builds the index file to the storage directory.

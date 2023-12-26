@@ -27,33 +27,37 @@ export const apiFetch = (
     input.toString().startsWith(domain)
   );
 
-  if (!client || !scope || !span || !isCodemuseDomain) {
+  if (!isCodemuseDomain) {
     return fetch(input, info);
   }
 
-  const transaction = span && span.transaction;
+  let sentryHeaders = {};
 
-  const { traceId, sampled, dsc } = Sentry.getCurrentHub()
-    .getScope()
-    .getPropagationContext();
+  if (client && scope && span) {
+    const transaction = span && span.transaction;
 
-  const sentryTraceHeader = span
-    ? span.toTraceparent()
-    : generateSentryTraceHeader(traceId, undefined, sampled);
-  const dynamicSamplingContext = transaction
-    ? transaction.getDynamicSamplingContext()
-    : dsc
-      ? dsc
-      : getDynamicSamplingContextFromClient(traceId, client, scope);
+    const { traceId, sampled, dsc } = Sentry.getCurrentHub()
+      .getScope()
+      .getPropagationContext();
 
-  const sentryBaggageHeader = dynamicSamplingContextToSentryBaggageHeader(
-    dynamicSamplingContext
-  );
+    const sentryTraceHeader = span
+      ? span.toTraceparent()
+      : generateSentryTraceHeader(traceId, undefined, sampled);
+    const dynamicSamplingContext = transaction
+      ? transaction.getDynamicSamplingContext()
+      : dsc
+        ? dsc
+        : getDynamicSamplingContextFromClient(traceId, client, scope);
 
-  const sentryHeaders = {
-    "sentry-trace": sentryTraceHeader,
-    [BAGGAGE_HEADER_NAME]: sentryBaggageHeader,
-  };
+    const sentryBaggageHeader = dynamicSamplingContextToSentryBaggageHeader(
+      dynamicSamplingContext
+    );
+
+    sentryHeaders = {
+      "sentry-trace": sentryTraceHeader,
+      [BAGGAGE_HEADER_NAME]: sentryBaggageHeader,
+    };
+  }
 
   return (async () => {
     return await fetch(input.toString(), {

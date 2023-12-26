@@ -1,83 +1,153 @@
-import { VectraManager } from "../embedding/embed";
-import { Graph, LocalGraphNode, ResultGraphNode } from "../graph/types";
-import { loadGraphFromFile } from "../graph/utils_graph";
+import { Graph, LocalGraphNode } from "../graph/types";
+import {
+  compareGraphs,
+  findCycles,
+  findMultiUpdateOrderWithDepth,
+  groupNodesByDepth,
+  loadGraphFromFile,
+  printCycles,
+} from "../graph/utils_graph";
 import { join } from "path";
-import { boost, graphQuery } from "../query";
-import { getSymbolName } from "../../../shared/utils";
+import * as Languages from "../../languages";
+import { buildGraph } from "../graph/build";
+import { MultiDirectedGraph } from "graphology";
+import { toSimple, union } from "graphology-operators";
+import { QueryIndex } from "./query";
+import { documentNode } from "../doc/build";
+import { batch } from "../../../shared/utils";
+import { buildFlattenedGraph } from "../graph/flatten";
 
-const MAX_RESULTS = 100;
-
-export class GenericIndex {
-  originalGraph?: Graph;
+export class GenericIndex extends QueryIndex {
   flattenedGraph?: Graph;
-  vectraManager: VectraManager;
+  languages: Languages.LanguageProvider[] = [];
 
   constructor(storagePath: string) {
-    this.vectraManager = new VectraManager(storagePath);
-    this.vectraManager.initializeIndex();
+    super(storagePath);
 
-    // Load graphs if they exist
-    this.originalGraph = loadGraphFromFile(
-      join(storagePath, "originalGraph.json")
-    );
+    this.languages = [
+      new Languages.Typescript(storagePath),
+      new Languages.Python(storagePath),
+    ];
 
     this.flattenedGraph = loadGraphFromFile(
       join(storagePath, "flattenedGraph.json")
     );
   }
 
-  async query(text: string, token: string): Promise<ResultGraphNode[]> {
-    const vectraResults = await graphQuery(
-      this.vectraManager,
-      this.originalGraph!,
-      text,
-      token
-    );
+  async indexFolder(folderPath: string) {
+    let newOriginalGraph: Graph = new MultiDirectedGraph();
 
-    // const vectraResults = await this.vectraManager.query(text);
-    let queryResults: ResultGraphNode[] = [];
+    for (const language of this.languages) {
+      const isLanguagePresent = await language.detect(folderPath);
 
-    for (const [nodeId, score] of vectraResults) {
-      if (this.originalGraph && this.originalGraph.hasNode(nodeId)) {
-        const nodeData = this.originalGraph.getNodeAttributes(
-          nodeId
-        ) as LocalGraphNode;
-        const resultNode: ResultGraphNode = {
-          score: score,
-          ...nodeData,
-        };
-        queryResults.push(resultNode);
+      console.log(isLanguagePresent);
+      console.log(language.languageId);
+
+      if (isLanguagePresent) {
+        const scipPath = await language.run(folderPath);
+
+        console.log(scipPath);
+        console.log("scip path");
+
+        if (scipPath) {
+          const newLanguageGraph = await buildGraph(
+            folderPath,
+            scipPath,
+            language.languageId
+          );
+
+          newOriginalGraph = union(newOriginalGraph, newLanguageGraph) as Graph;
+        }
       }
     }
 
-    const boosts = await boost(
-      queryResults.map((result) => {
-        return {
-          id: result.symbol,
-          document: {
-            ...result,
-            ...getSymbolName(result.symbol),
-          },
-          score: 0,
-        };
-      }),
-      text
+    return newOriginalGraph;
+  }
+
+  async process(graph: Graph, token: string) {
+    const newOriginalGraph = graph;
+    const simpleGraph = toSimple(graph);
+    // build the flattened graph
+    let newFlattenedGraph = buildFlattenedGraph(simpleGraph);
+
+    const { addedNodes, updatedNodes, deletedNodes } = compareGraphs(
+      this.flattenedGraph || new MultiDirectedGraph(),
+      newFlattenedGraph
     );
 
-    queryResults = queryResults.map((result) => {
-      return {
-        ...result,
-        score: result.score + (boosts.get(result.symbol) || 0) * result.score,
-      };
-    });
+    const flattened_cycles = findCycles(newFlattenedGraph);
+    console.log("Flattened cycles (should be NONE):");
+    printCycles(flattened_cycles);
 
-    // Resort the results
-    queryResults = queryResults.sort((a, b) => {
-      return b.score - a.score;
-    });
+    // throw an error if flattened_cyles is not empty
+    if (flattened_cycles.length > 0) {
+      throw new Error("Flattened graph has cycles. This should not happen.");
+    }
 
-    return queryResults.length > MAX_RESULTS
-      ? queryResults.slice(0, MAX_RESULTS)
-      : queryResults;
+    // Update the Vectra index
+    await this.vectraManager.refreshIndex();
+    const allNodesToUpdate = addedNodes.concat(updatedNodes);
+
+    await batch(
+      allNodesToUpdate.map((nodeId) => {
+        const graph = newFlattenedGraph as Graph;
+
+        return async () => {
+          const nodeData = graph.getNodeAttributes(nodeId) as LocalGraphNode;
+
+          if (nodeData.content) {
+            await this.vectraManager.upsertItem(
+              nodeData.content,
+              nodeId,
+              nodeData.hash,
+              nodeData.file,
+              token
+            );
+          }
+        };
+      }),
+      100,
+      async () => {
+        await this.vectraManager.beginUpdate();
+      },
+      async () => {
+        await this.vectraManager.endUpdate();
+      }
+    );
+
+    await this.vectraManager.beginUpdate();
+
+    // Delete embeddings for deleted nodes
+    for (const node of deletedNodes) {
+      await this.vectraManager.deleteItem(node);
+    }
+
+    await this.vectraManager.endUpdate();
+
+    // Builds documentation
+    // get the order of the nodes in which they should be documented:
+    const nodesOrder = findMultiUpdateOrderWithDepth(
+      newFlattenedGraph,
+      allNodesToUpdate
+    );
+
+    // get the different batch:
+    const nodesBatch = groupNodesByDepth(nodesOrder).reverse();
+
+    for (const nodeList of nodesBatch) {
+      // Map each nodeId to a documentNode promise
+      await batch(
+        nodeList.map((nodeId) => {
+          const graph = newOriginalGraph as Graph;
+
+          return async () => {
+            await documentNode(graph, nodeId, token);
+          };
+        }),
+        50
+      );
+    }
+
+    return newOriginalGraph;
   }
 }

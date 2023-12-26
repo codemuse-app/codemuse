@@ -45,6 +45,9 @@ export class VectraManager {
         );
 
         if (!response.ok) {
+          console.log(token);
+          console.log(text);
+          console.log(response);
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 

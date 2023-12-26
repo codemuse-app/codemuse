@@ -31,6 +31,9 @@ const extensionConfig = {
     extensions: ['.ts', '.js']
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env.BUNDLED': '"true"',
+    }),
     CI &&
     sentryWebpackPlugin({
       authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -80,7 +83,7 @@ const frontendConfig = {
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "codemuse",
       project: "vscode",
-    }),
+    })
   ],
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.css'],
