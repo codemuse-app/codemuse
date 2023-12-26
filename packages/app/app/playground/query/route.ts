@@ -92,7 +92,7 @@ export async function GET(request: Request) {
       headers: {
         // CORS allow from codemuse.app and localhost
         "Access-Control-Allow-Origin":
-          "https://codemuse.app, http://localhost:3000",
+          "https://codemuse.app, http://localhost:3000, http://localhost:4321",
       },
     }
   );
