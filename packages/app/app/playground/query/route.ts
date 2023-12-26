@@ -62,7 +62,8 @@ export async function GET(request: Request) {
     done: true,
     results: results.map((result) => ({
       ...result,
-      contents: undefined,
+      content: undefined,
+      processedContent: undefined,
     })),
   });
 }
