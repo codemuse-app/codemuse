@@ -1,1 +1,9 @@
-{"repo":"https://github.com/mckaywrigley/chatbot-ui","commit":"0c33d30695988c37008ba381fdf8b96fd96735d4"}
+{
+  "repo": "https://github.com/mckaywrigley/chatbot-ui",
+  "commit": "0c33d30695988c37008ba381fdf8b96fd96735d4",
+  "sampleQueries": [
+    "Component to render markdown",
+    "Update a conversation in local storage",
+    "Throttle requests"
+  ]
+}
