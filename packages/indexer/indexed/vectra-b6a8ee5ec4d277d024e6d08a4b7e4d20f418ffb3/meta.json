@@ -1,1 +1,9 @@
-{"repo":"https://github.com/Stevenic/vectra","commit":"b6a8ee5ec4d277d024e6d08a4b7e4d20f418ffb3"}
+{
+  "repo": "https://github.com/Stevenic/vectra",
+  "commit": "b6a8ee5ec4d277d024e6d08a4b7e4d20f418ffb3",
+  "sampleQueries": [
+    "Get local index metadata",
+    "Detect where to split input text",
+    "Convert webpages to readable format"
+  ]
+}
