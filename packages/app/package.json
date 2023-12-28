@@ -5,7 +5,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "sync:indexed": "cp -R ../indexer/indexed ./app/playground/indexed"
+    "sync:indexed": "cp -R ../indexer/indexed ./app/playground/"
   },
   "dependencies": {
     "@mailchimp/mailchimp_marketing": "^3.0.80",
