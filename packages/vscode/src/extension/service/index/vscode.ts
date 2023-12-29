@@ -29,7 +29,6 @@ export const MAX_RESULTS = 100;
 
 export class Index extends GenericIndex {
   private static instance: Index;
-  private languages: Languages.LanguageProvider[] = [];
   private context: vscode.ExtensionContext;
 
   constructor(context: vscode.ExtensionContext) {
@@ -57,8 +56,8 @@ export class Index extends GenericIndex {
     Index.instance = new Index(context);
 
     Index.getInstance().languages = [
-      new Languages.Typescript(this.instance.context),
-      new Languages.Python(this.instance.context),
+      new Languages.Typescript(this.instance.context.storageUri!.fsPath),
+      new Languages.Python(this.instance.context.storageUri!.fsPath),
     ];
   }
 
@@ -123,7 +122,9 @@ export class Index extends GenericIndex {
               name: "language detection",
             });
 
-            const isLanguagePresent = await language.detect();
+            const isLanguagePresent = await language.detect(
+              workspace.uri.fsPath
+            );
 
             languageDetectionSpan?.finish();
 
@@ -333,6 +334,10 @@ export class Index extends GenericIndex {
         // get the different batch:
         const nodesBatch = groupNodesByDepth(nodesOrder).reverse();
 
+        const session = await vscode.authentication.getSession("codemuse", [], {
+          createIfNone: true,
+        });
+
         for (const nodeList of nodesBatch) {
           if (cancellationToken.isCancellationRequested) {
             await cleanUpVectors();
@@ -345,7 +350,7 @@ export class Index extends GenericIndex {
               const graph = newOriginalGraph as Graph;
 
               return async () => {
-                await documentNode(graph, nodeId);
+                await documentNode(graph, nodeId, session.accessToken);
 
                 progress.report({
                   message: "generating documentation",

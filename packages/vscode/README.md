@@ -23,7 +23,7 @@ Upon installation, you will need to restart Visual Studio Code for the changes t
 
 
 
-First time using CodeMuse ? Checkout our ["How to use CodeMuse"](https://www.youtube.com/watch?v=8JmVMXH8kq4) video 🎥
+First time using CodeMuse ? Checkout our ["How to use CodeMuse"](https://www.youtube.com/watch?v=u4ZzGWaAXeo) video 🎥
 
 <!---
 Upon installation, you will need to restart Visual Studio Code for the changes to take effect. When you open a new workspace with supported language files and/or open the CodeMuse sidebar, CodeMuse will start indexing your project. Step by step guide:

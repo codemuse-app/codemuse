@@ -1,0 +1,10 @@
+{
+  "repo": "https://github.com/shadcn-ui/ui",
+  "commit": "f6fef4a2ed838cd0dddf39618a82b640038506cd",
+  "sampleQueries": [
+    "Handle form state update",
+    "Detect package manager",
+    "Resolve import aliases"
+  ],
+  "language": "typescript"
+}

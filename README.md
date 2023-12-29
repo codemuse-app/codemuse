@@ -97,7 +97,7 @@ Join us at **CodeMuse**, where we're making coding more accessible and bridging 
 
 Join us in shaping **CodeMuse**! Start by exploring our free access plan and share your feedback. Your insights are vital in refining our solution. Connect with us on our Discord channel, where you can discuss with our dev team and fellow users, contributing to the evolution of a tool that meets everyone's needs. Encounter an issue? Submit a ticket error promptly for a swift resolution. For those keen on a deeper involvement or with ideas for improvement, reach out to us directly. Your active contribution can significantly impact this project's success. Let's build something extraordinary together!
 
-[**Join our Discord!**](https://discord.gg/KSzM9kFq)
+[**Join our Discord!**](https://discord.com/invite/uRJE6e2rgr)
 
 [**Follow us on X**](https://twitter.com/CodeMuseApp) and [**LinkedIn**](https://www.linkedin.com/company/codemuse)!
 

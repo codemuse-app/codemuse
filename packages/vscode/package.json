@@ -8,7 +8,7 @@
     "url": "https://github.com/codemuse-app/codemuse"
   },
   "icon": "media/icon.png",
-  "version": "0.8.92",
+  "version": "0.8.95",
   "publisher": "codemuse-app",
   "engines": {
     "vscode": "^1.84.0"
@@ -74,7 +74,7 @@
     "gulp": "gulp",
     "vscode:prepublish": "npm run compile",
     "compile": "npm run gulp && cross-env NODE_ENV=production webpack --mode production --devtool hidden-source-map",
-    "watch": "npm run gulp && webpack --watch",
+    "watch": "npm run gulp && BUNDLED=true webpack --watch",
     "pretest": "npm run compile-tests && npm run compile",
     "lint": "eslint src --ext ts",
     "compile-tests": "tsc -p . --outDir out",

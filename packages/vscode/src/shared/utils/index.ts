@@ -79,3 +79,7 @@ export const getSymbolName = (symbol: string) => {
 };
 
 export type ParsedSymbolName = ReturnType<typeof getSymbolName>;
+
+export const isBundled = () => {
+  return process.env.BUNDLED === "true";
+};

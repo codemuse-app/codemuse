@@ -1,0 +1,10 @@
+{
+  "repo": "https://github.com/Pythagora-io/gpt-pilot",
+  "commit": "a6bd846d4e070ede3a38529376685baa5cf18f8c",
+  "sampleQueries": [
+    "Development state database model",
+    "Remove sensitive fields",
+    "List of all message types"
+  ],
+  "language": "python"
+}

@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "esnext",
+    "sourceMap": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "Node",
+    "lib": [
+      "es2021"
+    ]
+  },
+}

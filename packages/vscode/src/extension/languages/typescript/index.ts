@@ -1,11 +1,12 @@
-import * as vscode from "vscode";
 import { execFile } from "child_process";
-import { resolve } from "path";
+import { join, resolve } from "path";
 import { writeFileSync, existsSync, rmSync, readFileSync, rm } from "fs";
 import { promisify } from "util";
 import * as Sentry from "@sentry/browser";
 
 import { LanguageProvider } from "../provider";
+import { isBundled } from "../../../shared/utils";
+import { glob } from "glob";
 
 const execFileAsync = promisify(execFile);
 
@@ -14,12 +15,13 @@ export class Typescript extends LanguageProvider {
 
   async run(cwd: string) {
     const path = resolve(
-      __dirname + "../../../bin/scip-typescript/dist/main.js"
+      __dirname +
+        (isBundled()
+          ? "../../../bin/scip-typescript/dist/main.js"
+          : "../../../../../bin/scip-typescript/dist/main.js")
     );
 
-    console.log(path);
-
-    const files = await this.getParsableFiles();
+    const files = await this.getParsableFiles(cwd);
 
     // Check if the path contains a tsconfig.json file. If it doesn't, write {"compilerOptions":{"allowJs":true}}
     const tsconfigPath = resolve(cwd, "tsconfig.json");
@@ -112,22 +114,18 @@ export class Typescript extends LanguageProvider {
     return storagePath;
   }
 
-  private async getParsableFiles() {
-    const files = await vscode.workspace.findFiles(
-      "**/*.{js,jsx,ts,tsx,cjs,mjs}",
-      "**/node_modules/**"
-    );
+  private async getParsableFiles(path: string) {
+    // List all the files in the path, recursively
+    const files = await glob(join(path, "**/*.{ts,tsx,js,jsx}"), {
+      ignore: ["**/node_modules/**", "**/dist/**", "**/bin/**"],
+    });
 
-    return files
-      .map((file) => file.path)
-      .filter(
-        (path) => !path.includes("node_modules") && !path.includes("dist")
-      );
+    return files;
   }
 
-  async detect() {
+  async detect(path: string) {
     // Check if the workspace has any .js, .jsx, .ts, or .tsx files
-    const hasJsFiles = await this.getParsableFiles();
+    const hasJsFiles = await this.getParsableFiles(path);
 
     return hasJsFiles.length > 0;
   }

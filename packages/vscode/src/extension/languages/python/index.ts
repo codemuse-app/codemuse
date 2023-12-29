@@ -1,6 +1,5 @@
-import * as vscode from "vscode";
 import { execFile } from "child_process";
-import { resolve } from "path";
+import { join, resolve } from "path";
 import { promisify } from "util";
 import { execSync } from "child_process";
 import * as path from "path";
@@ -8,6 +7,8 @@ import * as Sentry from "@sentry/browser";
 
 import { LanguageProvider } from "../provider";
 import { writeFile } from "fs";
+import { isBundled } from "../../../shared/utils";
+import { glob } from "glob";
 
 const execFileAsync = promisify(execFile);
 const writeFileAsync = promisify(writeFile);
@@ -80,15 +81,17 @@ export class Python extends LanguageProvider {
     // Detect the presence of the python extension, if it is installed use its global python path (for the workspace)
 
     let pythonExtension;
+    let vscode;
 
     try {
+      vscode = await import("vscode");
       pythonExtension = vscode.extensions.getExtension("ms-python.python");
     } catch (e) {
       // Ignore
       console.error(e);
     }
 
-    if (pythonExtension) {
+    if (vscode && pythonExtension) {
       try {
         const pythonPath =
           await pythonExtension.exports.settings.getExecutionDetails(
@@ -238,7 +241,12 @@ export class Python extends LanguageProvider {
   }
 
   async run(cwd: string) {
-    const path = resolve(__dirname + "../../../bin/scip-python/index.js");
+    const path = resolve(
+      __dirname +
+        (isBundled()
+          ? "../../../bin/scip-python/index.js"
+          : "../../../../../bin/scip-python/index.js")
+    );
 
     console.log(path);
 
@@ -296,12 +304,12 @@ export class Python extends LanguageProvider {
     return result ? storagePath : undefined;
   }
 
-  async detect() {
-    const hasPythonFiles = await vscode.workspace.findFiles(
-      "**/*.{py,pyi}",
-      "**/node_modules/**"
-    );
+  async detect(path: string) {
+    // List all the files in the path, recursively
+    const files = await glob(join(path, "**/*.{py,pyi}"), {
+      ignore: [],
+    });
 
-    return hasPythonFiles.length > 0;
+    return files.length > 0;
   }
 }

@@ -1,6 +1,5 @@
 const { MultiDirectedGraph } = require("graphology");
 import * as buildInput from "./buildInput/buildInput";
-import * as vscode from "vscode";
 import { apiFetch } from "../../utils/fetch";
 
 import { start } from "repl";
@@ -89,20 +88,19 @@ const createDummyGraph = () => {
   return graph;
 };
 
-async function buildDocumentation(code: string): Promise<string> {
+async function buildDocumentation(
+  code: string,
+  token: string
+): Promise<string> {
   const maxRetries = 4;
   let retries = 0;
   let error: Error | undefined;
 
   while (retries < maxRetries) {
     try {
-      const session = await vscode.authentication.getSession("codemuse", [], {
-        createIfNone: true,
-      });
-
       const response = await apiFetch(
         "https://codemuse-app--api-api-asgi.modal.run/documentation",
-        session.accessToken,
+        token,
         {
           method: "POST",
           headers: {
@@ -189,7 +187,7 @@ function inputUsesChildren(
   );
 }
 
-export async function documentNode(graph: Graph, node: string) {
+export async function documentNode(graph: Graph, node: string, token: string) {
   const outBoundEdges: string[] = graph.outboundEdges(node);
   //const numberOfUnvisitedChildren = 0
 
@@ -247,7 +245,7 @@ export async function documentNode(graph: Graph, node: string) {
   }
 
   if (processedContent) {
-    const documentation = await buildDocumentation(processedContent);
+    const documentation = await buildDocumentation(processedContent, token);
     graph.setNodeAttribute(node, "documentation", documentation); //build documentation
   }
 }
@@ -256,7 +254,8 @@ function depthFirstDocument(
   graph: Graph,
   node: string,
   resolved = new Set<string>(),
-  unresolved = new Set<string>()
+  unresolved = new Set<string>(),
+  token: string
 ): void {
   // Print the node or perform the desired action
 
@@ -271,23 +270,23 @@ function depthFirstDocument(
 
       if (!resolved.has(successor)) {
         if (!unresolved.has(successor)) {
-          depthFirstDocument(graph, successor, resolved, unresolved);
+          depthFirstDocument(graph, successor, resolved, unresolved, token);
         }
       }
     });
 
-    documentNode(graph, node);
+    documentNode(graph, node, token);
   }
 }
 
-export function buildDocumentationsForGraph(graph: Graph) {
+export function buildDocumentationsForGraph(graph: Graph, token: string) {
   const rootNodes = graph.nodes().filter((node) => graph.inDegree(node) === 0);
 
   let resolved = new Set<string>();
   let unresolved = new Set<string>();
 
   rootNodes.forEach((rootNode) => {
-    depthFirstDocument(graph, rootNode, resolved, unresolved);
+    depthFirstDocument(graph, rootNode, resolved, unresolved, token);
   });
 }
 

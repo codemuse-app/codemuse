@@ -5,7 +5,9 @@
   "type": "module",
   "description": "AI Onboarding and peer programming assistant.",
   "workspaces": [
-    "packages/[!scip]*"
+    "packages/app",
+    "packages/vscode",
+    "packages/indexer"
   ],
   "scripts": {
     "sync:scip-python": "rsync -ax --exclude='node_modules/' --exclude='.git/' ../scip-python/* ./packages/scip-python && npm install --workspace=pyright-root && cd packages/scip-python/packages/pyright-scip && npm run build",
