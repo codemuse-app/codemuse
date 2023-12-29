@@ -1,5 +1,5 @@
 import { execFile } from "child_process";
-import { join, resolve } from "path";
+import { join, normalize, resolve } from "path";
 import { writeFileSync, existsSync, rmSync, readFileSync, rm } from "fs";
 import { promisify } from "util";
 import * as Sentry from "@sentry/browser";
@@ -7,6 +7,7 @@ import * as Sentry from "@sentry/browser";
 import { LanguageProvider } from "../provider";
 import { isBundled } from "../../../shared/utils";
 import { glob } from "glob";
+import { norm } from "../../utils/path";
 
 const execFileAsync = promisify(execFile);
 
@@ -50,7 +51,7 @@ export class Typescript extends LanguageProvider {
       include: [
         // ...(existingTsConfig.include || []),
         files,
-      ].flat(),
+      ].flat().map((file) => normalize(file)),
       exclude: [
         "**/node_modules/**",
         //...(existingTsConfig.exclude || []),
@@ -75,7 +76,7 @@ export class Typescript extends LanguageProvider {
 
       const result = await execFileAsync(
         `node`,
-        [path, "index", "--output", storagePath],
+        [norm(path), "index", "--output", storagePath],
         {
           cwd,
         }
@@ -116,7 +117,7 @@ export class Typescript extends LanguageProvider {
 
   private async getParsableFiles(path: string) {
     // List all the files in the path, recursively
-    const files = await glob(join(path, "**/*.{ts,tsx,js,jsx}"), {
+    const files = await glob(norm(join(path, "**/*.{ts,tsx,js,jsx}")), {
       ignore: ["**/node_modules/**", "**/dist/**", "**/bin/**"],
     });
 

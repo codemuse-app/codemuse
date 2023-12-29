@@ -9,6 +9,7 @@ import { LanguageProvider } from "../provider";
 import { writeFile } from "fs";
 import { isBundled } from "../../../shared/utils";
 import { glob } from "glob";
+import { norm } from "../../utils/path";
 
 const execFileAsync = promisify(execFile);
 const writeFileAsync = promisify(writeFile);
@@ -263,11 +264,11 @@ export class Python extends LanguageProvider {
       result = await execFileAsync(
         `node`,
         [
-          path,
+          norm(path),
           "index",
           cwd,
           "--environment",
-          environmentLocation,
+          norm(environmentLocation),
           "--cwd",
           cwd,
           "--output",
@@ -306,7 +307,7 @@ export class Python extends LanguageProvider {
 
   async detect(path: string) {
     // List all the files in the path, recursively
-    const files = await glob(join(path, "**/*.{py,pyi}"), {
+    const files = await glob(norm(join(path, "**/*.{py,pyi}")), {
       ignore: [],
     });
 
