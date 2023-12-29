@@ -17,8 +17,6 @@ export async function GET(request: Request) {
   //const currentSession = await supabase.auth.getSession()
   const user = await supabase.auth.getUser();
 
-  console.log(!user.data.user)
-  console.log(user)
   if (!user.data.user) {
     return NextResponse.redirect("http://localhost:3000/login?redirect=http://localhost:3000/billing/checkout");
   }
@@ -29,8 +27,13 @@ export async function GET(request: Request) {
     line_items: [{price:"price_1OMYihAPXUWu7ydfBdS3nblF", quantity:1}],
     success_url:"http://localhost:3000/billing/success",
     cancel_url:"http://localhost:4321/pricing",
-    customer_email: user.data.user.email // Replace with the customer's email address
+    //customer_email: user.data.user.email, // Replace with the customer's email address
+    subscription_data:{
+      metadata:{
+        user_id:user.data.user.id
 
+      }
+    }
   })
   
   return NextResponse.redirect(session.url!);
