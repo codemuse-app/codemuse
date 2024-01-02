@@ -16,6 +16,7 @@ import { CodeMuseAuthenticationProvider } from "./service/auth";
 // Declare a global variable to keep track of whether indexing is in progress, a timer to run indexing every 5 minutes, and a status bar item
 let indexingInProgress = false;
 const INDEXING_INTERVAL = 5; // in minutes
+const ACTIVE_AUTO_INDEXING = false; // Set to true to enable auto-indexing
 let countdownTimer: NodeJS.Timeout | null = null;
 let timeLeft = INDEXING_INTERVAL * 60; // 5 minutes in seconds
 
@@ -26,6 +27,12 @@ function formatTime(seconds: number): string {
 }
 
 function resetCountdownTimer(statusBarItem: vscode.StatusBarItem) {
+  // If auto-indexing is disabled, return early
+  if (!ACTIVE_AUTO_INDEXING) {
+    console.log("Auto-indexing is disabled.");
+    return;
+  }
+
   if (countdownTimer) {
     clearTimeout(countdownTimer);
     timeLeft = INDEXING_INTERVAL * 60; // Reset time to 5 minutes
@@ -194,7 +201,7 @@ export const activate = async (context: vscode.ExtensionContext) => {
   const statusBarBtn = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     -2
-  ); // -1 to force it to the righ
+  ); // -2 to force it to the righ
   statusBarBtn.command = "codemuse.index";
   resetCountdownTimer(statusBarBtn);
   statusBarBtn.show();
