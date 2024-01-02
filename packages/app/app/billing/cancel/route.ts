@@ -18,32 +18,28 @@ export async function GET(request: Request) {
   const user = await supabase.auth.getUser();
 
   if (!user.data.user) {
-    return NextResponse.redirect(process.env.BILLING_LOGIN_REDIRECT!);
+    return NextResponse.json({
+        message: "You must be authenticated to cancel your plan."
+      }, {
+        status: 400,
+      }) ;
   }
-
+  
   const {data:profile} = await supabase.from("plan").select("*").eq("user_id",user.data.user.id).single();
 
-  let session_obj:any = {
-    mode:"subscription",
-    payment_method_types:["card"],
-    line_items: [{price:process.env.PRO_PLAN_ID, quantity:1}],
-    success_url:process.env.BILLING_SUCCESS_URL!,
-    cancel_url:process.env.BILLING_CANCEL_URL,
-    //customer_email: user.data.user.email, // Replace with the customer's email address
-    subscription_data:{
-      metadata:{
-        user_id:user.data.user.id
+  console.log(profile);
+  //const stripe_customer_id = profile.stripe_customer_id;
 
-      }
-    }
-  }
+  const subscriptions = await stripe.subscriptions.search({
+    query: "status:\'active\' AND metadata[\'user_id\']:\'"+profile.user_id+"\'",
+  });
 
-  if(profile && profile.stripe_customer_id){
-    session_obj["customer"] = profile.stripe_customer_id
-  }
-  const session = await stripe.checkout.sessions.create(session_obj)
-    
-    return NextResponse.redirect(session.url!);
+  const subscription_id = subscriptions.data[0].id
+
+  const subscription = await stripe.subscriptions.cancel(subscription_id);
+
+
+  return NextResponse.redirect("http://localhost:4321");
 
 
 }
