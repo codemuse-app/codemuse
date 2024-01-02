@@ -36,9 +36,11 @@ export async function updateSubscription(event:any){
       if (!('deleted' in customer)){
 
         const customer_email = customer.email;
+        const customer_name = customer.name;
 
         if (customer_email){
           const customer_plan ={
+            name:customer_name,
             email:customer_email,
             stripe_customer_id:stripe_customer_id,
             subscription_status:subscription_status,

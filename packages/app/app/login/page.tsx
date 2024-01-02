@@ -7,7 +7,7 @@ import logo from "@/assets/logo-cutout.png";
 
 export default async function Login({
   searchParams,
-}: {
+}: { 
   searchParams: { message: string; redirect?: string; machine_id?: string };
 }) {
   const origin = headers().get("origin");

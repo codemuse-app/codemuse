@@ -18,15 +18,15 @@ export async function GET(request: Request) {
   const user = await supabase.auth.getUser();
 
   if (!user.data.user) {
-    return NextResponse.redirect("http://localhost:3000/login?redirect=http://localhost:3000/billing/checkout");
+    return NextResponse.redirect(process.env.BILLING_LOGIN_REDIRECT!);
   }
 
  const session = await stripe.checkout.sessions.create({
     mode:"subscription",
     payment_method_types:["card"],
-    line_items: [{price:"price_1OMYihAPXUWu7ydfBdS3nblF", quantity:1}],
-    success_url:"http://localhost:3000/billing/success",
-    cancel_url:"http://localhost:4321/pricing",
+    line_items: [{price:process.env.PRO_PLAN_ID, quantity:1}],
+    success_url:process.env.BILLING_SUCCESS_URL!,
+    cancel_url:process.env.BILLING_CANCEL_URL,
     //customer_email: user.data.user.email, // Replace with the customer's email address
     subscription_data:{
       metadata:{
@@ -39,5 +39,4 @@ export async function GET(request: Request) {
   return NextResponse.redirect(session.url!);
 
 
-  //return NextResponse.redirect("http://localhost:4321");
 }
